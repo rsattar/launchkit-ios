@@ -19,6 +19,16 @@ static BOOL USE_LOCAL_LAUNCHKIT_SERVER = NO;
 static NSString* const BASE_API_URL_REMOTE = @"https://api.launchkit.io/";
 static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 
+
+#pragma mark - Extending LKConfig to allow LaunchKit to modify parameters
+
+@interface LKConfig (Private)
+
+@property (readwrite, strong, nonatomic, nonnull) NSDictionary *parameters;
+- (void) updateParameters:(NSDictionary * __nonnull)parameters;
+
+@end
+
 @interface LaunchKit ()
 
 @property (copy, nonatomic) NSString *apiToken;
@@ -26,14 +36,16 @@ static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 /** Long-lived, persistent dictionary that is sent up with API requests. */
 @property (copy, nonatomic) NSDictionary *sessionParameters;
 
-@property (copy, nonatomic) NSDictionary *configurationParameters;
-
 @property (strong, nonatomic) LKAPIClient *apiClient;
 @property (strong, nonatomic) NSTimer *trackingTimer;
 @property (assign, nonatomic) NSTimeInterval trackingInterval;
 
 // Analytics
 @property (strong, nonatomic) LKAnalytics *analytics;
+
+// Config
+@property (readwrite, strong, nonatomic, nonnull) LKConfig *config;
+
 @end
 
 @implementation LaunchKit
@@ -83,7 +95,7 @@ static LaunchKit *_sharedInstance;
         self.trackingInterval = DEFAULT_TRACKING_INTERVAL;
 
         self.sessionParameters = @{};
-        self.configurationParameters = @{};
+        self.config = [[LKConfig alloc] initWithParameters:nil];
         [self retrieveSessionFromArchiveIfAvailable];
 
         // Update some local settings from known session_parameter variables
@@ -238,8 +250,8 @@ static LaunchKit *_sharedInstance;
             [self handleCommand:command withArgs:args];
         }
         NSDictionary *config = responseDict[@"config"];
-        if (config != nil && ![config isEqualToDictionary:self.configurationParameters]) {
-            self.configurationParameters = [config copy];
+        if (config != nil) {
+            [self.config updateParameters:config];
         }
     } errorBlock:^(NSError *error) {
         LKLog(@"Error tracking properties: %@", error);
@@ -346,7 +358,7 @@ static LaunchKit *_sharedInstance;
         LKLogError(@"Could not create directory for session archive file: %@", directoryCreateError);
     }
     NSDictionary *session = @{@"sessionParameters": self.sessionParameters,
-                              @"configurationParameters": self.configurationParameters};
+                              @"configurationParameters": self.config.parameters};
     BOOL success = [NSKeyedArchiver archiveRootObject:session toFile:filePath];
     if (!success) {
         LKLogError(@"Could not archive session parameters");
@@ -398,15 +410,15 @@ static LaunchKit *_sharedInstance;
         if ([[unarchivedDict allKeys] containsObject:@"configurationParameters"]) {
             // Dict contains both session and configuration parameters
             self.sessionParameters = unarchivedDict[@"sessionParameters"];
-            self.configurationParameters = unarchivedDict[@"configurationParameters"];
+            self.config.parameters = unarchivedDict[@"configurationParameters"];
         } else {
             // Old way, which stored only the session parameters directly
             self.sessionParameters = unarchivedDict;
-            self.configurationParameters = @{};
+            self.config.parameters = @{};
         }
     } else {
         self.sessionParameters = @{};
-        self.configurationParameters = @{};
+        self.config.parameters = @{};
     }
 }
 

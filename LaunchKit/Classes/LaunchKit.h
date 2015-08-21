@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 
 #import "LaunchKitShared.h"
+#import "LKConfig.h"
 
 #define LAUNCHKIT_VERSION = @"0.1.0"
 
@@ -47,6 +48,11 @@
  *  Unavailable. Use `+sharedInstance` to retrieve the shared Fabric instance.
  */
 - (nullable id)init __attribute__((unavailable("Use +launchWithToken: to initialize LaunchKit, and +sharedInstance to retrieve the shared LaunchKit instance.")));
+
+/**
+ * User-configurable parameters that you may have set in LaunchKit's Cloud Config tool. See https://launchkit.io/config
+ */
+@property (readonly, strong, nonatomic, nonnull) LKConfig *config;
 
 /** 
  * Useful to see log statements from LaunchKit in your console. Only useful when DEBUG macro = 1
