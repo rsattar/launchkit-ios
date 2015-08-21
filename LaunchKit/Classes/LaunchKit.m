@@ -12,6 +12,8 @@
 #import "LKAPIClient.h"
 #import "LKBundlesManager.h"
 #import "LKLog.h"
+#import "LKUIManager.h"
+
 #define DEBUG_DESTROY_BUNDLE_CACHE_ON_START 0
 
 static NSTimeInterval const DEFAULT_TRACKING_INTERVAL = 30.0;
@@ -21,7 +23,7 @@ static BOOL USE_LOCAL_LAUNCHKIT_SERVER = NO;
 static NSString* const BASE_API_URL_REMOTE = @"https://api.launchkit.io/";
 static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 
-@interface LaunchKit ()
+@interface LaunchKit () <LKUIManagerDelegate>
 
 @property (copy, nonatomic) NSString *apiToken;
 
@@ -36,6 +38,9 @@ static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 
 // Analytics
 @property (strong, nonatomic) LKAnalytics *analytics;
+
+// Displaying UI
+@property (strong, nonatomic) LKUIManager *uiManager;
 
 // Bundles Manager
 @property (strong, nonatomic) LKBundlesManager *bundlesManager;
@@ -89,6 +94,9 @@ static LaunchKit *_sharedInstance;
         self.bundlesManager = [[LKBundlesManager alloc] initWithAPIClient:self.apiClient];
 
         self.trackingInterval = DEFAULT_TRACKING_INTERVAL;
+
+        self.uiManager = [[LKUIManager alloc] initWithBundlesManager:self.bundlesManager];
+        self.uiManager.delegate = self;
 
         self.sessionParameters = @{};
         self.configurationParameters = @{};
@@ -356,6 +364,25 @@ static LaunchKit *_sharedInstance;
     params[@"email"] = (userEmail) ? userEmail : @"";
     params[@"name"] = (userName) ? userName : @"";
     [self trackProperties:params];
+}
+
+#pragma mark - Remote UI
+
+- (void)loadRemoteUIWithId:(nonnull NSString *)remoteUIId completion:(nonnull LKRemoteUILoadHandler)completion
+{
+    [self.uiManager loadRemoteUIWithId:remoteUIId completion:completion];
+}
+
+
+- (void)presentRemoteUIViewController:(nonnull LKViewController *)viewController
+                   fromViewController:(nonnull UIViewController *)presentingViewController
+                             animated:(BOOL)animated
+                     dismissalHandler:(nullable LKRemoteUIDismissalHandler)dismissalHandler
+{
+    [self.uiManager presentRemoteUIViewController:viewController
+                               fromViewController:presentingViewController
+                                         animated:animated
+                                 dismissalHandler:dismissalHandler];
 }
 
 #pragma mark - Saving/Persisting our Session

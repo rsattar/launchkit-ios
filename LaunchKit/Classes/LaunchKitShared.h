@@ -11,4 +11,9 @@
 
 #import <UIKit/UIKit.h>
 
+#import "LKViewController.h"
+
+typedef void (^LKRemoteUILoadHandler)(LKViewController *__nullable viewController, NSError *__nullable error);
+typedef void (^LKRemoteUIDismissalHandler)(LKViewControllerFlowResult flowResult);
+
 #endif
