@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+#import "LKBundleInfo.h"
+
 extern NSString* const LKAPIFailedAuthenticationChallenge;
 
 @interface LKAPIClient : NSObject
@@ -21,6 +23,10 @@ extern NSString* const LKAPIFailedAuthenticationChallenge;
 - (void) trackProperties:(NSDictionary *)properties
         withSuccessBlock:(void (^)(NSDictionary *responseDict))successBlock
               errorBlock:(void(^)(NSError *error))errorBlock;
+
+#pragma mark - Remote UI Loading
+- (void) retrieveAvailableRemoteUIInfoWithSuccessBlock:(void (^)(NSArray *bundleInfos))successBlock
+                                             errorBlock:(void(^)(NSError *error))errorBlock;
 
 #pragma mark - Sending requests
 - (void) objectFromPath:(NSString*)path

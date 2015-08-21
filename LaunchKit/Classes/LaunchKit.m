@@ -10,7 +10,9 @@
 
 #import "LKAnalytics.h"
 #import "LKAPIClient.h"
+#import "LKBundlesManager.h"
 #import "LKLog.h"
+#define DEBUG_DESTROY_BUNDLE_CACHE_ON_START 0
 
 static NSTimeInterval const DEFAULT_TRACKING_INTERVAL = 30.0;
 static NSTimeInterval const MIN_TRACKING_INTERVAL = 5.0;
@@ -45,6 +47,10 @@ static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 
 // Config
 @property (readwrite, strong, nonatomic, nonnull) LKConfig *config;
+
+
+// Bundles Manager
+@property (strong, nonatomic) LKBundlesManager *bundlesManager;
 
 @end
 
@@ -92,6 +98,8 @@ static LaunchKit *_sharedInstance;
         }
         self.apiClient.apiToken = self.apiToken;
 
+        self.bundlesManager = [[LKBundlesManager alloc] initWithAPIClient:self.apiClient];
+
         self.trackingInterval = DEFAULT_TRACKING_INTERVAL;
 
         self.sessionParameters = @{};
@@ -127,6 +135,19 @@ static LaunchKit *_sharedInstance;
         }
 
         [self createListeners];
+
+#if DEBUG_DESTROY_BUNDLE_CACHE_ON_START
+        [LKBundlesManager deleteBundlesCacheDirectory];
+#endif
+
+        [self.bundlesManager rebuildLocalBundlesMap];
+        [self.bundlesManager retrieveAndCacheAvailableRemoteBundlesWithCompletion:^(NSError *error) {
+            if (error) {
+                LKLogWarning(@"Received error downloading and caching remote bundles: %@", error);
+            } else {
+                LKLog(@"Remote bundles downloaded and cached.");
+            }
+        }];
     }
     return self;
 }
@@ -140,11 +161,13 @@ static LaunchKit *_sharedInstance;
 {
     _debugMode = debugMode;
     LKLOG_ENABLED = _debugMode;
+    self.bundlesManager.debugMode = debugMode;
 }
 
 - (void)setVerboseLogging:(BOOL)verboseLogging
 {
     _verboseLogging = verboseLogging;
+    self.bundlesManager.verboseLogging = verboseLogging;
 }
 
 - (NSString *)version

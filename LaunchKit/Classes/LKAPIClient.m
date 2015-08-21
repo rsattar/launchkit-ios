@@ -115,6 +115,29 @@ static NSCalendar *_globalGregorianCalendar;
 }
 
 
+#pragma mark - Remote Nib Loading
+
+
+- (void) retrieveAvailableRemoteUIInfoWithSuccessBlock:(void (^)(NSArray *bundleInfos))successBlock
+                                             errorBlock:(void(^)(NSError *error))errorBlock
+{
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    params[@"token"] = self.apiToken;
+    [self objectFromPath:@"v1/ui/ios/bundles" method:@"GET" params:params successBlock:^(NSDictionary *responseDict) {
+        // TODO: (Riz) Actually make ObjC models for the data, rather than returning raw dictionary
+        NSArray *rawBundleInfos = responseDict[@"bundles"];
+        NSMutableArray *bundleInfos = [NSMutableArray arrayWithCapacity:rawBundleInfos.count];
+        for (NSDictionary *rawBundleInfo in rawBundleInfos) {
+            LKBundleInfo *bundleInfo = [[LKBundleInfo alloc] initWithAPIDictionary:rawBundleInfo];
+            [bundleInfos addObject:bundleInfo];
+        }
+        if (successBlock) {
+            successBlock(bundleInfos);
+        }
+    } failureBlock:errorBlock];
+}
+
+
 #pragma mark - Sending requests
 
 

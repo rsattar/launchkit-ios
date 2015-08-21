@@ -17,10 +17,12 @@ Pod::Spec.new do |s|
   s.requires_arc = true
 
   s.source_files = 'LaunchKit/Classes/**/*.{h,m,c}'
+  s.private_header_files = 'LaunchKit/Classes/ThirdParty/**/*.h'
   s.resource_bundles = {
     'LaunchKitResources' => ['LaunchKit/Assets/*.xcassets']
   }
 
   # s.public_header_files = 'LaunchKit/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
+  s.libraries = 'z'
 end
