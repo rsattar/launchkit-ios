@@ -345,7 +345,9 @@ static LaunchKit *_sharedInstance;
     if (![[NSFileManager defaultManager] createDirectoryAtPath:directoryPath withIntermediateDirectories:YES attributes:nil error:&directoryCreateError]) {
         LKLogError(@"Could not create directory for session archive file: %@", directoryCreateError);
     }
-    BOOL success = [NSKeyedArchiver archiveRootObject:self.sessionParameters toFile:filePath];
+    NSDictionary *session = @{@"sessionParameters": self.sessionParameters,
+                              @"configurationParameters": self.configurationParameters};
+    BOOL success = [NSKeyedArchiver archiveRootObject:session toFile:filePath];
     if (!success) {
         LKLogError(@"Could not archive session parameters");
     }
@@ -392,9 +394,19 @@ static LaunchKit *_sharedInstance;
     }
 
     if ([unarchivedObject isKindOfClass:[NSDictionary class]]) {
-        self.sessionParameters = (NSDictionary *)unarchivedObject;
+        NSDictionary *unarchivedDict = (NSDictionary *)unarchivedObject;
+        if ([[unarchivedDict allKeys] containsObject:@"configurationParameters"]) {
+            // Dict contains both session and configuration parameters
+            self.sessionParameters = unarchivedDict[@"sessionParameters"];
+            self.configurationParameters = unarchivedDict[@"configurationParameters"];
+        } else {
+            // Old way, which stored only the session parameters directly
+            self.sessionParameters = unarchivedDict;
+            self.configurationParameters = @{};
+        }
     } else {
         self.sessionParameters = @{};
+        self.configurationParameters = @{};
     }
 }
 
