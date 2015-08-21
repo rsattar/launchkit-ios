@@ -8,6 +8,8 @@
 
 #import "LKConfig.h"
 
+#import "LKLog.h"
+
 NSString *const LKConfigUpdatedNotificationName = @"LKConfigUpdatedNotificationName";
 NSString *const LKConfigOldParametersKey = @"LKConfigOldParametersKey";
 NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
@@ -53,6 +55,11 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
     id value = self.parameters[key];
     if ([value isKindOfClass:[NSNumber class]]) {
         return ((NSNumber *)value).boolValue;
+    } else if (value != nil) {
+        LKLogWarning(@"LKConfig returned value for '%@' is %@, not a BOOL. Returning default: %d",
+                     key,
+                     NSStringFromClass([value class]),
+                     defaultValue);
     }
     return defaultValue;
 }
@@ -62,6 +69,11 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
     id value = self.parameters[key];
     if ([value isKindOfClass:[NSNumber class]]) {
         return ((NSNumber *)value).integerValue;
+    } else if (value != nil) {
+        LKLogWarning(@"LKConfig returned value for '%@' is %@, not an NSInteger. Returning default: %ld",
+                     key,
+                     NSStringFromClass([value class]),
+                     (long)defaultValue);
     }
     return defaultValue;
 }
@@ -71,6 +83,11 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
     id value = self.parameters[key];
     if ([value isKindOfClass:[NSNumber class]]) {
         return ((NSNumber *)value).doubleValue;
+    } else if (value != nil) {
+        LKLogWarning(@"LKConfig returned value for '%@' is %@, not a double. Returning default: %@",
+                     key,
+                     NSStringFromClass([value class]),
+                     [NSNumber numberWithDouble:defaultValue]);
     }
     return defaultValue;
 }
@@ -80,6 +97,11 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
     id value = self.parameters[key];
     if ([value isKindOfClass:[NSString class]]) {
         return (NSString *)value;
+    } else if (value != nil) {
+        LKLogWarning(@"LKConfig returned value for '%@' is %@, not an NSString. Returning default: %@",
+                     key,
+                     NSStringFromClass([value class]),
+                     defaultValue);
     }
     return defaultValue;
 }
