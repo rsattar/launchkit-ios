@@ -48,40 +48,40 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
     }
 }
 
-- (BOOL) boolForKey:(NSString * __nonnull)key
+- (BOOL) boolForKey:(NSString * __nonnull)key defaultValue:(BOOL)defaultValue
 {
     id value = self.parameters[key];
     if ([value isKindOfClass:[NSNumber class]]) {
         return ((NSNumber *)value).boolValue;
     }
-    return NO;
+    return defaultValue;
 }
 
-- (NSInteger) integerForKey:(NSString * __nonnull)key
+- (NSInteger) integerForKey:(NSString * __nonnull)key defaultValue:(NSInteger)defaultValue
 {
     id value = self.parameters[key];
     if ([value isKindOfClass:[NSNumber class]]) {
         return ((NSNumber *)value).integerValue;
     }
-    return 0;
+    return defaultValue;
 }
 
-- (double) doubleForKey:(NSString * __nonnull)key
+- (double) doubleForKey:(NSString * __nonnull)key defaultValue:(double)defaultValue
 {
     id value = self.parameters[key];
     if ([value isKindOfClass:[NSNumber class]]) {
         return ((NSNumber *)value).doubleValue;
     }
-    return 0;
+    return defaultValue;
 }
 
-- (nullable NSString *) stringForKey:(NSString * __nonnull)key
+- (nullable NSString *) stringForKey:(NSString * __nonnull)key defaultValue:(nullable NSString *)defaultValue
 {
     id value = self.parameters[key];
     if ([value isKindOfClass:[NSString class]]) {
         return (NSString *)value;
     }
-    return nil;
+    return defaultValue;
 }
 
 @end

@@ -22,9 +22,9 @@ extern NSString *const __nonnull LKConfigNewParametersKey;
 - (nonnull instancetype)initWithParameters:(nullable NSDictionary *)configParameters;
 
 #pragma mark - Casted getters
-- (BOOL) boolForKey:(NSString * __nonnull)key;
-- (NSInteger) integerForKey:(NSString * __nonnull)key;
-- (double) doubleForKey:(NSString * __nonnull)key;
-- (nullable NSString *) stringForKey:(NSString * __nonnull)key;
+- (BOOL) boolForKey:(NSString * __nonnull)key defaultValue:(BOOL)defaultValue;
+- (NSInteger) integerForKey:(NSString * __nonnull)key defaultValue:(NSInteger)defaultValue;
+- (double) doubleForKey:(NSString * __nonnull)key defaultValue:(double)defaultValue;
+- (nullable NSString *) stringForKey:(NSString * __nonnull)key defaultValue:(nullable NSString *)defaultValue;
 
 @end
