@@ -340,6 +340,11 @@ static LaunchKit *_sharedInstance;
 - (void)archiveSession
 {
     NSString *filePath = [self sessionArchiveFilePath];
+    NSString *directoryPath = [filePath stringByDeletingLastPathComponent];
+    NSError *directoryCreateError = nil;
+    if (![[NSFileManager defaultManager] createDirectoryAtPath:directoryPath withIntermediateDirectories:YES attributes:nil error:&directoryCreateError]) {
+        LKLogError(@"Could not create directory for session archive file: %@", directoryCreateError);
+    }
     BOOL success = [NSKeyedArchiver archiveRootObject:self.sessionParameters toFile:filePath];
     if (!success) {
         LKLogError(@"Could not archive session parameters");
