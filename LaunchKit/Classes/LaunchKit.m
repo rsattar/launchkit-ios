@@ -457,3 +457,27 @@ static LaunchKit *_sharedInstance;
 }
 
 @end
+
+
+#pragma mark - LKConfig Convenience Functions
+
+BOOL LKConfigBool(NSString *__nonnull key, BOOL defaultValue)
+{
+    return [[LaunchKit sharedInstance].config boolForKey:key defaultValue:defaultValue];
+}
+
+
+NSInteger LKConfigInteger(NSString *__nonnull key, NSInteger defaultValue)
+{
+    return [[LaunchKit sharedInstance].config integerForKey:key defaultValue:defaultValue];
+}
+
+double LKConfigDouble(NSString *__nonnull key, double defaultValue)
+{
+    return [[LaunchKit sharedInstance].config doubleForKey:key defaultValue:defaultValue];
+}
+
+extern NSString * __nullable LKConfigString(NSString *__nonnull key, NSString *__nullable defaultValue)
+{
+    return [[LaunchKit sharedInstance].config stringForKey:key defaultValue:defaultValue];
+}

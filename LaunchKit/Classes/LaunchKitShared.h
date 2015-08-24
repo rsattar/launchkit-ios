@@ -11,4 +11,11 @@
 
 #import <UIKit/UIKit.h>
 
+#pragma mark - LKConfig Convenience Functions
+
+extern BOOL LKConfigBool(NSString *__nonnull key, BOOL defaultValue);
+extern NSInteger LKConfigInteger(NSString *__nonnull key, NSInteger defaultValue);
+extern double LKConfigDouble(NSString *__nonnull key, double defaultValue);
+extern NSString * __nullable LKConfigString(NSString *__nonnull key, NSString *__nullable defaultValue);
+
 #endif
