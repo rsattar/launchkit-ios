@@ -62,6 +62,11 @@
  */
 @property (assign, nonatomic) BOOL verboseLogging;
 
+/**
+ * The version of the LaunchKit library
+ */
+@property (readonly, nonatomic, nonnull) NSString *version;
+
 
 /*!
  @method

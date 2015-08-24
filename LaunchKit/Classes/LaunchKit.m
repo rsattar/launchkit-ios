@@ -147,6 +147,11 @@ static LaunchKit *_sharedInstance;
     _verboseLogging = verboseLogging;
 }
 
+- (NSString *)version
+{
+    return LAUNCHKIT_VERSION;
+}
+
 - (void)createListeners
 {
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
