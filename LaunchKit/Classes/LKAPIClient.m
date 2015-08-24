@@ -8,13 +8,13 @@
 
 #import "LKAPIClient.h"
 
+#import "LaunchKitShared.h"
 #import "LKLog.h"
 #import "NSDictionary+LKFormEncoded.h"
 #import <sys/utsname.h>
 
 NSString* const LKAPIFailedAuthenticationChallenge = @"LKAPIFailedAuthenticationChallenge";
 
-static NSString* const API_USER_AGENT_FORMAT = @"%@ %@ (%@; %@)";
 static NSString* const API_ERROR_DOMAIN = @"LaunchKitAPI";
 
 #define LK_DEBUG_LOG_REQUESTS 0
@@ -268,12 +268,7 @@ static NSCalendar *_globalGregorianCalendar;
 
 + (NSString *) userAgentString
 {
-    NSString *version = [LKAPIClient bundleVersion];
-    NSString *bundle = [LKAPIClient bundleIdentifier];
-    NSString *hardwareModel = [LKAPIClient hardwareModel];
-    NSString *softwareVersion = [LKAPIClient softwareVersion];
-
-    NSString *userAgent = [NSString stringWithFormat:API_USER_AGENT_FORMAT, bundle, version, hardwareModel, softwareVersion];
+    NSString *userAgent = [NSString stringWithFormat:@"LaunchKit iOS SDK %@", LAUNCHKIT_VERSION];
     return userAgent;
 }
 
