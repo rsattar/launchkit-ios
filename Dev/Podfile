@@ -10,7 +10,7 @@ end
 target 'Tests', :exclusive => true do
     pod "LaunchKit", :path => "../"
 
-  pod 'Specta', '~> 0.2.1'
+  pod 'Specta', '~> 1.0.3'
   pod 'Expecta', '~> 1.0.2'
 end
 
