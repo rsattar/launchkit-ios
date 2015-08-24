@@ -94,6 +94,12 @@ static NSCalendar *_globalGregorianCalendar;
     params[@"os_version"] = self.cachedOSVersion;
     params[@"hardware"] = self.cachedHardwareModel;
     params[@"screen"] = self.cachedScreenInfo;
+#if DEBUG
+    // Notify LK servers when the app is running in debug mode
+    params[@"debug_build"] = @(YES);
+#else
+    params[@"debug_build"] = @(NO);
+#endif
     if (self.sessionParameters.count > 0) {
         params[@"session"] = self.sessionParameters;
     }

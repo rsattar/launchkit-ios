@@ -243,11 +243,6 @@ static LaunchKit *_sharedInstance;
     [propertiesToInclude addEntriesFromDictionary:self.analytics.trackableProperties];
     [self.analytics clearTrackableProperties];
 
-    // Notify LK servers when the app is running in debug mode
-#if DEBUG
-    propertiesToInclude[@"debug_build"] = @(YES);
-#endif
-
     __weak LaunchKit *_weakSelf = self;
     [self.apiClient trackProperties:propertiesToInclude withSuccessBlock:^(NSDictionary *responseDict) {
         if (_weakSelf.verboseLogging) {
