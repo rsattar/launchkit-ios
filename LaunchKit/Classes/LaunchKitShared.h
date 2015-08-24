@@ -11,6 +11,8 @@
 
 #import <UIKit/UIKit.h>
 
+#define LAUNCHKIT_VERSION @"0.2.0"
+
 #pragma mark - LKConfig Convenience Functions
 
 extern BOOL LKConfigBool(NSString *__nonnull key, BOOL defaultValue);

@@ -11,8 +11,6 @@
 #import "LaunchKitShared.h"
 #import "LKConfig.h"
 
-#define LAUNCHKIT_VERSION = @"0.1.0"
-
 @interface LaunchKit : NSObject
 
 /*!
