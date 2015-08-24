@@ -523,7 +523,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 027F712E10E3F7E61732A841 /* Pods-Tests.debug.xcconfig */;
 			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/LaunchKit.app/LaunchKit";
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/LaunchKitSample.app/LaunchKitSample";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -546,7 +546,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9D04F8B845BD57AAC50E3026 /* Pods-Tests.release.xcconfig */;
 			buildSettings = {
-				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/LaunchKit.app/LaunchKit";
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/LaunchKitSample.app/LaunchKitSample";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
