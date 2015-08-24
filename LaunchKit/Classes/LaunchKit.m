@@ -245,7 +245,7 @@ static LaunchKit *_sharedInstance;
 
     // Notify LK servers when the app is running in debug mode
 #if DEBUG
-    propertiesToInclude[@"debugBuild"] = @(YES);
+    propertiesToInclude[@"debug_build"] = @(YES);
 #endif
 
     __weak LaunchKit *_weakSelf = self;
