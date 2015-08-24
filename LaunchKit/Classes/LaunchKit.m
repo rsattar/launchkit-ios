@@ -236,12 +236,17 @@ static LaunchKit *_sharedInstance;
         LKLog(@"Tracking: %@", properties);
     }
 
-    NSMutableDictionary *propertiesToInclude = [NSMutableDictionary dictionaryWithCapacity:2];
+    NSMutableDictionary *propertiesToInclude = [NSMutableDictionary dictionaryWithCapacity:3];
     if (properties != nil) {
         [propertiesToInclude addEntriesFromDictionary:properties];
     }
     [propertiesToInclude addEntriesFromDictionary:self.analytics.trackableProperties];
     [self.analytics clearTrackableProperties];
+
+    // Notify LK servers when the app is running in debug mode
+#if DEBUG
+    propertiesToInclude[@"debugBuild"] = @(YES);
+#endif
 
     __weak LaunchKit *_weakSelf = self;
     [self.apiClient trackProperties:propertiesToInclude withSuccessBlock:^(NSDictionary *responseDict) {
