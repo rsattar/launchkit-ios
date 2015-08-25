@@ -10,7 +10,7 @@
 #import <LaunchKit/LKAPIClient.h>
 #import <LaunchKit/LKAnalytics.h>
 
-NSString *const LAUNCHKIT_TEST_API_TOKEN = @"hOjBSpXfaRzzhQCNwBnfr00Gcxe14u61XZ5rmVAeTWkd";
+NSString *const LAUNCHKIT_TEST_API_TOKEN = @"73UhwH5CXba6MZSSa9oynByf3_NtQjQlACPpenAhuGbf";
 
 @interface LaunchKit (TestingAdditions)
 
