@@ -400,6 +400,14 @@ static LaunchKit *_sharedInstance;
                                fromViewController:presentingViewController
                                          animated:animated
                                  dismissalHandler:dismissalHandler];
+    // Notify LaunchKit that this view controller has been displayed"
+    if (viewController.bundleInfo != nil) {
+        NSMutableDictionary *params = [NSMutableDictionary dictionary];
+        params[@"command"] = @"ui-shown";
+        params[@"ui_name"] = viewController.bundleInfo.name;
+        params[@"ui_version"] = viewController.bundleInfo.version;
+        [self trackProperties:params];
+    }
 }
 
 #pragma mark - Saving/Persisting our Session
