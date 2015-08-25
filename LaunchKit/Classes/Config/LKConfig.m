@@ -35,6 +35,18 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
     return self;
 }
 
+- (NSDictionary *)dictionaryWithoutLaunchKitKeys:(nonnull NSDictionary *)dictionary
+{
+    NSMutableDictionary *strippedDict = [NSMutableDictionary dictionaryWithCapacity:dictionary.count];
+    for (NSString *key in dictionary) {
+        if ([key hasPrefix:@"io.launchkit."]) {
+            continue;
+        }
+        strippedDict[key] = dictionary[key];
+    }
+    return strippedDict;
+}
+
 - (void) updateParameters:(NSDictionary * __nonnull)parameters
 {
     if (parameters == nil) {
@@ -43,10 +55,15 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
     if (![parameters isEqualToDictionary:_parameters]) {
         NSDictionary *oldParameters = self.parameters;
         self.parameters = [parameters copy];
-        [[NSNotificationCenter defaultCenter] postNotificationName:LKConfigUpdatedNotificationName
-                                                            object:self
-                                                          userInfo:@{LKConfigOldParametersKey: oldParameters,
-                                                                     LKConfigNewParametersKey: self.parameters}];
+
+        NSDictionary *strippedOld = [self dictionaryWithoutLaunchKitKeys:oldParameters];
+        NSDictionary *strippedNew = [self dictionaryWithoutLaunchKitKeys:parameters];
+        if (![strippedOld isEqualToDictionary:strippedNew]) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:LKConfigUpdatedNotificationName
+                                                                object:self
+                                                              userInfo:@{LKConfigOldParametersKey: strippedOld,
+                                                                         LKConfigNewParametersKey: strippedNew}];
+        }
     }
 }
 

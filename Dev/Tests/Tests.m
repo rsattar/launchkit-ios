@@ -33,6 +33,7 @@ NSString *const LAUNCHKIT_TEST_API_TOKEN = @"hOjBSpXfaRzzhQCNwBnfr00Gcxe14u61XZ5
 @interface LKConfig (TestingAdditions)
 
 @property (readwrite, strong, nonatomic, nonnull) NSDictionary *parameters;
+- (NSDictionary *)dictionaryWithoutLaunchKitKeys:(nonnull NSDictionary *)dictionary;
 
 @end
 
@@ -130,6 +131,13 @@ describe(@"LKConfig", ^{
         config.parameters = @{@"key" : @(34)};
         NSString *extracted = [config stringForKey:@"key" defaultValue:@"invalid string"];
         expect(extracted).to.equal(@"invalid string");
+    });
+
+    it(@"strips internal keys", ^{
+        NSDictionary *parameters = @{@"io.launchkit.currentVersionDuration" : @(0.018598),
+                                     @"io.launchkit.installDuration" : @(0.018624)};
+        NSDictionary *stripped = [config dictionaryWithoutLaunchKitKeys:parameters];
+        expect(stripped.count).to.equal(0);
     });
 });
 
