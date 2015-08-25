@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+#import "LKBundleInfo.h"
+
 typedef NS_ENUM(NSInteger, LKViewControllerFlowResult)
 {
     LKViewControllerFlowResultNotSet,
@@ -29,6 +31,8 @@ typedef NS_ENUM(NSInteger, LKViewControllerFlowResult)
 @interface LKViewController : UIViewController
 
 @property (weak, nonatomic, nullable) id <LKViewControllerFlowDelegate> flowDelegate;
+
+@property (strong, nonatomic, nullable) LKBundleInfo *bundleInfo;
 
 @property (assign, nonatomic) IBInspectable BOOL statusBarShouldHide;
 @property (assign, nonatomic) IBInspectable NSInteger statusBarStyleValue;

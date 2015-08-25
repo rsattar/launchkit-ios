@@ -61,6 +61,8 @@
         }
 
         LKViewController *viewController = [storyboard instantiateInitialViewController];
+        // Set the related bundleinfo into the initialviewcontroller, useful later (for tracking)
+        viewController.bundleInfo = [self.bundlesManager localBundleInfoWithName:remoteUIId];
 
         if ([UIPresentationController class]) {
             if ([viewController.presentationStyleName isEqualToString:@"card"]) {
