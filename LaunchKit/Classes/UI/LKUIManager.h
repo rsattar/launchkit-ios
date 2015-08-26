@@ -34,6 +34,6 @@
                    fromViewController:(UIViewController *)presentingViewController
                              animated:(BOOL)animated
                      dismissalHandler:(LKRemoteUIDismissalHandler)dismissalHandler;
-
+- (BOOL)remoteUIPresentedForThisAppVersion:(NSString *)remoteUIId;
 
 @end

@@ -20,6 +20,8 @@
 @property (weak, nonatomic) UIViewController *remoteUIPresentingController;
 @property (copy, nonatomic) LKRemoteUIDismissalHandler remoteUIControllerDismissalHandler;
 
+@property (strong, nonatomic) NSMutableDictionary *appVersionsForPresentedBundleId;
+
 @end
 
 @implementation LKUIManager
@@ -29,6 +31,8 @@
     self = [super init];
     if (self) {
         self.bundlesManager = bundlesManager;
+        self.appVersionsForPresentedBundleId = [@{} mutableCopy];
+        [self restoreAppVersionsForPresentedBundleIdFromArchive];
     }
     return self;
 }
@@ -122,6 +126,9 @@
     self.remoteUIPresentingController = presentingViewController;
     self.remoteUIControllerDismissalHandler = dismissalHandler;
     [self.remoteUIPresentingController presentViewController:self.remoteUIPresentedController animated:animated completion:nil];
+    if (viewController.bundleInfo.name != nil) {
+        [self markPresentationOfRemoteUI:viewController.bundleInfo.name];
+    }
 }
 
 
@@ -185,6 +192,79 @@
         _isPad = [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad;
     });
     return _isPad;
+}
+
+#pragma mark - Locally recording which UI's have been shown (by bundle version)
+
+- (void) restoreAppVersionsForPresentedBundleIdFromArchive
+{
+    NSDictionary *restored = [NSKeyedUnarchiver unarchiveObjectWithFile:[self appVersionsForPresentedBundleIdArchiveFilePath]];
+    if (restored != nil) {
+        [self.appVersionsForPresentedBundleId removeAllObjects];
+        [self.appVersionsForPresentedBundleId addEntriesFromDictionary:restored];
+    }
+}
+
+
+- (void) archiveAppVersionsForPresentedBundleId
+{
+    NSString *archiveFilePath = [self appVersionsForPresentedBundleIdArchiveFilePath];
+    NSString *archiveParentDirectory = [archiveFilePath stringByDeletingLastPathComponent];
+    NSError *archiveParentDirError = nil;
+    [[NSFileManager defaultManager] createDirectoryAtPath:archiveParentDirectory withIntermediateDirectories:YES attributes:nil error:&archiveParentDirError];
+    if (archiveParentDirError != nil) {
+        LKLogWarning(@"Error trying to create UI prefs archive folder: %@", archiveParentDirError);
+    }
+    BOOL saved = [NSKeyedArchiver archiveRootObject:self.appVersionsForPresentedBundleId
+                                             toFile:archiveFilePath];
+    if (!saved) {
+        LKLogWarning(@"Could not save app versions for presented UI's");
+    }
+}
+
+
+- (NSString *)appVersionsForPresentedBundleIdArchiveFilePath
+{
+    // Library/Application Support/launchkit/ui/appVersionsForPresentedBundleId.plist
+    NSString *appSupportDir = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES).lastObject;
+    NSString *launchKitDir = [appSupportDir stringByAppendingPathComponent:@"launchkit"];
+    NSString *ui = [launchKitDir stringByAppendingPathComponent:@"ui"];
+    NSString *filename = [NSString stringWithFormat:@"appVersionsForPresentedBundleId.plist"];
+    return [ui stringByAppendingPathComponent:filename];
+}
+
+
+- (NSString *)currentAppVersion
+{
+    // Example: 1.5.2
+    NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+    if (!version) {
+        version = @"(unknown)";
+    }
+    return version;
+}
+
+
+- (void)markPresentationOfRemoteUI:(NSString *)remoteUIId
+{
+    NSSet *presentedInVersions = self.appVersionsForPresentedBundleId[remoteUIId];
+    NSString *currentVersion = [self currentAppVersion];
+    if (![presentedInVersions member:currentVersion]) {
+        if (presentedInVersions == nil) {
+            presentedInVersions = [NSSet setWithObject:currentVersion];
+        } else {
+            presentedInVersions = [presentedInVersions setByAddingObject:currentVersion];
+        }
+        self.appVersionsForPresentedBundleId[remoteUIId] = presentedInVersions;
+    }
+    [self archiveAppVersionsForPresentedBundleId];
+}
+
+
+- (BOOL)remoteUIPresentedForThisAppVersion:(NSString *)remoteUIId
+{
+    NSSet *presentedInVersions = self.appVersionsForPresentedBundleId[remoteUIId];
+    return ([presentedInVersions member:remoteUIId] != nil);
 }
 
 @end
