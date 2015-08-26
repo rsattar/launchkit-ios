@@ -38,34 +38,6 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)showUIWithName:(NSString *)uiName
-{
-    __weak RootViewController *_weakSelf = self;
-    [[LaunchKit sharedInstance] loadRemoteUIWithId:uiName completion:^(LKViewController *viewController, NSError *error) {
-        if (viewController) {
-            [[LaunchKit sharedInstance] presentRemoteUIViewController:viewController fromViewController:_weakSelf animated:YES dismissalHandler:nil];
-        } else {
-            NSString *message = nil;
-            if (error) {
-                NSString *reason = @"";
-                NSString *errorMessage = error.userInfo[@"message"];
-                if (errorMessage.length > 0) {
-                    reason = errorMessage;
-                }
-                message = [NSString stringWithFormat:@"Could not load UI named %@.\n\nError %ld - %@", uiName, (long)error.code, reason];
-            } else {
-                message = [NSString stringWithFormat:@"Could not load UI named %@.", uiName];
-            }
-            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"UI not found"
-                                                                message:message
-                                                               delegate:nil
-                                                      cancelButtonTitle:@"OK"
-                                                      otherButtonTitles:nil];
-            [alertView show];
-        }
-    }];
-}
-
 - (NSUInteger)supportedInterfaceOrientations
 {
     return UIInterfaceOrientationMaskAll;
