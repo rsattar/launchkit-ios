@@ -26,7 +26,9 @@
 {
     [super viewDidAppear:animated];
 
-    [self showUIWithName:@"WhatsNew"];
+    [[LaunchKit sharedInstance] presentAppUpdateNotesFromViewController:self completion:^(BOOL didPresent) {
+        NSLog(@"Did present: %d", didPresent);
+    }];
 
 }
 

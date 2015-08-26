@@ -87,6 +87,12 @@
 - (void) setUserIdentifier:(nullable NSString *)userIdentifier email:(nullable NSString *)userEmail name:(nullable NSString *)userName;
 
 
+#pragma mark - What's New
+
+- (void) presentAppUpdateNotesFromViewController:(nonnull UIViewController *)viewController
+                                      completion:(nullable LKUpdateNotesCompletionHandler)completion;
+
+
 #pragma mark - Remote UI
 /*!
  @method

@@ -23,6 +23,7 @@ extern double LKConfigDouble(NSString *__nonnull key, double defaultValue);
 extern NSString * __nullable LKConfigString(NSString *__nonnull key, NSString *__nullable defaultValue);
 
 #pragma mark - Remote UI
+typedef void (^LKUpdateNotesCompletionHandler)(BOOL didPresent);
 typedef void (^LKRemoteUILoadHandler)(LKViewController *__nullable viewController, NSError *__nullable error);
 typedef void (^LKRemoteUIDismissalHandler)(LKViewControllerFlowResult flowResult);
 

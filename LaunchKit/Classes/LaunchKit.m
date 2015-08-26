@@ -387,6 +387,48 @@ static LaunchKit *_sharedInstance;
     [self trackProperties:params];
 }
 
+
+#pragma mark - What's New
+
+- (void) presentAppUpdateNotesFromViewController:(nonnull UIViewController *)viewController
+                                      completion:(nullable LKUpdateNotesCompletionHandler)completion
+{
+    BOOL whatsNewEnabled = LKConfigBool(@"io.launchkit.whatsNewEnabled", YES);
+    if (whatsNewEnabled && // WhatsNew feature is enabled on LaunchKit
+        [self.uiManager remoteUIPresentedForThisAppVersion:@"WhatsNew"] && // We haven't shown this UI before (for this app version)
+        [self.config.parameters[@"io.launchkit.currentVersionDuration"] isKindOfClass:[NSNumber class]]) { // This session has upgraded app versions at least once
+
+        // TODO(Riz): Mark our app-launch current and previous versions, so we know if we have upgraded or not
+        [self showUIWithName:@"WhatsNew" fromViewController:viewController completion:^(LKViewControllerFlowResult flowResult, NSError *error) {
+            BOOL didPresent = flowResult == LKViewControllerFlowResultCompleted || flowResult == LKViewControllerFlowResultCancelled;
+            if (completion) {
+                completion(didPresent);
+            }
+        }];
+    } else {
+        if (completion) {
+            completion(NO);
+        }
+    }
+}
+
+- (void)showUIWithName:(NSString *)uiName fromViewController:(UIViewController *)presentingViewController completion:(void (^)(LKViewControllerFlowResult flowResult, NSError *error))completion
+{
+    [[LaunchKit sharedInstance] loadRemoteUIWithId:uiName completion:^(LKViewController *viewController, NSError *error) {
+        if (viewController) {
+            [[LaunchKit sharedInstance] presentRemoteUIViewController:viewController fromViewController:presentingViewController animated:YES dismissalHandler:^(LKViewControllerFlowResult flowResult) {
+                if (completion) {
+                    completion(flowResult, nil);
+                }
+            }];
+        } else {
+            if (completion) {
+                completion(LKViewControllerFlowResultFailed, error);
+            }
+        }
+    }];
+}
+
 #pragma mark - Remote UI
 
 - (void)loadRemoteUIWithId:(nonnull NSString *)remoteUIId completion:(nonnull LKRemoteUILoadHandler)completion
