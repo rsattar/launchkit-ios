@@ -44,6 +44,8 @@ static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 @property (strong, nonatomic) NSTimer *trackingTimer;
 @property (assign, nonatomic) NSTimeInterval trackingInterval;
 
+@property (strong, nonatomic) NSDate *launchTime;
+
 // Analytics
 @property (strong, nonatomic) LKAnalytics *analytics;
 
@@ -94,6 +96,8 @@ static LaunchKit *_sharedInstance;
             LKLogError(@"Invalid or empty api token. Please get one from https://launchkit.io/tokens for your team.");
         }
         self.apiToken = apiToken;
+
+        self.launchTime = [NSDate date];
 
         self.apiClient = [[LKAPIClient alloc] init];
         if (USE_LOCAL_LAUNCHKIT_SERVER) {
