@@ -20,6 +20,12 @@ static LKBundlesManager *_sharedInstance;
 NSString *const LKBundlesManagerDidFinishRetrievingBundlesManifest = @"LKBundlesManagerDidFinishRetrievingBundlesManifest";
 NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesManagerDidFinishDownloadingRemoteBundles";
 
+// Add category that reveals our (private) LKBundleInfo method to upgrade resource version to newest
+// (once we have retrieved the remote manifest and determined that this is, in fact, the newest available
+@interface LKBundleInfo (UpdatingResourceVersion)
+- (void) markResourceVersionAsNewest;
+@end
+
 @interface LKBundlesManager ()
 
 @property (strong, nonatomic) NSMutableDictionary *remoteBundleMap;
@@ -146,7 +152,8 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
             self.localBundleMap[bundleName] = [[LKBundleInfo alloc] initWithName:bundleName
                                                                          version:version
                                                                              url:bundleUrl
-                                                                      createTime:createTime];
+                                                                      createTime:createTime
+                                                                 resourceVersion:LKResourceVersionPrepackaged];
         }
     }
 
@@ -208,8 +215,9 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
             LKBundleInfo *info = [[LKBundleInfo alloc] initWithName:name
                                                             version:version
                                                                 url:localCacheUrl
-                                                         createTime:mostRecentCreateTime];
-            
+                                                         createTime:mostRecentCreateTime
+                                                    resourceVersion:LKResourceVersionLocalCache];
+
             self.localBundleMap[info.name] = info;
         }
     }
@@ -244,6 +252,14 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
             _weakSelf.remoteBundleMap = [NSMutableDictionary dictionaryWithCapacity:bundleInfos.count];
         }
         for (LKBundleInfo *bundleInfo in bundleInfos) {
+            // Check our local bundle map, and
+            // if we have the same version,
+            // mark our local version as "newest"
+            LKBundleInfo *localBundleInfo = self.localBundleMap[bundleInfo.name];
+            if (localBundleInfo != nil && [localBundleInfo.version isEqualToString:bundleInfo.version]) {
+                [localBundleInfo markResourceVersionAsNewest];
+            }
+
             NSURL *remoteUrl = bundleInfo.url;
             if (remoteUrl == nil) {
                 // no url, skip
@@ -486,7 +502,8 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
                     savedInfo = [[LKBundleInfo alloc] initWithName:info.name
                                                            version:info.version
                                                                url:savedFileUrl
-                                                        createTime:info.createTime];
+                                                        createTime:info.createTime
+                                                   resourceVersion:LKResourceVersionNewest];
                     _weakSelf.localBundleMap[savedInfo.name] = savedInfo;
                     if (deleteOtherVersions) {
                         [_weakSelf deleteVersionsOfBundleWithName:savedInfo.name

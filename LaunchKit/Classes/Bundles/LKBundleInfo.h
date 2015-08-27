@@ -12,7 +12,7 @@ typedef NS_ENUM(NSInteger, LKResourceVersion) {
     LKResourceVersionInvalid,
     LKResourceVersionNewest,
     LKResourceVersionLocalCache,
-    LKResourceVersionPrePackaged,
+    LKResourceVersionPrepackaged,
 };
 
 @interface LKBundleInfo : NSObject <NSCoding>
@@ -29,6 +29,7 @@ typedef NS_ENUM(NSInteger, LKResourceVersion) {
 - (instancetype) initWithName:(NSString *)name
                       version:(NSString *)version
                           url:(NSURL *)url
-                   createTime:(NSDate *)date;
+                   createTime:(NSDate *)date
+              resourceVersion:(LKResourceVersion)resourceVersion;
 
 @end
