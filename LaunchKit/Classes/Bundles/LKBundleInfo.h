@@ -8,12 +8,22 @@
 
 #import <Foundation/Foundation.h>
 
+typedef NS_ENUM(NSInteger, LKResourceVersion) {
+    LKResourceVersionInvalid,
+    LKResourceVersionNewest,
+    LKResourceVersionLocalCache,
+    LKResourceVersionPrePackaged,
+};
+
 @interface LKBundleInfo : NSObject <NSCoding>
 
 @property (readonly, nonatomic) NSDate *createTime;
 @property (readonly, nonatomic) NSString *name;
 @property (readonly, nonatomic) NSURL *url;
 @property (readonly, nonatomic) NSString *version;
+
+// Locally synthesized version
+@property (readonly, nonatomic) LKResourceVersion resourceVersion;
 
 - (instancetype) initWithAPIDictionary:(NSDictionary *)dictionary;
 - (instancetype) initWithName:(NSString *)name

@@ -15,6 +15,9 @@
 @property (strong, nonatomic) NSURL *url;
 @property (strong, nonatomic) NSString *version;
 
+// Locally synthesized version
+@property (readwrite, assign, nonatomic) LKResourceVersion resourceVersion;
+
 @end
 
 @implementation LKBundleInfo
@@ -29,6 +32,7 @@
         NSString *urlString = dictionary[@"url"];
         self.url = [NSURL URLWithString:urlString];
         self.version = dictionary[@"version"];
+        self.resourceVersion = LKResourceVersionNewest;
     }
     return self;
 }
@@ -37,6 +41,7 @@
                       version:(NSString *)version
                           url:(NSURL *)url
                    createTime:(NSDate *)date
+              resourceVersion:(LKResourceVersion)resourceVersion;
 {
     self = [super init];
     if (self) {
@@ -44,6 +49,7 @@
         self.version = version;
         self.url = url;
         self.createTime = date;
+        self.resourceVersion = resourceVersion;
     }
     return self;
 }
@@ -56,6 +62,7 @@
         self.name = [aDecoder decodeObjectForKey:@"name"];
         self.url = [aDecoder decodeObjectForKey:@"url"];
         self.version = [aDecoder decodeObjectForKey:@"version"];
+        self.resourceVersion = [aDecoder decodeIntegerForKey:@"resourceVersion"];
     }
     return self;
 }
@@ -66,6 +73,12 @@
     [aCoder encodeObject:self.name forKey:@"name"];
     [aCoder encodeObject:self.url forKey:@"url"];
     [aCoder encodeObject:self.version forKey:@"version"];
+    [aCoder encodeInteger:self.resourceVersion forKey:@"resourceVersion"];
+}
+
+- (void) markResourceVersionAsNewest
+{
+    self.resourceVersion = LKResourceVersionNewest;
 }
 
 @end
