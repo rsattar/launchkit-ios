@@ -68,7 +68,9 @@
 @property (readonly, nonatomic, nonnull) NSString *version;
 
 /**
- * Always present App Update Notes, for testing. (Only valid for debug builds)
+ * Always present App Update Notes, for testing. (Only valid for debug builds).
+ * @discussion Note that your LaunchKit account should have Update Notes configured
+ * for this version of your app, or nothing will be shown.
  */
 @property (assign, nonatomic) BOOL debugAlwaysPresentAppUpdateNotes;
 
