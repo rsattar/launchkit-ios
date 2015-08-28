@@ -123,6 +123,14 @@ static NSCalendar *_globalGregorianCalendar;
 {
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
     params[@"token"] = self.apiToken;
+    params[@"bundle"] = [LKAPIClient bundleIdentifier];
+    params[@"version"] = [LKAPIClient bundleVersion];
+    params[@"build"] = [LKAPIClient buildNumber];
+#if DEBUG
+    params[@"build_debug"] = @(0);
+#else
+    params[@"build_debug"] = @(1);
+#endif
     [self objectFromPath:@"v1/ui/ios/bundles" method:@"GET" params:params successBlock:^(NSDictionary *responseDict) {
         // TODO: (Riz) Actually make ObjC models for the data, rather than returning raw dictionary
         NSArray *rawBundleInfos = responseDict[@"bundles"];
