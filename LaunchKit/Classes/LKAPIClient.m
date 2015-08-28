@@ -126,10 +126,14 @@ static NSCalendar *_globalGregorianCalendar;
     params[@"bundle"] = self.cachedBundleIdentifier;
     params[@"version"] = self.cachedBundleVersion;
     params[@"build"] = self.cachedBuildNumber;
+    params[@"os_version"] = self.cachedOSVersion;
+    params[@"hardware"] = self.cachedHardwareModel;
+    params[@"screen"] = self.cachedScreenInfo;
 #if DEBUG
-    params[@"build_debug"] = @(0);
+    // Notify LK servers when the app is running in debug mode
+    params[@"debug_build"] = @(YES);
 #else
-    params[@"build_debug"] = @(1);
+    params[@"debug_build"] = @(NO);
 #endif
     [self objectFromPath:@"v1/ui/ios/bundles" method:@"GET" params:params successBlock:^(NSDictionary *responseDict) {
         // TODO: (Riz) Actually make ObjC models for the data, rather than returning raw dictionary
