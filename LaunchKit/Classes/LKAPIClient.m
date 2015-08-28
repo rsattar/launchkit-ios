@@ -118,7 +118,7 @@ static NSCalendar *_globalGregorianCalendar;
 #pragma mark - Remote Nib Loading
 
 
-- (void) retrieveAvailableRemoteUIInfoWithSuccessBlock:(void (^)(NSArray *bundleInfos))successBlock
+- (void) retrieveBundlesManifestWithSuccessBlock:(void (^)(NSArray *bundleInfos))successBlock
                                              errorBlock:(void(^)(NSError *error))errorBlock
 {
     NSMutableDictionary *params = [NSMutableDictionary dictionary];

@@ -247,7 +247,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     }
     self.retrievingRemoteBundlesManifest = YES;
     __weak LKBundlesManager *_weakSelf = self;
-    [self.apiClient retrieveAvailableRemoteUIInfoWithSuccessBlock:^(NSArray *bundleInfos) {
+    [self.apiClient retrieveBundlesManifestWithSuccessBlock:^(NSArray *bundleInfos) {
         if (!_weakSelf.remoteBundleMap) {
             _weakSelf.remoteBundleMap = [NSMutableDictionary dictionaryWithCapacity:bundleInfos.count];
         }

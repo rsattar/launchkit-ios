@@ -25,7 +25,7 @@ extern NSString* const LKAPIFailedAuthenticationChallenge;
               errorBlock:(void(^)(NSError *error))errorBlock;
 
 #pragma mark - Remote UI Loading
-- (void) retrieveAvailableRemoteUIInfoWithSuccessBlock:(void (^)(NSArray *bundleInfos))successBlock
+- (void) retrieveBundlesManifestWithSuccessBlock:(void (^)(NSArray *bundleInfos))successBlock
                                              errorBlock:(void(^)(NSError *error))errorBlock;
 
 #pragma mark - Sending requests
