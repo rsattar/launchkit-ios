@@ -67,6 +67,11 @@
  */
 @property (readonly, nonatomic, nonnull) NSString *version;
 
+/**
+ * Always present App Update Notes, for testing. (Only valid for debug builds)
+ */
+@property (assign, nonatomic) BOOL debugAlwaysPresentAppUpdateNotes;
+
 
 /*!
  @method
