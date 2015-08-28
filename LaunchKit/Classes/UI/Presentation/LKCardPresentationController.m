@@ -116,6 +116,10 @@
         if (self.traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassRegular &&
             self.traitCollection.verticalSizeClass == UIUserInterfaceSizeClassRegular) {
             preferredSize = CGSizeMake(540, 620);
+        } else if (CGRectGetWidth(bounds) == 375) {
+            // Ugh, hardcoded for iPhone 6 size :(
+            maxRect = bounds;
+            preferredSize = CGSizeMake(320, 568);
         }
         preferredSize.width = MIN(preferredSize.width, CGRectGetWidth(maxRect));
         preferredSize.height = MIN(preferredSize.height, CGRectGetHeight(maxRect));
