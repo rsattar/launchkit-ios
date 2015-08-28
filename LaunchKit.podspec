@@ -21,6 +21,7 @@ Pod::Spec.new do |s|
   s.resource_bundles = {
     'LaunchKitResources' => ['LaunchKit/Assets/*.xcassets']
   }
+  s.preserve_paths = 'LaunchKit/Scripts/**/*'
 
   # s.public_header_files = 'LaunchKit/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
