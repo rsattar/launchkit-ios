@@ -57,6 +57,7 @@ static NSString *const LAUNCHKIT_TOKEN = @"YOUR_LAUNCHKIT_TOKEN";
         [LaunchKit launchWithToken:launchKitToken];
         [LaunchKit sharedInstance].debugMode = YES;
         [LaunchKit sharedInstance].verboseLogging = YES;
+        [LaunchKit sharedInstance].debugAlwaysPresentAppUpdateNotes = YES;
     }
     return YES;
 }
