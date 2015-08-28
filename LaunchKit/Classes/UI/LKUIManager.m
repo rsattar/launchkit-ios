@@ -256,8 +256,8 @@
             presentedInVersions = [presentedInVersions setByAddingObject:currentVersion];
         }
         self.appVersionsForPresentedBundleId[remoteUIId] = presentedInVersions;
+        [self archiveAppVersionsForPresentedBundleId];
     }
-    [self archiveAppVersionsForPresentedBundleId];
 }
 
 
