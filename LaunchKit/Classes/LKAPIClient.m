@@ -123,9 +123,9 @@ static NSCalendar *_globalGregorianCalendar;
 {
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
     params[@"token"] = self.apiToken;
-    params[@"bundle"] = [LKAPIClient bundleIdentifier];
-    params[@"version"] = [LKAPIClient bundleVersion];
-    params[@"build"] = [LKAPIClient buildNumber];
+    params[@"bundle"] = self.cachedBundleIdentifier;
+    params[@"version"] = self.cachedBundleVersion;
+    params[@"build"] = self.cachedBuildNumber;
 #if DEBUG
     params[@"build_debug"] = @(0);
 #else
