@@ -264,7 +264,9 @@
 - (BOOL)remoteUIPresentedForThisAppVersion:(NSString *)remoteUIId
 {
     NSSet *presentedInVersions = self.appVersionsForPresentedBundleId[remoteUIId];
-    return ([presentedInVersions member:remoteUIId] != nil);
+    NSString *currentVersion = [self currentAppVersion];
+    BOOL hasPresentedInThisVersion = [presentedInVersions member:currentVersion] != nil;
+    return hasPresentedInThisVersion;
 }
 
 @end
