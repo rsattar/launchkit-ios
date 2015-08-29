@@ -1,6 +1,72 @@
 #!/usr/bin/env xcrun swift
 import Foundation
 
+// EXIT IF NOT RUNNING WITH PARAM
+if Process.arguments.count <= 1 {
+    println("No apiToken supplied. Supply apiToken as first parameter. Get an api token at https://launchkit.io/my-apps")
+    exit(EXIT_FAILURE)
+}
+
+let apiToken = Process.arguments[1]
+var useLocalServer = false
+if Process.arguments.count > 2 {
+    if Process.arguments[2] == "-local" {
+        useLocalServer = true
+    }
+}
+
+let apiBaseUrlString: String
+if useLocalServer {
+    apiBaseUrlString = "http://localhost:9101"
+} else {
+    apiBaseUrlString = "https://api.launchkit.io"
+}
+
+let env = NSProcessInfo.processInfo().environment as! [String:NSString]
+
+let targetBuildDir: NSString
+let appExecutableDir: NSString
+let infoPlistPath: String
+if let buildDir = env["TARGET_BUILD_DIR"], let executableDir = env["EXECUTABLE_FOLDER_PATH"], let plistPath = env["INFOPLIST_PATH"] {
+    targetBuildDir = buildDir
+    appExecutableDir = executableDir
+    infoPlistPath = targetBuildDir.stringByAppendingPathComponent(plistPath as String);
+} else {
+    targetBuildDir = "."
+    appExecutableDir = ""
+    infoPlistPath = ""
+}
+
+let debugBuild: Int
+if let configurationString = env["CONFIGURATION"] where configurationString == "Debug" {
+    debugBuild = 1
+} else {
+    debugBuild = 0
+}
+println("Debug build: \(debugBuild), local server: \(useLocalServer)")
+
+
+var appInfoPlist = NSMutableDictionary(contentsOfFile: infoPlistPath)
+let appBundle: String
+let appBundleVersion: String
+let appBuildNumber: String
+
+if let appInfoPlist = appInfoPlist,
+    let bundle = appInfoPlist[kCFBundleIdentifierKey as String] as? String,
+    let version = appInfoPlist["CFBundleShortVersionString"] as? String,
+    let build = appInfoPlist["CFBundleVersion"] as? String
+{
+    appBundle = bundle
+    appBundleVersion = version
+    appBuildNumber = build
+}
+
+// TODO(Riz):
+let appOSVersion: String = ""
+let hardwareModel: String = ""
+
+// Include helper functions inline (scripts can't use support files) ///////////////////////////////////////////////
+
 func prettyJsonStringFromObject(object: AnyObject) -> NSString {
     var jsonPrintStream = NSOutputStream.outputStreamToMemory()
     jsonPrintStream.open()
@@ -14,7 +80,7 @@ func prettyJsonStringFromObject(object: AnyObject) -> NSString {
 func retrieveRemoteBundlesManifest(apiToken: String, completion: ((bundles: [[NSObject: AnyObject]], error: NSError?) -> Void)?) {
     //println("Retrieving LaunchKit Remote Bundles Manifest...")
 
-    let url = NSURL(string: "https://api.launchkit.io/v1/ui/ios/bundles?token=\(apiToken)")!
+    let url = NSURL(string: "\(apiBaseUrlString)/v1/ui/ios/bundles?token=\(apiToken)&bundle=\(appBundle)&version=\(appBundleVersion)&build=\(appBuildNumber)&debug_build=\(debugBuild)")!
     var request = NSMutableURLRequest(URL: url)
 
     var response: NSURLResponse?
@@ -91,6 +157,8 @@ func saveDataAtUrl(url:NSURL, toFileUrl fileUrl:NSURL) -> Bool {
                     println("Couldn't remove the zipped file after extracting it: \(removeZipFileError)")
                 }
             }
+
+            //println("Saved to: \(fileUrl.URLByDeletingLastPathComponent!)")
         }
         return true
 
@@ -101,27 +169,10 @@ func saveDataAtUrl(url:NSURL, toFileUrl fileUrl:NSURL) -> Bool {
 }
 
 /////////////////////////////////////////////////////////////////
-
-if Process.arguments.count <= 1 {
-    println("No apiToken supplied. Supply apiToken as first parameter. Get an api token at https://launchkit.io/my-apps")
-    exit(EXIT_FAILURE)
-}
-
-let env = NSProcessInfo.processInfo().environment as! [String:NSString]
-let targetBuildDir: NSString
-let appExecutableDir: NSString
-if let buildDir = env["TARGET_BUILD_DIR"], let executableDir = env["EXECUTABLE_FOLDER_PATH"] {
-    targetBuildDir = buildDir
-    appExecutableDir = executableDir
-} else {
-    targetBuildDir = "."
-    appExecutableDir = ""
-}
 let launchKitResourcesFolderPath = targetBuildDir
     .stringByAppendingPathComponent(appExecutableDir as String)
     .stringByAppendingPathComponent("LaunchKitRemoteResources" as String)
 
-let apiToken = Process.arguments[1]
 retrieveRemoteBundlesManifest(apiToken, { (bundles, error) -> Void in
     if error != nil {
         println("Error retrieving remote resource info (for caching): \(error)")
