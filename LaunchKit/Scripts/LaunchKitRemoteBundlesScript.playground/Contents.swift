@@ -182,7 +182,7 @@ func saveDataAtUrl(url:NSURL, toFileUrl fileUrl:NSURL) -> Bool {
 }
 
 /////////////////////////////////////////////////////////////////
-let launchKitResourcesFolderPath = targetBuildDir
+let launchKitAppResourcesFolderPath = targetBuildDir
     .stringByAppendingPathComponent(appExecutableDir as String)
     .stringByAppendingPathComponent("LaunchKitRemoteResources" as String)
 
@@ -197,10 +197,11 @@ retrieveRemoteBundlesManifest(apiToken, { (bundles, error) -> Void in
             let url = NSURL(string: bundle["url"] as! String)!
             let version = bundle["version"] as! String
 
-            let fileDownloadUrl = NSURL(fileURLWithPath: launchKitResourcesFolderPath)!
             if verboseDebugging {
                 println(" => \(name): \(url.absoluteString!)")
             }
+
+            let fileDownloadUrl = NSURL(fileURLWithPath: launchKitCachedBundlesFolderPath)!
                 .URLByAppendingPathComponent(name, isDirectory:true)
                 .URLByAppendingPathComponent(version, isDirectory: true)
             .URLByAppendingPathComponent(url.lastPathComponent!, isDirectory: false)
