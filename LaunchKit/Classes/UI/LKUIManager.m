@@ -137,12 +137,16 @@
     if (self.remoteUIPresentedController == controller) {
         controller.flowDelegate = nil;
 
-        [self.remoteUIPresentingController dismissViewControllerAnimated:animated completion:^{
-            self.remoteUIPresentingController = nil;
-            self.remoteUIPresentedController = nil;
-            if (self.remoteUIControllerDismissalHandler != nil) {
-                self.remoteUIControllerDismissalHandler(flowResult);
-                self.remoteUIControllerDismissalHandler = nil;
+        UIViewController *presentingController = self.remoteUIPresentingController;
+
+        self.remoteUIPresentingController = nil;
+        self.remoteUIPresentedController = nil;
+        LKRemoteUIDismissalHandler handler = self.remoteUIControllerDismissalHandler;
+        self.remoteUIControllerDismissalHandler = nil;
+        [presentingController dismissViewControllerAnimated:animated completion:^{
+
+            if (handler != nil) {
+                handler(flowResult);
             }
         }];
     }
