@@ -8,12 +8,19 @@ if Process.arguments.count <= 1 {
 }
 
 let apiToken = Process.arguments[1]
-var useLocalServer = false
-if Process.arguments.count > 2 {
-    if Process.arguments[2] == "-local" {
-        useLocalServer = true
-    }
+let useLocalServer: Bool
+if find(Process.arguments, "-local") != nil {
+    useLocalServer = true
+} else {
+    useLocalServer = false
 }
+let verboseDebugging: Bool
+if find(Process.arguments, "-verbose") != nil {
+    verboseDebugging = true;
+} else {
+    verboseDebugging = false;
+}
+
 
 let apiBaseUrlString: String
 if useLocalServer {
@@ -43,7 +50,9 @@ if let configurationString = env["CONFIGURATION"] where configurationString == "
 } else {
     debugBuild = 0
 }
-println("Debug build: \(debugBuild), local server: \(useLocalServer)")
+if verboseDebugging {
+    println("Debug build: \(debugBuild), local server: \(useLocalServer)")
+}
 
 
 var appInfoPlist = NSMutableDictionary(contentsOfFile: infoPlistPath)
@@ -93,7 +102,9 @@ func retrieveRemoteBundlesManifest(apiToken: String, completion: ((bundles: [[NS
             println("Invalid json returned. Check your api token and network connection (received \(data!.length) bytes)")
             completion?(bundles: [], error: jsonError)
         } else {
-            //println("JSON Response: \(prettyJsonStringFromObject(jsonDict))")
+            if verboseDebugging {
+                println("JSON Response: \(prettyJsonStringFromObject(jsonDict))")
+            }
             if let bundleInfos = jsonDict["bundles"] as? [[NSObject:AnyObject]] {
                 completion?(bundles: bundleInfos, error: nil)
             } else {
@@ -158,7 +169,9 @@ func saveDataAtUrl(url:NSURL, toFileUrl fileUrl:NSURL) -> Bool {
                 }
             }
 
-            //println("Saved to: \(fileUrl.URLByDeletingLastPathComponent!)")
+            if verboseDebugging {
+                println("Saved to: \(fileUrl.URLByDeletingLastPathComponent!)")
+            }
         }
         return true
 
@@ -183,9 +196,11 @@ retrieveRemoteBundlesManifest(apiToken, { (bundles, error) -> Void in
             let name = bundle["name"] as! String
             let url = NSURL(string: bundle["url"] as! String)!
             let version = bundle["version"] as! String
-            //println(" => \(name): \(url.absoluteString!)")
 
             let fileDownloadUrl = NSURL(fileURLWithPath: launchKitResourcesFolderPath)!
+            if verboseDebugging {
+                println(" => \(name): \(url.absoluteString!)")
+            }
                 .URLByAppendingPathComponent(name, isDirectory:true)
                 .URLByAppendingPathComponent(version, isDirectory: true)
             .URLByAppendingPathComponent(url.lastPathComponent!, isDirectory: false)
