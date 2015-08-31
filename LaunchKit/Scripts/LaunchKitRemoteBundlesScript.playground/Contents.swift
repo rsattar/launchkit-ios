@@ -74,6 +74,15 @@ if let appInfoPlist = appInfoPlist,
 let appOSVersion: String = ""
 let hardwareModel: String = ""
 
+let cachedBundlesFolderPath = targetBuildDir
+    .stringByAppendingPathComponent("LaunchKitCachedBundles" as String)
+let cachedBundlesFolderUrl = NSURL(fileURLWithPath: cachedBundlesFolderPath)!
+
+let appResourcesFolderPath = targetBuildDir
+    .stringByAppendingPathComponent(appExecutableDir as String)
+    .stringByAppendingPathComponent("LaunchKitRemoteResources" as String)
+let appResourcesFolderUrl = NSURL(fileURLWithPath: appResourcesFolderPath)!
+
 // Include helper functions inline (scripts can't use support files) ///////////////////////////////////////////////
 
 func prettyJsonStringFromObject(object: AnyObject) -> NSString {
@@ -114,6 +123,58 @@ func retrieveRemoteBundlesManifest(apiToken: String, completion: ((bundles: [[NS
     } else {
         println("Got no data from remote bundles lookup, response: \(response?.description)")
         completion?(bundles: [], error: error)
+    }
+}
+
+func directoryUrlForBundleName(name:String, #version:String, parentUrl: NSURL = cachedBundlesFolderUrl) -> NSURL {
+    let directoryUrl = parentUrl
+        .URLByAppendingPathComponent(name, isDirectory:true)
+        .URLByAppendingPathComponent(version, isDirectory: true)
+    return directoryUrl
+}
+
+func bundleAlreadyCached(name:String, #version:String) -> Bool {
+    let fileManager = NSFileManager.defaultManager()
+
+    let bundleDir = directoryUrlForBundleName(name, version: version, parentUrl: cachedBundlesFolderUrl)
+    let versionFolderExists = fileManager.fileExistsAtPath(bundleDir.path!)
+    return versionFolderExists
+}
+
+func copyCachedBundleToAppBundle(name:String, #version:String) {
+    let fileManager = NSFileManager.defaultManager()
+    let cachedBundleDir = directoryUrlForBundleName(name, version: version, parentUrl: cachedBundlesFolderUrl)
+    let appBundleDir = directoryUrlForBundleName(name, version: version, parentUrl: appResourcesFolderUrl)
+
+    let bundleNameDir = appBundleDir.URLByDeletingLastPathComponent!
+    if fileManager.fileExistsAtPath(bundleNameDir.path!) {
+        // Delete all version of this bundle (and then we'll copy a new fresh version over)
+        if verboseDebugging {
+            println("Deleting bundle \(name) in app bundle dir...")
+        }
+        var deleteError:NSError?
+        let deleted = fileManager.removeItemAtURL(bundleNameDir, error: &deleteError)
+        if !deleted {
+            println("Could not delete existing bundle \(name) in app bundle dir: \(deleteError!)")
+        }
+    }
+    // Make dir structure for [app]/LaunchKitRemoteResources/[bundle]/[version]
+    if !fileManager.fileExistsAtPath(appBundleDir.path!) {
+        var appBundleDirCreateError:NSError?
+        let dirCreated = fileManager.createDirectoryAtPath(appBundleDir.path!, withIntermediateDirectories: true, attributes: nil, error: &appBundleDirCreateError)
+        if !dirCreated {
+            println("Could not create app bundle dir: \(appBundleDirCreateError!)")
+        }
+    }
+    // Copy contents of [cached]/[bundle]/[version]/* to [app]/LaunchKitRemoteResources/[bundle]/[version]/
+    if let sourceItemUrls = fileManager.contentsOfDirectoryAtURL(cachedBundleDir, includingPropertiesForKeys: nil, options: .SkipsHiddenFiles, error: nil) as? [NSURL] {
+        for sourceItemUrl in sourceItemUrls {
+            var copyError:NSError?
+            let copied = fileManager.copyItemAtURL(sourceItemUrl, toURL: appBundleDir.URLByAppendingPathComponent(sourceItemUrl.lastPathComponent!), error: &copyError)
+            if !copied {
+                println("Could not copy cached bundle \(name)'s file \(sourceItemUrl.lastPathComponent!) to app bundle dir: \(copyError!.userInfo!)")
+            }
+        }
     }
 }
 
@@ -182,9 +243,6 @@ func saveDataAtUrl(url:NSURL, toFileUrl fileUrl:NSURL) -> Bool {
 }
 
 /////////////////////////////////////////////////////////////////
-let launchKitAppResourcesFolderPath = targetBuildDir
-    .stringByAppendingPathComponent(appExecutableDir as String)
-    .stringByAppendingPathComponent("LaunchKitRemoteResources" as String)
 
 retrieveRemoteBundlesManifest(apiToken, { (bundles, error) -> Void in
     if error != nil {
@@ -197,15 +255,23 @@ retrieveRemoteBundlesManifest(apiToken, { (bundles, error) -> Void in
             let url = NSURL(string: bundle["url"] as! String)!
             let version = bundle["version"] as! String
 
+            var available = bundleAlreadyCached(name, version: version)
             if verboseDebugging {
-                println(" => \(name): \(url.absoluteString!)")
+                let cachedString = available ? " (cached)" : " (needs download)"
+                println(" => \(name): \(url.absoluteString!)\(cachedString)")
             }
 
-            let fileDownloadUrl = NSURL(fileURLWithPath: launchKitCachedBundlesFolderPath)!
-                .URLByAppendingPathComponent(name, isDirectory:true)
-                .URLByAppendingPathComponent(version, isDirectory: true)
-            .URLByAppendingPathComponent(url.lastPathComponent!, isDirectory: false)
-            saveDataAtUrl(url, toFileUrl: fileDownloadUrl)
+            if !available {
+                if verboseDebugging {
+                    println("Downloading \(name)...")
+                }
+                let fileDownloadUrl = directoryUrlForBundleName(name, version: version, parentUrl: cachedBundlesFolderUrl)
+                    .URLByAppendingPathComponent(url.lastPathComponent!, isDirectory: false)
+                available = saveDataAtUrl(url, toFileUrl: fileDownloadUrl)
+            }
+            if available {
+                copyCachedBundleToAppBundle(name, version: version)
+            }
         }
         // TODO: Perhaps save a dictionary of the remote UI maps to the app bundle too, 
         // so a mapping is available on the first-time launch of the app
