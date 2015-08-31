@@ -115,7 +115,7 @@ static NSCalendar *_globalGregorianCalendar;
 }
 
 
-#pragma mark - Remote Nib Loading
+#pragma mark - Remote Bundles Loading
 
 
 - (void) retrieveBundlesManifestWithSuccessBlock:(void (^)(NSArray *bundleInfos))successBlock
@@ -135,7 +135,7 @@ static NSCalendar *_globalGregorianCalendar;
 #else
     params[@"debug_build"] = @(NO);
 #endif
-    [self objectFromPath:@"v1/ui/ios/bundles" method:@"GET" params:params successBlock:^(NSDictionary *responseDict) {
+    [self objectFromPath:@"v1/bundles" method:@"GET" params:params successBlock:^(NSDictionary *responseDict) {
         // TODO: (Riz) Actually make ObjC models for the data, rather than returning raw dictionary
         NSArray *rawBundleInfos = responseDict[@"bundles"];
         NSMutableArray *bundleInfos = [NSMutableArray arrayWithCapacity:rawBundleInfos.count];

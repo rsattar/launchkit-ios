@@ -80,7 +80,7 @@ func prettyJsonStringFromObject(object: AnyObject) -> NSString {
 func retrieveRemoteBundlesManifest(apiToken: String, completion: ((bundles: [[NSObject: AnyObject]], error: NSError?) -> Void)?) {
     //println("Retrieving LaunchKit Remote Bundles Manifest...")
 
-    let url = NSURL(string: "\(apiBaseUrlString)/v1/ui/ios/bundles?token=\(apiToken)&bundle=\(appBundle)&version=\(appBundleVersion)&build=\(appBuildNumber)&debug_build=\(debugBuild)")!
+    let url = NSURL(string: "\(apiBaseUrlString)/v1/bundles?token=\(apiToken)&bundle=\(appBundle)&version=\(appBundleVersion)&build=\(appBuildNumber)&debug_build=\(debugBuild)")!
     var request = NSMutableURLRequest(URL: url)
 
     var response: NSURLResponse?
