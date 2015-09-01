@@ -68,11 +68,23 @@ if let appInfoPlist = appInfoPlist,
     appBundle = bundle
     appBundleVersion = version
     appBuildNumber = build
+} else {
+    appBundle = ""
+    appBundleVersion = ""
+    appBuildNumber = ""
 }
 
 // TODO(Riz):
 let appOSVersion: String = ""
 let hardwareModel: String = ""
+
+if verboseDebugging {
+    println("Bundle: \(appBundle)")
+    println("Version: \(appBundleVersion)")
+    println("Build: \(appBuildNumber)")
+    println("App OS Version: \(appOSVersion)")
+    println("hardwareModel: \(hardwareModel)")
+}
 
 let cachedBundlesFolderPath = targetBuildDir
     .stringByAppendingPathComponent("LaunchKitCachedBundles" as String)
