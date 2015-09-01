@@ -123,7 +123,7 @@ static NSCalendar *_globalGregorianCalendar;
 {
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
     params[@"token"] = self.apiToken;
-    params[@"bundle"] = self.cachedBundleIdentifier;
+    params[@"bundle_id"] = self.cachedBundleIdentifier;
     params[@"version"] = self.cachedBundleVersion;
     params[@"build"] = self.cachedBuildNumber;
     params[@"os_version"] = self.cachedOSVersion;
