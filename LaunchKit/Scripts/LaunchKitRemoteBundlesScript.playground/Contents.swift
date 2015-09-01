@@ -107,10 +107,14 @@ func prettyJsonStringFromObject(object: AnyObject) -> NSString {
     return jsonOutString
 }
 
+func urlEncoded(str:String) -> String {
+    return str.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)
+}
+
 func retrieveRemoteBundlesManifest(apiToken: String, completion: ((bundles: [[NSObject: AnyObject]], error: NSError?) -> Void)?) {
     //println("Retrieving LaunchKit Remote Bundles Manifest...")
 
-    let url = NSURL(string: "\(apiBaseUrlString)/v1/bundles?token=\(apiToken)&bundle=\(appBundle)&version=\(appBundleVersion)&build=\(appBuildNumber)&debug_build=\(debugBuild)")!
+    let url = NSURL(string: "\(apiBaseUrlString)/v1/bundles?token=\(urlEncoded(apiToken))&bundle=\(urlEncoded(appBundle))&version=\(urlEncoded(appBundleVersion))&build=\(urlEncoded(appBuildNumber))&debug_build=\(debugBuild)")!
     var request = NSMutableURLRequest(URL: url)
 
     var response: NSURLResponse?
