@@ -108,7 +108,7 @@ func prettyJsonStringFromObject(object: AnyObject) -> NSString {
 }
 
 func urlEncoded(str:String) -> String {
-    return str.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)
+    return str.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
 }
 
 func retrieveRemoteBundlesManifest(apiToken: String, completion: ((bundles: [[NSObject: AnyObject]], error: NSError?) -> Void)?) {
