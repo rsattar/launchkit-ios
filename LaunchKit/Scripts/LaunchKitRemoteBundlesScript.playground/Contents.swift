@@ -31,14 +31,24 @@ if useLocalServer {
 
 let env = NSProcessInfo.processInfo().environment as! [String:NSString]
 
+// Useful for storing intermediate files (like cached bundles)
+let configurationBuildDir: NSString
+// Useful for finding the final "build" destination. Things like 
+// intermediate files should not use targetBuildDir
 let targetBuildDir: NSString
 let appExecutableDir: NSString
 let infoPlistPath: String
-if let buildDir = env["TARGET_BUILD_DIR"], let executableDir = env["EXECUTABLE_FOLDER_PATH"], let plistPath = env["INFOPLIST_PATH"] {
+if  let configDir = env["CONFIGURATION_BUILD_DIR"],
+    let buildDir = env["TARGET_BUILD_DIR"],
+    let executableDir = env["EXECUTABLE_FOLDER_PATH"],
+    let plistPath = env["INFOPLIST_PATH"] {
+
+    configurationBuildDir = configDir
     targetBuildDir = buildDir
     appExecutableDir = executableDir
     infoPlistPath = targetBuildDir.stringByAppendingPathComponent(plistPath as String);
 } else {
+    configurationBuildDir = "."
     targetBuildDir = "."
     appExecutableDir = ""
     infoPlistPath = ""
@@ -86,7 +96,7 @@ if verboseDebugging {
     println("hardwareModel: \(hardwareModel)")
 }
 
-let cachedBundlesFolderPath = targetBuildDir
+let cachedBundlesFolderPath = configurationBuildDir
     .stringByAppendingPathComponent("LaunchKitCachedBundles" as String)
 let cachedBundlesFolderUrl = NSURL(fileURLWithPath: cachedBundlesFolderPath)!
 
@@ -291,7 +301,7 @@ retrieveRemoteBundlesManifest(apiToken, { (bundles, error) -> Void in
                 copyCachedBundleToAppBundle(name, version: version)
             }
         }
-        // TODO: Perhaps save a dictionary of the remote UI maps to the app bundle too, 
+        // TODO: Perhaps save a dictionary of the remote UI maps to the app bundle too,
         // so a mapping is available on the first-time launch of the app
         exit(EXIT_SUCCESS)
     }
