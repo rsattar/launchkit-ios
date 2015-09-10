@@ -202,6 +202,8 @@
 		65DA47C81B619F9D00A048AF /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftMigration = 0700;
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0640;
 				ORGANIZATIONNAME = "Cluster Labs, Inc.";
 				TargetAttributes = {
