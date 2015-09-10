@@ -3,19 +3,19 @@ import Foundation
 
 // EXIT IF NOT RUNNING WITH PARAM
 if Process.arguments.count <= 1 {
-    println("No apiToken supplied. Supply apiToken as first parameter. Get an api token at https://launchkit.io/my-apps")
+    print("No apiToken supplied. Supply apiToken as first parameter. Get an api token at https://launchkit.io/my-apps")
     exit(EXIT_FAILURE)
 }
 
 let apiToken = Process.arguments[1]
 let useLocalServer: Bool
-if find(Process.arguments, "-local") != nil {
+if Process.arguments.indexOf("-local") != nil {
     useLocalServer = true
 } else {
     useLocalServer = false
 }
 let verboseDebugging: Bool
-if find(Process.arguments, "-verbose") != nil {
+if Process.arguments.indexOf("-verbose") != nil {
     verboseDebugging = true;
 } else {
     verboseDebugging = false;
@@ -29,7 +29,7 @@ if useLocalServer {
     apiBaseUrlString = "https://api.launchkit.io"
 }
 
-let env = NSProcessInfo.processInfo().environment as! [String:NSString]
+let env = NSProcessInfo.processInfo().environment
 
 // Useful for storing intermediate files (like cached bundles)
 let configurationBuildDir: NSString
@@ -61,7 +61,7 @@ if let configurationString = env["CONFIGURATION"] where configurationString == "
     debugBuild = 0
 }
 if verboseDebugging {
-    println("Debug build: \(debugBuild), local server: \(useLocalServer)")
+    print("Debug build: \(debugBuild), local server: \(useLocalServer)")
 }
 
 
@@ -89,26 +89,25 @@ let appOSVersion: String = ""
 let hardwareModel: String = ""
 
 if verboseDebugging {
-    println("Bundle: \(appBundle)")
-    println("Version: \(appBundleVersion)")
-    println("Build: \(appBuildNumber)")
-    println("App OS Version: \(appOSVersion)")
-    println("hardwareModel: \(hardwareModel)")
+    print("Bundle: \(appBundle)")
+    print("Version: \(appBundleVersion)")
+    print("Build: \(appBuildNumber)")
+    print("App OS Version: \(appOSVersion)")
+    print("hardwareModel: \(hardwareModel)")
 }
 
 let cachedBundlesFolderPath = configurationBuildDir
     .stringByAppendingPathComponent("LaunchKitCachedBundles" as String)
-let cachedBundlesFolderUrl = NSURL(fileURLWithPath: cachedBundlesFolderPath)!
+let cachedBundlesFolderUrl = NSURL(fileURLWithPath: cachedBundlesFolderPath)
 
-let appResourcesFolderPath = targetBuildDir
-    .stringByAppendingPathComponent(appExecutableDir as String)
+let appResourcesFolderPath = (targetBuildDir.stringByAppendingPathComponent(appExecutableDir as String) as NSString)
     .stringByAppendingPathComponent("LaunchKitRemoteResources" as String)
-let appResourcesFolderUrl = NSURL(fileURLWithPath: appResourcesFolderPath)!
+let appResourcesFolderUrl = NSURL(fileURLWithPath: appResourcesFolderPath)
 
 // Include helper functions inline (scripts can't use support files) ///////////////////////////////////////////////
 
 func prettyJsonStringFromObject(object: AnyObject) -> NSString {
-    var jsonPrintStream = NSOutputStream.outputStreamToMemory()
+    let jsonPrintStream = NSOutputStream.outputStreamToMemory()
     jsonPrintStream.open()
     var jsonError: NSError?
     NSJSONSerialization.writeJSONObject(object, toStream: jsonPrintStream, options: .PrettyPrinted, error: &jsonError)
@@ -121,47 +120,45 @@ func urlEncoded(str:String) -> String {
     return str.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
 }
 
-func retrieveRemoteBundlesManifest(apiToken: String, completion: ((bundles: [[NSObject: AnyObject]], error: NSError?) -> Void)?) {
-    //println("Retrieving LaunchKit Remote Bundles Manifest...")
+func retrieveRemoteBundlesManifest(apiToken: String, _ completion: ((bundles: [[NSObject: AnyObject]], error: NSError?) -> Void)?) {
+    //print("Retrieving LaunchKit Remote Bundles Manifest...")
     let query = urlEncoded("token=\(apiToken)&bundle_id=\(appBundle)&version=\(appBundleVersion)&build=\(appBuildNumber)&debug_build=\(debugBuild)")
     let url = NSURL(string: "\(apiBaseUrlString)/v1/bundles?\(query)")!
-    println("URL:")
-    println("\(url)")
-    var request = NSMutableURLRequest(URL: url)
+    print("URL:")
+    print("\(url)")
+    let request = NSMutableURLRequest(URL: url)
 
     var response: NSURLResponse?
-    var error: NSError?
-    let data = NSURLConnection.sendSynchronousRequest(request, returningResponse: &response, error: &error)
-    if data != nil {
-        var jsonError: NSError?
-        let jsonDict = NSJSONSerialization.JSONObjectWithData(data!, options: nil, error: &jsonError) as! [NSObject:AnyObject]
-        if jsonError != nil {
-            println("Invalid json returned. Check your api token and network connection (received \(data!.length) bytes)")
-            completion?(bundles: [], error: jsonError)
-        } else {
+    do {
+        let data = try NSURLConnection.sendSynchronousRequest(request, returningResponse: &response)
+        do {
+            let jsonDict = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions()) as! [NSObject:AnyObject]
             if verboseDebugging {
-                println("JSON Response: \(prettyJsonStringFromObject(jsonDict))")
+                print("JSON Response: \(prettyJsonStringFromObject(jsonDict))")
             }
             if let bundleInfos = jsonDict["bundles"] as? [[NSObject:AnyObject]] {
                 completion?(bundles: bundleInfos, error: nil)
             } else {
                 completion?(bundles: [], error: nil)
             }
+        } catch {
+            print("Invalid json returned. Check your api token and network connection (received \(data.length) bytes)")
+            completion?(bundles: [], error: error as NSError)
         }
-    } else {
-        println("Got no data from remote bundles lookup, response: \(response?.description)")
-        completion?(bundles: [], error: error)
+    } catch {
+        print("Got no data from remote bundles lookup, response: \(response?.description)")
+        completion?(bundles: [], error: error as NSError)
     }
 }
 
-func directoryUrlForBundleName(name:String, #version:String, parentUrl: NSURL = cachedBundlesFolderUrl) -> NSURL {
+func directoryUrlForBundleName(name:String, version:String, parentUrl: NSURL = cachedBundlesFolderUrl) -> NSURL {
     let directoryUrl = parentUrl
         .URLByAppendingPathComponent(name, isDirectory:true)
         .URLByAppendingPathComponent(version, isDirectory: true)
     return directoryUrl
 }
 
-func bundleAlreadyCached(name:String, #version:String) -> Bool {
+func bundleAlreadyCached(name:String, version:String) -> Bool {
     let fileManager = NSFileManager.defaultManager()
 
     let bundleDir = directoryUrlForBundleName(name, version: version, parentUrl: cachedBundlesFolderUrl)
@@ -169,7 +166,7 @@ func bundleAlreadyCached(name:String, #version:String) -> Bool {
     return versionFolderExists
 }
 
-func copyCachedBundleToAppBundle(name:String, #version:String) {
+func copyCachedBundleToAppBundle(name:String, version:String) {
     let fileManager = NSFileManager.defaultManager()
     let cachedBundleDir = directoryUrlForBundleName(name, version: version, parentUrl: cachedBundlesFolderUrl)
     let appBundleDir = directoryUrlForBundleName(name, version: version, parentUrl: appResourcesFolderUrl)
@@ -178,58 +175,61 @@ func copyCachedBundleToAppBundle(name:String, #version:String) {
     if fileManager.fileExistsAtPath(bundleNameDir.path!) {
         // Delete all version of this bundle (and then we'll copy a new fresh version over)
         if verboseDebugging {
-            println("Deleting bundle \(name) in app bundle dir...")
+            print("Deleting bundle \(name) in app bundle dir...")
         }
-        var deleteError:NSError?
-        let deleted = fileManager.removeItemAtURL(bundleNameDir, error: &deleteError)
-        if !deleted {
-            println("Could not delete existing bundle \(name) in app bundle dir: \(deleteError!)")
+        do {
+            try fileManager.removeItemAtURL(bundleNameDir)
+        } catch {
+            print("Could not delete existing bundle \(name) in app bundle dir: \(error as NSError)")
         }
+
     }
     // Make dir structure for [app]/LaunchKitRemoteResources/[bundle]/[version]
     if !fileManager.fileExistsAtPath(appBundleDir.path!) {
-        var appBundleDirCreateError:NSError?
-        let dirCreated = fileManager.createDirectoryAtPath(appBundleDir.path!, withIntermediateDirectories: true, attributes: nil, error: &appBundleDirCreateError)
-        if !dirCreated {
-            println("Could not create app bundle dir: \(appBundleDirCreateError!)")
+        do {
+            try fileManager.createDirectoryAtPath(appBundleDir.path!, withIntermediateDirectories: true, attributes: nil)
+        } catch {
+            print("Could not create app bundle dir: \(error as NSError)")
         }
     }
     // Copy contents of [cached]/[bundle]/[version]/* to [app]/LaunchKitRemoteResources/[bundle]/[version]/
-    if let sourceItemUrls = fileManager.contentsOfDirectoryAtURL(cachedBundleDir, includingPropertiesForKeys: nil, options: .SkipsHiddenFiles, error: nil) as? [NSURL] {
+    do {
+        let sourceItemUrls = try fileManager.contentsOfDirectoryAtURL(cachedBundleDir, includingPropertiesForKeys: nil, options: .SkipsHiddenFiles) as [NSURL]
         for sourceItemUrl in sourceItemUrls {
-            var copyError:NSError?
-            let copied = fileManager.copyItemAtURL(sourceItemUrl, toURL: appBundleDir.URLByAppendingPathComponent(sourceItemUrl.lastPathComponent!), error: &copyError)
-            if !copied {
-                println("Could not copy cached bundle \(name)'s file \(sourceItemUrl.lastPathComponent!) to app bundle dir: \(copyError!.userInfo!)")
+            do {
+                try fileManager.copyItemAtURL(sourceItemUrl, toURL: appBundleDir.URLByAppendingPathComponent(sourceItemUrl.lastPathComponent!))
+            } catch {
+                print("Could not copy cached bundle \(name)'s file \(sourceItemUrl.lastPathComponent!) to app bundle dir: \((error as NSError).userInfo)")
             }
         }
+    } catch {
+
     }
 }
 
 func saveDataAtUrl(url:NSURL, toFileUrl fileUrl:NSURL) -> Bool {
     let fileManager = NSFileManager.defaultManager()
 
-    var request = NSMutableURLRequest(URL: url)
+    let request = NSMutableURLRequest(URL: url)
 
     var response: NSURLResponse?
-    var error: NSError?
-    if let data = NSURLConnection.sendSynchronousRequest(request, returningResponse: &response, error: &error) {
-
+    do {
+        let data = try NSURLConnection.sendSynchronousRequest(request, returningResponse: &response)
         if let folderUrl = fileUrl.URLByDeletingLastPathComponent {
             // Ensure that the parent folder for this fileurl is already created
-            var createDirError: NSError?
-            fileManager.createDirectoryAtURL(folderUrl, withIntermediateDirectories: true, attributes: nil, error: &createDirError)
-            if createDirError != nil {
-                println("Couldn't create directory at \(folderUrl), error: \(error)")
+            do {
+                try fileManager.createDirectoryAtURL(folderUrl, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                print("Couldn't create directory at \(folderUrl), error: \(error as NSError)")
                 return false
             }
 
             // Remove an older file, if it exists
             if fileManager.fileExistsAtPath(fileUrl.path!) {
-                var removeExistingFileError: NSError?
-                fileManager.removeItemAtPath(fileUrl.path!, error: &removeExistingFileError)
-                if removeExistingFileError != nil {
-                    println("Couldn't delete existing file at url: \(fileUrl)")
+                do {
+                    try fileManager.removeItemAtPath(fileUrl.path!)
+                } catch {
+                    print("Couldn't delete existing file at url: \(fileUrl)")
                 }
             }
 
@@ -251,21 +251,20 @@ func saveDataAtUrl(url:NSURL, toFileUrl fileUrl:NSURL) -> Bool {
                 task.waitUntilExit()
 
                 // Now delete the original fileUrl
-                var removeZipFileError: NSError?
-                fileManager.removeItemAtURL(fileUrl, error: &removeZipFileError)
-                if removeZipFileError != nil {
-                    println("Couldn't remove the zipped file after extracting it: \(removeZipFileError)")
+                do {
+                    try fileManager.removeItemAtURL(fileUrl)
+                } catch {
+                    print("Couldn't remove the zipped file after extracting it: \(error as NSError)")
                 }
             }
 
             if verboseDebugging {
-                println("Saved to: \(fileUrl.URLByDeletingLastPathComponent!)")
+                print("Saved to: \(fileUrl.URLByDeletingLastPathComponent!)")
             }
         }
         return true
-
-    } else {
-        println("Received no data from remote url. Response: \(response), error: \(error)")
+    } catch {
+        print("Received no data from remote url. Response: \(response), error: \(error as NSError)")
         return false
     }
 }
@@ -274,10 +273,10 @@ func saveDataAtUrl(url:NSURL, toFileUrl fileUrl:NSURL) -> Bool {
 
 retrieveRemoteBundlesManifest(apiToken, { (bundles, error) -> Void in
     if error != nil {
-        println("Error retrieving remote resource info (for caching): \(error)")
+        print("Error retrieving remote resource info (for caching): \(error)")
         exit(EXIT_FAILURE)
     } else {
-        println("Caching LaunchKit remote resources to app bundle (for super-fast loads)")
+        print("Caching LaunchKit remote resources to app bundle (for super-fast loads)")
         for bundle in bundles {
             let name = bundle["name"] as! String
             let url = NSURL(string: bundle["url"] as! String)!
@@ -286,12 +285,12 @@ retrieveRemoteBundlesManifest(apiToken, { (bundles, error) -> Void in
             var available = bundleAlreadyCached(name, version: version)
             if verboseDebugging {
                 let cachedString = available ? " (cached)" : " (needs download)"
-                println(" => \(name): \(url.absoluteString!)\(cachedString)")
+                print(" => \(name): \(url.absoluteString)\(cachedString)")
             }
 
             if !available {
                 if verboseDebugging {
-                    println("Downloading \(name)...")
+                    print("Downloading \(name)...")
                 }
                 let fileDownloadUrl = directoryUrlForBundleName(name, version: version, parentUrl: cachedBundlesFolderUrl)
                     .URLByAppendingPathComponent(url.lastPathComponent!, isDirectory: false)
@@ -306,4 +305,4 @@ retrieveRemoteBundlesManifest(apiToken, { (bundles, error) -> Void in
         exit(EXIT_SUCCESS)
     }
 })
-//println(NSProcessInfo.processInfo().environment)
+//print(NSProcessInfo.processInfo().environment)
