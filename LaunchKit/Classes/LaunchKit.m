@@ -139,12 +139,14 @@ static LaunchKit *_sharedInstance;
 - (void)setDebugMode:(BOOL)debugMode
 {
     _debugMode = debugMode;
+    self.analytics.debugMode = debugMode;
     LKLOG_ENABLED = _debugMode;
 }
 
 - (void)setVerboseLogging:(BOOL)verboseLogging
 {
     _verboseLogging = verboseLogging;
+    self.analytics.verboseLogging = verboseLogging;
 }
 
 - (NSString *)version
