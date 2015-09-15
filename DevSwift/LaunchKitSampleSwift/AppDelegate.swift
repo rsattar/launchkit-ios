@@ -28,7 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 launchKitToken = token
             }
         }
-        if count(launchKitToken) == 0 || launchKitToken == "YOUR_LAUNCHKIT_TOKEN" {
+        if launchKitToken.characters.count == 0 || launchKitToken == "YOUR_LAUNCHKIT_TOKEN" {
             // We don't have a valid launchkit token, so prompt
             let title = "Set LaunchKit Token"
             let msg = "You must go to Settings and enter in your LaunchKit token."
