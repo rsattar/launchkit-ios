@@ -10,6 +10,8 @@
 
 @interface UIView (LKAdditions)
 
+#if LK_IB_DESIGNABLE
 @property (assign, nonatomic) IBInspectable CGFloat lk_cornerRadius;
+#endif
 
 @end
