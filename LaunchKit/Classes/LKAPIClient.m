@@ -128,7 +128,9 @@ static NSCalendar *_globalGregorianCalendar;
     params[@"build"] = self.cachedBuildNumber;
     params[@"os_version"] = self.cachedOSVersion;
     params[@"hardware"] = self.cachedHardwareModel;
-    params[@"screen"] = self.cachedScreenInfo;
+    // TODO(Riz): maybe send cachedScreenInfo? Would need to
+    // convert it to usable url-params though (can't post as
+    // JSON)
 #if DEBUG
     // Notify LK servers when the app is running in debug mode
     params[@"debug_build"] = @(YES);
