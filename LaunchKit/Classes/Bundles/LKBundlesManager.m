@@ -564,7 +564,13 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
                 // This will store the unzippedPath into .tempUnzippedPath.
                 // NOTE: This is clearly not thread-safe. Ideally Soffes' method should *return*
                 // the unzipped path, or nil if unsuccessful, rather than BOOL.
-                [LK_SSZipArchive unzipFileAtPath:location.path toDestination:directoryUrl.path overwrite:YES password:nil error:&unzipError];
+                BOOL unzipped = [LK_SSZipArchive unzipFileAtPath:location.path toDestination:directoryUrl.path overwrite:YES password:nil error:&unzipError];
+
+                if (!unzipped || unzipError != nil) {
+                    if (completion) {
+                        completion(nil, unzipError);
+                    }
+                }
 
                 // Find the first file in the directory path we saved
                 NSError *directoryContentsError = nil;
