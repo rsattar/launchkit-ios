@@ -554,6 +554,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
                     if (completion) {
                         completion(nil, deleteExistingFileError);
                     }
+                    return;
                 }
             }
 
@@ -570,6 +571,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
                     if (completion) {
                         completion(nil, unzipError);
                     }
+                    return;
                 }
 
                 // Find the first file in the directory path we saved
@@ -588,9 +590,9 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
                 [fileManager copyItemAtURL:location toURL:directoryUrl error:&copyError];
                 savedUrl = directoryUrl;
             }
-        }
-        if (completion) {
-            completion(savedUrl, nil);
+            if (completion) {
+                completion(savedUrl, nil);
+            }
         }
     }];
     [downloadTask resume];
