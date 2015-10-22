@@ -35,7 +35,7 @@ class RootViewController: UIViewController {
                 let message: String
                 if let error = error {
                     let reason: String
-                    if let errorMessage = error.userInfo?["message"] as? String {
+                    if let errorMessage = error.userInfo["message"] as? String {
                         reason = errorMessage
                     } else {
                         reason = ""
