@@ -136,14 +136,11 @@ func retrieveRemoteBundlesManifest(apiToken: String, _ completion: ((bundles: [[
         data = maybeData
         response = maybeResponse
         error = maybeError
-        print("Data retrieved")
         dispatch_semaphore_signal(semaphore)
     })
-    print("Waiting for data")
     dataTask.resume()
     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
 
-    print("Parsing retrieved data")
     if let data = data {
         do {
             let jsonDict = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions()) as! [NSObject:AnyObject]
