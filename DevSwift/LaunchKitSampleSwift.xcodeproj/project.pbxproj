@@ -15,8 +15,8 @@
 		65DA47DD1B619F9D00A048AF /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 65DA47DC1B619F9D00A048AF /* Images.xcassets */; };
 		65DA47E01B619F9D00A048AF /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 65DA47DE1B619F9D00A048AF /* LaunchScreen.xib */; };
 		65DA47EC1B619F9D00A048AF /* LaunchKitSampleSwiftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65DA47EB1B619F9D00A048AF /* LaunchKitSampleSwiftTests.swift */; };
-		6EBDB7C4A977D6E01C7708E4 /* Pods_LaunchKitSampleSwiftTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 741D3C7430DF1B5156698BED /* Pods_LaunchKitSampleSwiftTests.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
-		B38C26EA8DE0E6D1DE6A79E1 /* Pods_LaunchKitSampleSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 961267596601447EF6F33E94 /* Pods_LaunchKitSampleSwift.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		6EBDB7C4A977D6E01C7708E4 /* Pods_LaunchKitSampleSwiftTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 741D3C7430DF1B5156698BED /* Pods_LaunchKitSampleSwiftTests.framework */; };
+		B38C26EA8DE0E6D1DE6A79E1 /* Pods_LaunchKitSampleSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 961267596601447EF6F33E94 /* Pods_LaunchKitSampleSwift.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -166,6 +166,7 @@
 				65DA47CD1B619F9D00A048AF /* Frameworks */,
 				65DA47CE1B619F9D00A048AF /* Resources */,
 				3C2BDDF71746A9D0B79436C6 /* Copy Pods Resources */,
+				8AC46113DB3980103904BCF2 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -185,6 +186,7 @@
 				65DA47E21B619F9D00A048AF /* Frameworks */,
 				65DA47E31B619F9D00A048AF /* Resources */,
 				EB7A36190368C7BE2D95CF7A /* Copy Pods Resources */,
+				6E0C02BAC595084BB4D27C95 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -301,6 +303,36 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		6E0C02BAC595084BB4D27C95 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LaunchKitSampleSwiftTests/Pods-LaunchKitSampleSwiftTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8AC46113DB3980103904BCF2 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LaunchKitSampleSwift/Pods-LaunchKitSampleSwift-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		EB7A36190368C7BE2D95CF7A /* Copy Pods Resources */ = {
