@@ -214,6 +214,7 @@
 				6003F588195388D20070C39A /* Resources */,
 				BBE3E9E11CFBB0967911C25D /* Copy Pods Resources */,
 				650AC9D41B91260F0004F0D6 /* ShellScript */,
+				C11712004C2480A87FA98F23 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -233,6 +234,7 @@
 				6003F5AB195388D20070C39A /* Frameworks */,
 				6003F5AC195388D20070C39A /* Resources */,
 				86BB648E84ADBB68B276FD3E /* Copy Pods Resources */,
+				7C7F2282B9FFC599FAE9F109 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -330,6 +332,21 @@
 			shellScript = "SCRIPT=`/usr/bin/find \"${SRCROOT}/..\" -name LaunchKitRemoteBundlesScript.playground | head -n 1`\nxcrun -sdk macosx swift \"${SCRIPT}/Contents.swift\" \"WwRpLHVdbIsQDMAVZbB-7txnBuv4vq6EeBaXgh6cRGxK\" \"-local\"";
 			showEnvVarsInLog = 0;
 		};
+		7C7F2282B9FFC599FAE9F109 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Tests/Pods-Tests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		86BB648E84ADBB68B276FD3E /* Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -373,6 +390,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LaunchKitSample/Pods-LaunchKitSample-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C11712004C2480A87FA98F23 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LaunchKitSample/Pods-LaunchKitSample-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
