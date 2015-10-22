@@ -36,7 +36,6 @@ static NSCalendar *_globalGregorianCalendar;
 @property (strong, nonatomic) NSString *cachedBuildNumber;      // E.g.: 14
 @property (strong, nonatomic) NSString *cachedOSVersion;        // E.g.: iOS 8.1.3
 @property (strong, nonatomic) NSString *cachedHardwareModel;    // E.g.: iPhone 7,1
-@property (strong, nonatomic) NSDictionary *cachedScreenInfo;   // E.g.: {'width' : 414, 'height' : 736, 'scale' : 3.0}
 
 @end
 
@@ -52,19 +51,6 @@ static NSCalendar *_globalGregorianCalendar;
         _cachedBuildNumber = [LKAPIClient buildNumber];
         _cachedOSVersion = [NSString stringWithFormat:@"iOS %@", [LKAPIClient softwareVersion]];
         _cachedHardwareModel = [LKAPIClient hardwareModel];
-
-        UIScreen *screen = [UIScreen mainScreen];
-        CGSize mainScreenSize = [UIScreen mainScreen].bounds.size;
-        if ([screen respondsToSelector:@selector(fixedCoordinateSpace)]) {
-            // iOS 8 screen bounds are converted for the orientation they are in, so
-            // hackishly convert to "portrait-up" as our canonical representation
-            mainScreenSize = CGSizeMake(MIN(mainScreenSize.width, mainScreenSize.height),
-                                        MAX(mainScreenSize.width, mainScreenSize.height));
-        }
-        CGFloat mainScreenScale = [UIScreen mainScreen].scale;
-        _cachedScreenInfo = @{@"width" : @(mainScreenSize.width),
-                              @"height" : @(mainScreenSize.height),
-                              @"scale" : @(mainScreenScale)};
 
         _urlSessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
         _urlSessionConfiguration.networkServiceType = NSURLNetworkServiceTypeBackground;
@@ -93,7 +79,7 @@ static NSCalendar *_globalGregorianCalendar;
     params[@"build"] = self.cachedBuildNumber;
     params[@"os_version"] = self.cachedOSVersion;
     params[@"hardware"] = self.cachedHardwareModel;
-    params[@"screen"] = self.cachedScreenInfo;
+    params[@"screen"] = [LKAPIClient currentScreenInfo];
 #if DEBUG
     // Notify LK servers when the app is running in debug mode
     params[@"debug_build"] = @(YES);
@@ -269,6 +255,23 @@ static NSCalendar *_globalGregorianCalendar;
                                                         completionHandler:completionHandler];
     dataTask.taskDescription = [NSString stringWithFormat:@"LaunchKit: %@ %@", method, path];
     [dataTask resume];
+}
+
+// Returns a dictionary (e.g. {'width' : 414, 'height' : 736, 'scale' : 3.0})
++ (NSDictionary *) currentScreenInfo
+{
+    UIWindow *window = [UIApplication sharedApplication].keyWindow;
+    CGSize windowSize = window.bounds.size;
+    if ([UIScreen instancesRespondToSelector:@selector(fixedCoordinateSpace)]) {
+        // iOS 8 screen bounds are converted for the orientation they are in, so
+        // hackishly convert to "portrait-up" as our canonical representation
+        windowSize = CGSizeMake(MIN(windowSize.width, windowSize.height),
+                                MAX(windowSize.width, windowSize.height));
+    }
+    CGFloat mainScreenScale = [UIScreen mainScreen].scale;
+    return @{@"width" : @(windowSize.width),
+             @"height" : @(windowSize.height),
+             @"scale" : @(mainScreenScale)};
 }
 
 
