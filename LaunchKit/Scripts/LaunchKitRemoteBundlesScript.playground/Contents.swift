@@ -128,9 +128,23 @@ func retrieveRemoteBundlesManifest(apiToken: String, _ completion: ((bundles: [[
     print("\(url)")
     let request = NSMutableURLRequest(URL: url)
 
+    let semaphore = dispatch_semaphore_create(0)
+    var data: NSData?
     var response: NSURLResponse?
-    do {
-        let data = try NSURLConnection.sendSynchronousRequest(request, returningResponse: &response)
+    var error: NSError?
+    let dataTask = NSURLSession.sharedSession().dataTaskWithRequest(request, completionHandler: { (maybeData, maybeResponse, maybeError) -> Void in
+        data = maybeData
+        response = maybeResponse
+        error = maybeError
+        print("Data retrieved")
+        dispatch_semaphore_signal(semaphore)
+    })
+    print("Waiting for data")
+    dataTask.resume()
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+
+    print("Parsing retrieved data")
+    if let data = data {
         do {
             let jsonDict = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions()) as! [NSObject:AnyObject]
             if verboseDebugging {
@@ -145,9 +159,9 @@ func retrieveRemoteBundlesManifest(apiToken: String, _ completion: ((bundles: [[
             print("Invalid json returned. Check your api token and network connection (received \(data.length) bytes)")
             completion?(bundles: [], error: error as NSError)
         }
-    } catch {
+    } else {
         print("Got no data from remote bundles lookup, response: \(response?.description)")
-        completion?(bundles: [], error: error as NSError)
+        completion?(bundles: [], error: error)
     }
 }
 
@@ -212,9 +226,20 @@ func saveDataAtUrl(url:NSURL, toFileUrl fileUrl:NSURL) -> Bool {
 
     let request = NSMutableURLRequest(URL: url)
 
+    let semaphore = dispatch_semaphore_create(0)
+    var data: NSData?
     var response: NSURLResponse?
-    do {
-        let data = try NSURLConnection.sendSynchronousRequest(request, returningResponse: &response)
+    var error: NSError?
+    let dataTask = NSURLSession.sharedSession().dataTaskWithRequest(request, completionHandler: { (maybeData, maybeResponse, maybeError) -> Void in
+        data = maybeData
+        response = maybeResponse
+        error = maybeError
+        dispatch_semaphore_signal(semaphore)
+    })
+    dataTask.resume()
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+
+    if let data = data {
         if let folderUrl = fileUrl.URLByDeletingLastPathComponent {
             // Ensure that the parent folder for this fileurl is already created
             do {
@@ -263,8 +288,8 @@ func saveDataAtUrl(url:NSURL, toFileUrl fileUrl:NSURL) -> Bool {
             }
         }
         return true
-    } catch {
-        print("Received no data from remote url. Response: \(response), error: \(error as NSError)")
+    } else {
+        print("Received no data from remote url. Response: \(response), error: \(error)")
         return false
     }
 }
