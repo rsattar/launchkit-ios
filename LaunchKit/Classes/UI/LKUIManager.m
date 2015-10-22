@@ -64,7 +64,28 @@
             error = [self uiNotFoundError];
         }
 
-        LKViewController *viewController = [storyboard instantiateInitialViewController];
+        LKViewController *viewController = nil;
+        @try {
+            viewController = [storyboard instantiateInitialViewController];
+        }
+        @catch (NSException *exception) {
+            // In production, there seems to be an intermittent NSInternalConsistencyException
+            // which causes a crash. A way to reproduce this is to take the .nib file *inside*
+            // a .storyboardc file and either delete or rename it. (i.e. "WhatsNew.nib.fake")
+            // It is unclear why this would be happening. Perhaps an unzipping error, or disk
+            // corruption?
+            LKLogError(@"Encountered error loading LK storyboard:\n%@", exception);
+            NSError *nibLoadError = [NSError errorWithDomain:@"LKUIManagerError"
+                                                        code:500
+                                                    userInfo:@{@"underlyingException" : exception}];
+            if (completion) {
+                completion(nil, nibLoadError);
+            }
+            return;
+        }
+        @finally {
+            // Code that gets executed whether or not an exception is thrown
+        }
         // Set the related bundleinfo into the initialviewcontroller, useful later (for tracking)
         viewController.bundleInfo = [self.bundlesManager localBundleInfoWithName:remoteUIId];
 
