@@ -10,6 +10,7 @@
 
 BOOL LKLOG_ENABLED = NO;
 
+#if DEBUG
 // See: http://stackoverflow.com/a/3530807/9849
 static inline void LKLogFormat(NSString *level, NSString *format, va_list arg_list) {
     NSString *msg = [[NSString alloc] initWithFormat:format arguments:arg_list];
@@ -19,6 +20,7 @@ static inline void LKLogFormat(NSString *level, NSString *format, va_list arg_li
         NSLog(@"[LaunchKit] %@", msg);
     }
 }
+#endif
 
 void LKLog(NSString *format, ...)
 {
