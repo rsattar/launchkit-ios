@@ -294,9 +294,12 @@ func saveDataAtUrl(url:NSURL, toFileUrl fileUrl:NSURL) -> Bool {
 /////////////////////////////////////////////////////////////////
 
 retrieveRemoteBundlesManifest(apiToken, { (bundles, error) -> Void in
-    if error != nil {
-        print("Error retrieving remote resource info (for caching): \(error)")
-        exit(EXIT_FAILURE)
+    if let error = error {
+        // Probably some sort of networking issue, but don't fail the script. 
+        // Developer could be on a plane building their app, for example.
+        print("Error caching LaunchKit remote resources due to error: \(error.domain) - \(error.code) - \(error.localizedDescription).")
+        print("Verify that your network connection is established and working. Skipping for this build.")
+        exit(EXIT_SUCCESS)
     } else {
         print("Caching LaunchKit remote resources to app bundle (for super-fast loads)")
         for bundle in bundles {
