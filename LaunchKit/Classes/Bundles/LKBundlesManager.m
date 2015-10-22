@@ -347,7 +347,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 - (NSBundle *) availableBundleWithId:(NSString *)bundleId error:(NSError **)error
 {
     LKBundleInfo *bundleInfo = [self localBundleInfoWithName:bundleId];
-    if (!bundleInfo) {
+    if (!bundleInfo || !bundleInfo.url) {
         *error = [self bundleInfoNotFoundErrorForId:bundleId];
         return nil;
     }
