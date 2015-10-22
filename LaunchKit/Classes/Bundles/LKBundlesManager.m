@@ -191,6 +191,15 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
             NSURL *mostRecentVersionUrl = nil;
             NSDate *mostRecentCreateTime = nil;
             for (NSURL *versionUrl in versionUrls) {
+                // Verify this version folder has a bundle in it
+                // in case for some reason the bundle was deleted or didn't download correctly
+                NSError *errorEnumeratingVersionFiles = nil;
+                NSArray *versionContents = [fileManager contentsOfDirectoryAtURL:versionUrl includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsHiddenFiles error:&errorEnumeratingVersionFiles];
+                if (versionContents.count == 0) {
+                    // The version folder doesn't have anything, so this might be corrupt, skip it
+                    continue;
+                }
+
                 NSError *getVersionFolderAttributeError = nil;
                 NSDictionary *attributes = [fileManager attributesOfItemAtPath:versionUrl.path
                                                                          error:&getVersionFolderAttributeError];
@@ -202,6 +211,10 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
             }
             NSString *version = mostRecentVersionUrl.lastPathComponent;
 
+            if (!mostRecentVersionUrl) {
+                // This bundle doesn't have any valid versions, so skip it
+                continue;
+            }
 
             // Pick the first file within this directory
             NSError *errorEnumeratingUIFiles = nil;
