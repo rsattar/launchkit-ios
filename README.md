@@ -89,11 +89,6 @@ In your app's `Info.plist` file, add the following properties to `NSAppTransport
                <key>NSIncludesSubdomains</key>
                <true/>
            </dict>
-		<key>localhost</key>
-		<dict>
-			<key>NSExceptionAllowsInsecureHTTPLoads</key>
-			<true/>
-		</dict>
 	</dict>
 </dict>
 ```
