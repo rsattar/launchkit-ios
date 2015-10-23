@@ -386,7 +386,12 @@ static LaunchKit *_sharedInstance;
 // window tap info, which only makes sense against the screen size at the time
 - (void)applicationWillChangeStatusBarOrientation:(NSNotification *)notification
 {
-    [self trackProperties:nil];
+    // Sometimes this is called when the application resigns active, (in which case
+    // we would invalidate the timer, so check if the timer is active before flushing
+    // our properties)
+    if (self.trackingTimer != nil) {
+        [self trackProperties:nil];
+    }
 }
 
 #pragma mark - User Info
