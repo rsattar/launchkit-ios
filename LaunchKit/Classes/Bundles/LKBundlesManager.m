@@ -1,6 +1,6 @@
 //
 //  LKBundlesManager.m
-//  Pods
+//  LaunchKit
 //
 //  Created by Rizwan Sattar on 7/27/15.
 //

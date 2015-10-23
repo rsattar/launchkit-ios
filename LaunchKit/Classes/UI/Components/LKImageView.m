@@ -1,6 +1,6 @@
 //
 //  LKImageView.m
-//  Pods
+//  LaunchKit
 //
 //  Created by Rizwan Sattar on 8/28/15.
 //

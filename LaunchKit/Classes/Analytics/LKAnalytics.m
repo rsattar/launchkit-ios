@@ -1,6 +1,6 @@
 //
 //  LKAnalytics.m
-//  Pods
+//  LaunchKit
 //
 //  Created by Rizwan Sattar on 8/13/15.
 //

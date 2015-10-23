@@ -1,6 +1,6 @@
 //
 //  LKUIManager.m
-//  Pods
+//  LaunchKit
 //
 //  Created by Rizwan Sattar on 1/19/15.
 //

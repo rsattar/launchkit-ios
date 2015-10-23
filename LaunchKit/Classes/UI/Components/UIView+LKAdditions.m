@@ -1,6 +1,6 @@
 //
 //  UIView+LKAdditions.m
-//  Pods
+//  LaunchKit
 //
 //  Created by Rizwan Sattar on 8/10/15.
 //

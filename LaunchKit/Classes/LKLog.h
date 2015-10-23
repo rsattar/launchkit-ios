@@ -1,6 +1,6 @@
 //
 //  LKLog.h
-//  Pods
+//  LaunchKit
 //
 //  Created by Rizwan Sattar on 1/20/15.
 //

@@ -1,6 +1,6 @@
 //
 //  LaunchKit.h
-//  Pods
+//  LaunchKit
 //
 //  Created by Cluster Labs, Inc. on 1/13/15.
 //

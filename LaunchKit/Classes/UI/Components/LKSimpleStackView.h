@@ -1,6 +1,6 @@
 //
 //  LKSimpleStackView.h
-//  Pods
+//  LaunchKit
 //
 //  Created by Rizwan Sattar on 8/3/15.
 //
