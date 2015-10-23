@@ -245,16 +245,36 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 
 - (void)handleWindowTap:(UITapGestureRecognizer *)recognizer
 {
+    static BOOL allowsMultipleAppsOnScreen = NO;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        UIWindow *window = [UIApplication sharedApplication].keyWindow;
+        BOOL isiOS9AndUp = NO;
+        if ([[NSProcessInfo processInfo] respondsToSelector:@selector(isOperatingSystemAtLeastVersion:)]) {
+            NSOperatingSystemVersion iOS9;
+            iOS9.majorVersion = 9;
+            iOS9.minorVersion = 0;
+            iOS9.patchVersion = 0;
+            isiOS9AndUp = [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:iOS9];
+        }
+        // NOTE: This incorrectly assumes *all* iPads on iOS 9 support multi-screen, which is not true
+        if (isiOS9AndUp && window.traitCollection.userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+            allowsMultipleAppsOnScreen = YES;
+        }
+    });
     if (recognizer.state == UIGestureRecognizerStateEnded) {
         CGPoint touchPoint = [recognizer locationInView:nil];
         CGRect frame = recognizer.view.bounds;
 
         UIWindow *window = [UIApplication sharedApplication].keyWindow;
+        BOOL isLandscape = NO;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         UIInterfaceOrientation orientation = window.rootViewController.interfaceOrientation;
-        BOOL isLandscape = UIInterfaceOrientationIsLandscape(orientation);
 #pragma GCC diagnostic pop
+        if (!allowsMultipleAppsOnScreen) {
+            isLandscape = UIInterfaceOrientationIsLandscape(orientation);
+        }
 
         if (![UIViewController instancesRespondToSelector:@selector(traitCollection)]) {
             // We have to transform the rect ourselves for landscape
