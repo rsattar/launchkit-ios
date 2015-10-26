@@ -4,11 +4,11 @@ xcodeproj 'LaunchKitSample.xcodeproj'
 workspace 'LaunchKitDev.xcworkspace'
 
 target 'LaunchKitSample', :exclusive => true do
-    pod "LaunchKit", :path => "../"
+    pod "LaunchKit/Internal", :path => "../"
 end
 
 target 'Tests', :exclusive => true do
-    pod "LaunchKit", :path => "../"
+    pod "LaunchKit/Internal", :path => "../"
 
   pod 'Specta', '~> 1.0.3'
   pod 'Expecta', '~> 1.0.2'

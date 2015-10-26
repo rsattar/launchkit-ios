@@ -6,11 +6,11 @@ xcodeproj 'LaunchKitSampleSwift.xcodeproj'
 workspace 'LaunchKitDevSwift.xcworkspace'
 
 target 'LaunchKitSampleSwift', :exclusive => true do
-    pod "LaunchKit", :path => "../"
+    pod "LaunchKit/Internal", :path => "../"
 end
 
 target 'LaunchKitSampleSwiftTests', :exclusive => true do
-    pod "LaunchKit", :path => "../"
+    pod "LaunchKit/Internal", :path => "../"
 end
 
 # See: http://stackoverflow.com/questions/21046282/debug-preprocessor-macro-not-defined-for-cocoapods-targets
