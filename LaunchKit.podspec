@@ -16,12 +16,12 @@ Pod::Spec.new do |s|
   s.platform     = :ios, '7.0'
   s.requires_arc = true
 
-  s.default_subspec = 'Default'
+  s.default_subspec = 'LaunchKit'
 
-  s.subspec 'Default' do |default|
-    default.source_files = 'LaunchKit/Classes/**/*.{h,m,c}'
-    default.private_header_files = 'LaunchKit/Classes/ThirdParty/**/*.h'
-    default.exclude_files = 'LaunchKit/Classes/**/Private/*'
+  s.subspec 'LaunchKit' do |launchkit|
+    launchkit.source_files = 'LaunchKit/Classes/**/*.{h,m,c}'
+    launchkit.private_header_files = 'LaunchKit/Classes/ThirdParty/**/*.h'
+    launchkit.exclude_files = 'LaunchKit/Classes/**/Private/*'
   end
 
   s.subspec 'Internal' do |internal|
