@@ -300,6 +300,10 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
             }
         } else {
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
+            // Because of iPad multitasking (where our window might not be at 0,0), add
+            // a conversion to the touchPoint (which, in iOS 9.0 and 9.1 (+ future?) has a
+            // small bug which accidentally reveals its position when it's not supposed to.
+            // So normalize the window frame and touch point.
             CGPoint zeroPoint = CGPointMake(0, 0);
             CGFloat offsetX = ABS([window convertPoint:zeroPoint fromCoordinateSpace:window.screen.coordinateSpace].x);
             if ([window.screen respondsToSelector:@selector(fixedCoordinateSpace)]) {
