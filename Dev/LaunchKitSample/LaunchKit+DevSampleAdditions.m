@@ -10,4 +10,8 @@
 
 @implementation LaunchKit (DevSampleAdditions)
 
+@dynamic sessionParameters;
+@dynamic apiToken;
+@dynamic trackingInterval;
+
 @end
