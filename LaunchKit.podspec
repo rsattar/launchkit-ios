@@ -16,8 +16,19 @@ Pod::Spec.new do |s|
   s.platform     = :ios, '7.0'
   s.requires_arc = true
 
-  s.source_files = 'LaunchKit/Classes/**/*.{h,m,c}'
-  s.private_header_files = 'LaunchKit/Classes/ThirdParty/**/*.h'
+  s.default_subspec = 'Default'
+
+  s.subspec 'Default' do |default|
+    default.source_files = 'LaunchKit/Classes/**/*.{h,m,c}'
+    default.private_header_files = 'LaunchKit/Classes/ThirdParty/**/*.h'
+    default.exclude_files = 'LaunchKit/Classes/**/Private/*'
+  end
+
+  s.subspec 'Internal' do |internal|
+    internal.source_files = 'LaunchKit/Classes/**/*.{h,m,c}'
+    internal.private_header_files = 'LaunchKit/Classes/ThirdParty/**/*.h'
+    internal.exclude_files = 'LaunchKit/Classes/**/Public/*'
+  end
 
   s.resource_bundles = {
     'LaunchKitResources' => ['LaunchKit/Assets/*.xcassets']
