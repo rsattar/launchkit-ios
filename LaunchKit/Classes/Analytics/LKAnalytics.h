@@ -11,6 +11,8 @@
 #import "LKAPIClient.h"
 #import "LKAppUser.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 extern NSString *const LKAppUserUpdatedNotificationName;
 extern NSString *const LKPreviousAppUserKey;
 extern NSString *const LKCurrentAppUserKey;
@@ -23,7 +25,7 @@ extern NSString *const LKCurrentAppUserKey;
 @property (readonly, nonatomic) BOOL shouldReportScreens;
 @property (readonly, nonatomic) BOOL shouldReportTaps;
 
-@property (readonly, retain, nonatomic) LKAppUser *user;
+@property (readonly, retain, nonatomic, nullable) LKAppUser *user;
 
 - (instancetype)initWithAPIClient:(LKAPIClient *)apiClient screenReporting:(BOOL)shouldReportScreens tapReportingEnabled:(BOOL)shouldReportTaps;
 
@@ -45,3 +47,5 @@ extern NSString *const LKCurrentAppUserKey;
 + (double)angleForInterfaceOrientation:(UIInterfaceOrientation)orientation;
 
 @end
+
+NS_ASSUME_NONNULL_END
