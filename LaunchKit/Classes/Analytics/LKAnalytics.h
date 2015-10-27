@@ -9,6 +9,11 @@
 #import <UIKit/UIKit.h>
 
 #import "LKAPIClient.h"
+#import "LKAppUser.h"
+
+extern NSString *const LKAppUserUpdatedNotificationName;
+extern NSString *const LKPreviousAppUserKey;
+extern NSString *const LKCurrentAppUserKey;
 
 @interface LKAnalytics : NSObject
 
@@ -17,6 +22,8 @@
 
 @property (readonly, nonatomic) BOOL shouldReportScreens;
 @property (readonly, nonatomic) BOOL shouldReportTaps;
+
+@property (readonly, retain, nonatomic) LKAppUser *user;
 
 - (instancetype)initWithAPIClient:(LKAPIClient *)apiClient screenReporting:(BOOL)shouldReportScreens tapReportingEnabled:(BOOL)shouldReportTaps;
 
@@ -28,6 +35,10 @@
 
 - (void) createListeners;
 - (void) destroyListeners;
+
+#pragma mark - Current User Data
+
+- (void) updateUserFromDictionary:(NSDictionary *)dictionary;
 
 #pragma mark - Convenience Methods
 
