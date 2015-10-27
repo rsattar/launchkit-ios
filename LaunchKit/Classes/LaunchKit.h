@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 
 #import "LaunchKitShared.h"
+#import "LKAppUser.h"
 #import "LKConfig.h"
 
 @interface LaunchKit : NSObject
@@ -51,6 +52,13 @@
  * User-configurable parameters that you may have set in LaunchKit's Cloud Config tool. See https://launchkit.io/config
  */
 @property (readonly, strong, nonatomic, nonnull) LKConfig *config;
+
+
+/**
+ * According to LaunchKit, what information is availabe for the current app user. See https://launchkit.io/users
+ */
+@property (readonly, nonatomic, nullable) LKAppUser *currentUser;
+
 
 /** 
  * Useful to see log statements from LaunchKit in your console. Only useful when DEBUG macro = 1

@@ -376,6 +376,11 @@ static LaunchKit *_sharedInstance;
     [self trackProperties:params];
 }
 
+- (LKAppUser *) currentUser
+{
+    return self.analytics.user;
+}
+
 #pragma mark - Saving/Persisting our Session
 
 - (void)archiveSession
