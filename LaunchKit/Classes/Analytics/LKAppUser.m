@@ -37,12 +37,12 @@
 @interface LKAppUser ()
 
 // Definition of readonly properties
-@property (retain, nonatomic) NSString *email;
-@property (retain, nonatomic) NSDate *firstVisit;
-@property (retain, nonatomic) NSArray *labels;
-@property (retain, nonatomic) NSString *name;
-@property (retain, nonatomic) LKAppUserStat *stats;
-@property (retain, nonatomic) NSString *uniqueId;
+@property (strong, nonatomic) NSString *email;
+@property (strong, nonatomic) NSDate *firstVisit;
+@property (strong, nonatomic) NSArray *labels;
+@property (strong, nonatomic) NSString *name;
+@property (strong, nonatomic) LKAppUserStat *stats;
+@property (strong, nonatomic) NSString *uniqueId;
 
 @end
 

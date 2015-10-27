@@ -35,8 +35,8 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 @property (strong, nonatomic) NSMutableArray *recordedTaps;
 
 // Current User Info
-@property (retain, nonatomic) LKAppUser *user;
-@property (retain, nonatomic) NSDictionary *lastUserDictionary;
+@property (strong, nonatomic) LKAppUser *user;
+@property (strong, nonatomic) NSDictionary *lastUserDictionary;
 
 @end
 

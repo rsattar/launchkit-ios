@@ -25,7 +25,7 @@ extern NSString *const LKCurrentAppUserKey;
 @property (readonly, nonatomic) BOOL shouldReportScreens;
 @property (readonly, nonatomic) BOOL shouldReportTaps;
 
-@property (readonly, retain, nonatomic, nullable) LKAppUser *user;
+@property (readonly, strong, nonatomic, nullable) LKAppUser *user;
 
 - (instancetype)initWithAPIClient:(LKAPIClient *)apiClient screenReporting:(BOOL)shouldReportScreens tapReportingEnabled:(BOOL)shouldReportTaps;
 

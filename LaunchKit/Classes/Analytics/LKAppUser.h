@@ -19,12 +19,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface LKAppUser : NSObject
 
-@property (readonly, retain, nonatomic, nullable) NSString *email;
-@property (readonly, retain, nonatomic) NSDate *firstVisit;
-@property (readonly, retain, nonatomic) NSArray *labels;
-@property (readonly, retain, nonatomic, nullable) NSString *name;
-@property (readonly, retain, nonatomic) LKAppUserStat *stats;
-@property (readonly, retain, nonatomic, nullable) NSString *uniqueId;
+@property (readonly, strong, nonatomic, nullable) NSString *email;
+@property (readonly, strong, nonatomic) NSDate *firstVisit;
+@property (readonly, strong, nonatomic) NSArray *labels;
+@property (readonly, strong, nonatomic, nullable) NSString *name;
+@property (readonly, strong, nonatomic) LKAppUserStat *stats;
+@property (readonly, strong, nonatomic, nullable) NSString *uniqueId;
 
 - (instancetype)initWithDictionary:(NSDictionary *)dictionary;
 
