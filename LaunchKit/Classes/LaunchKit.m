@@ -260,15 +260,15 @@ static LaunchKit *_sharedInstance;
         for (NSDictionary *todo in todos) {
             NSString *command = todo[@"command"];
             NSDictionary *args = todo[@"args"];
-            [self handleCommand:command withArgs:args];
+            [_weakSelf handleCommand:command withArgs:args];
         }
         NSDictionary *config = responseDict[@"config"];
         if (config != nil) {
-            [self.config updateParameters:config];
+            [_weakSelf.config updateParameters:config];
         }
         NSDictionary *user = responseDict[@"user"];
         if (user != nil) {
-            [self.analytics updateUserFromDictionary:user];
+            [_weakSelf.analytics updateUserFromDictionary:user];
         }
     } errorBlock:^(NSError *error) {
         LKLog(@"Error tracking properties: %@", error);
