@@ -41,10 +41,6 @@ extern NSString *const LKCurrentAppUserKey;
 
 - (void) updateUserFromDictionary:(NSDictionary *)dictionary;
 
-#pragma mark - Convenience Methods
-
-+ (double)angleForInterfaceOrientation:(UIInterfaceOrientation)orientation;
-
 @end
 
 NS_ASSUME_NONNULL_END
