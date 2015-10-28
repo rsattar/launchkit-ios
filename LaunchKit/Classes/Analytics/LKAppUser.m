@@ -34,6 +34,8 @@
 
 @end
 
+static NSString *const LKAppUserLabelSuper = @"super";
+
 @interface LKAppUser ()
 
 // Definition of readonly properties
@@ -79,6 +81,11 @@
         }
     }
     return self;
+}
+
+- (BOOL)isSuper
+{
+    return [self.labels containsObject:LKAppUserLabelSuper];
 }
 
 

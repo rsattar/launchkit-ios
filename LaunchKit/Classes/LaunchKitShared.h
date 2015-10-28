@@ -20,4 +20,8 @@ extern NSInteger LKConfigInteger(NSString *__nonnull key, NSInteger defaultValue
 extern double LKConfigDouble(NSString *__nonnull key, double defaultValue);
 extern NSString * __nullable LKConfigString(NSString *__nonnull key, NSString *__nullable defaultValue);
 
+#pragma mark - LKAppUser Convenience Functions
+
+extern BOOL LKAppUserIsSuper()
+
 #endif

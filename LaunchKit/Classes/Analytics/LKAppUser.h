@@ -27,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readonly, strong, nonatomic, nullable) NSString *uniqueId;
 
 - (instancetype)initWithDictionary:(NSDictionary *)dictionary;
+- (BOOL)isSuper;
 
 @end
 

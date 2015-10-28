@@ -497,3 +497,11 @@ extern NSString * __nullable LKConfigString(NSString *__nonnull key, NSString *_
 {
     return [[LaunchKit sharedInstance].config stringForKey:key defaultValue:defaultValue];
 }
+
+
+#pragma mark - LKAppUser Convenience Functions
+
+BOOL LKAppUserIsSuper()
+{
+    return [LaunchKit sharedInstance].currentUser.isSuper;
+}
