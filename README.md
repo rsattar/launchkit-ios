@@ -1,7 +1,11 @@
+<p align="center"><img src="https://d2kfjaekmjmy1l.cloudfront.net/images/icon-v8d70a510a2c9.png" width="100" alt="LaunchKit Logo"/></p>
+
 # LaunchKit iOS SDK
 
+The LaunchKit iOS SDK supports some of the app-level products in [LaunchKit](https://launchkit.io), like [Super Users](https://launchkit.io/users/onboard/install).
 
-# Install and Configure LaunchKit iOS SDK
+## Install and Configure LaunchKit iOS SDK
+<!--
 We are still learning how to make this easy for you. If you have any feedback, please send it our way.
 
 ---
@@ -10,27 +14,27 @@ We are still learning how to make this easy for you. If you have any feedback, p
 _Warning! This part of the process needs to be completed by someone with access to your mobile app’s source code. If that’s not you, we’ve made it easy to get them involved. Just click here to send them an email with all the info they need._
 
 ---
+-->
 
+### Step 1
 
-## Step 1
-
-### Option 1: Cocoapods
+#### Option 1: Cocoapods
 LaunchKit is available through [CocoaPods](http://cocoapods.org/). To install it, simply add the following line to your Podfile:
 
 ```
 pod "LaunchKit"
 ```
 
-### Option 2: Manual Installation
+#### Option 2: Manual Installation
 You can install the LaunchKit SDK manually by [cloning the repo](https://github.com/launchkit/launchkit-ios), and copy the files in:
 
   * LaunchKit/Classes
   * LaunchKit/Assets
  
 
-## Step 2
-### Add to your App Delegate
-#### _Objective C_
+### Step 2
+#### Add to your App Delegate
+##### _Objective C_
 Somewhere near the top of your `-applicationDidFinishLaunching:withOptions:`, add `[LaunchKit launchWithToken:@"YOUR_API_TOKEN"]`, where `YOUR_API_TOKEN` is [a special token you can get here](https://launchkit.io/account/sdk-tokens).
 
 ```
@@ -45,7 +49,7 @@ Somewhere near the top of your `-applicationDidFinishLaunching:withOptions:`, ad
 }
 ```
 
-#### _Swift_
+##### _Swift_
 
 ```
 import LaunchKit
@@ -59,7 +63,7 @@ func application(application: UIApplication, didFinishLaunchingWithOptions launc
 }
 ```
 
-## Step 3 (Xcode 7 / iOS 9)
+### Step 3 (Xcode 7 / iOS 9)
 LaunchKit access some resources in Amazon AWS, and Amazon isn't fully TLS ready (yet). They have [documented the issue](https://mobile.awsblog.com/post/Tx2QM69ZE6BGTYX/Preparing-Your-Apps-for-iOS-9).
 
 In your app's `Info.plist` file, add the following properties to `NSAppTransportSecurity`:
@@ -93,18 +97,18 @@ In your app's `Info.plist` file, add the following properties to `NSAppTransport
 </dict>
 ```
 
-## (Optional) Step 4
-### Add Build Phase
+### (Optional) Step 4
+#### Add Build Phase
 If you are using remote resources like What's New, this script will retrieve any resource NSBundles and place them within your App Bundle as a cache. That way, those resources will be available immediately upon app start. On subsequent starts, LaunchKit will download any newer available versions of those resources, in case you make changes after building your app!
 
-#### _Click Project in Xcode, and go to Build Phases_
+##### _Click Project in Xcode, and go to Build Phases_
 ![](http://i.imgur.com/2t4s3ua.png =800x)
 
 
-#### _Click the + icon, and add a Script Phase_
+##### _Click the + icon, and add a Script Phase_
 ![](http://i.imgur.com/7x0C22e.png =600x)
 
-#### _Paste the following_
+##### _Paste the following_
 
 ```
 SCRIPT=`/usr/bin/find "${SRCROOT}/.." -name LaunchKitRemoteBundlesScript.playground | head -n 1`
@@ -114,10 +118,10 @@ xcrun -sdk macosx swift "${SCRIPT}/Contents.swift" "YOUR_API_TOKEN"
 
 
 ---
-## Author
+### Author
 
 Cluster Labs, Inc., info@launchkit.io
 
-## License
+### License
 
 LaunchKit is available under the Apache 2.0 license. See the LICENSE file for more info.
