@@ -22,6 +22,6 @@ extern NSString * __nullable LKConfigString(NSString *__nonnull key, NSString *_
 
 #pragma mark - LKAppUser Convenience Functions
 
-extern BOOL LKAppUserIsSuper()
+extern BOOL LKAppUserIsSuper();
 
 #endif
