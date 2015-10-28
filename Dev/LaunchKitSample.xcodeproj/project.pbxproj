@@ -27,6 +27,7 @@
 		6503119D1B8D00BD00836A4D /* LaunchKit+DevSampleAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 6503119C1B8D00BD00836A4D /* LaunchKit+DevSampleAdditions.m */; };
 		6543FE261A6EE3E200C2D7B7 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 6543FE251A6EE3E200C2D7B7 /* Settings.bundle */; };
 		6554BF151B8D0EC500FE4213 /* ConfigTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6554BF141B8D0EC500FE4213 /* ConfigTableViewController.m */; };
+		659A5B381BE187CA00AEB789 /* UserTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 659A5B371BE187CA00AEB789 /* UserTableViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,6 +73,8 @@
 		6543FE251A6EE3E200C2D7B7 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		6554BF131B8D0EC500FE4213 /* ConfigTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConfigTableViewController.h; sourceTree = "<group>"; };
 		6554BF141B8D0EC500FE4213 /* ConfigTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConfigTableViewController.m; sourceTree = "<group>"; };
+		659A5B361BE187CA00AEB789 /* UserTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserTableViewController.h; sourceTree = "<group>"; };
+		659A5B371BE187CA00AEB789 /* UserTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserTableViewController.m; sourceTree = "<group>"; };
 		8221CF9464CF4F5B64641E4A /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		9D04F8B845BD57AAC50E3026 /* Pods-Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-Tests/Pods-Tests.release.xcconfig"; sourceTree = "<group>"; };
 		B7FE16FED0945D647AD5FC35 /* libPods-LaunchKit.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-LaunchKit.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -156,6 +159,8 @@
 				650311991B8D001F00836A4D /* SessionViewController.m */,
 				6554BF131B8D0EC500FE4213 /* ConfigTableViewController.h */,
 				6554BF141B8D0EC500FE4213 /* ConfigTableViewController.m */,
+				659A5B361BE187CA00AEB789 /* UserTableViewController.h */,
+				659A5B371BE187CA00AEB789 /* UserTableViewController.m */,
 				6003F5A8195388D20070C39A /* Images.xcassets */,
 				6003F594195388D20070C39A /* Supporting Files */,
 				6543FE251A6EE3E200C2D7B7 /* Settings.bundle */,
@@ -418,6 +423,7 @@
 				6003F59E195388D20070C39A /* AppDelegate.m in Sources */,
 				6503119A1B8D001F00836A4D /* SessionViewController.m in Sources */,
 				6554BF151B8D0EC500FE4213 /* ConfigTableViewController.m in Sources */,
+				659A5B381BE187CA00AEB789 /* UserTableViewController.m in Sources */,
 				6003F5A7195388D20070C39A /* RootViewController.m in Sources */,
 				6003F59A195388D20070C39A /* main.m in Sources */,
 			);
