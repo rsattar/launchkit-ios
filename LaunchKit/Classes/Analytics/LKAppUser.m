@@ -41,7 +41,7 @@ static NSString *const LKAppUserLabelSuper = @"super";
 // Definition of readonly properties
 @property (strong, nonatomic) NSString *email;
 @property (strong, nonatomic) NSDate *firstVisit;
-@property (strong, nonatomic) NSArray *labels;
+@property (strong, nonatomic) NSSet *labels;
 @property (strong, nonatomic) NSString *name;
 @property (strong, nonatomic) LKAppUserStat *stats;
 @property (strong, nonatomic) NSString *uniqueId;
@@ -64,9 +64,9 @@ static NSString *const LKAppUserLabelSuper = @"super";
             self.firstVisit = [NSDate date];
         }
         if ([dictionary[@"labels"] isKindOfClass:[NSArray class]]) {
-            self.labels = dictionary[@"labels"];
+            self.labels = [NSSet setWithArray:dictionary[@"labels"]];
         } else {
-            self.labels = @[];
+            self.labels = [NSSet set];
         }
         if ([dictionary[@"name"] isKindOfClass:[NSString class]]) {
             self.name = dictionary[@"name"];
@@ -85,7 +85,7 @@ static NSString *const LKAppUserLabelSuper = @"super";
 
 - (BOOL)isSuper
 {
-    return [self.labels containsObject:LKAppUserLabelSuper];
+    return [self.labels member:LKAppUserLabelSuper] != nil;
 }
 
 

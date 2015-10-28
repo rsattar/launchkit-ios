@@ -21,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (readonly, strong, nonatomic, nullable) NSString *email;
 @property (readonly, strong, nonatomic) NSDate *firstVisit;
-@property (readonly, strong, nonatomic) NSArray *labels;
+@property (readonly, strong, nonatomic) NSSet *labels;
 @property (readonly, strong, nonatomic, nullable) NSString *name;
 @property (readonly, strong, nonatomic) LKAppUserStat *stats;
 @property (readonly, strong, nonatomic, nullable) NSString *uniqueId;
