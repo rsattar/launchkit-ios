@@ -175,12 +175,6 @@ static LaunchKit *_sharedInstance;
                selector:@selector(applicationDidEnterBackground:)
                    name:UIApplicationDidEnterBackgroundNotification
                  object:nil];
-#if !TARGET_OS_TV
-    [center addObserver:self
-               selector:@selector(applicationWillChangeStatusBarOrientation:)
-                   name:UIApplicationWillChangeStatusBarOrientationNotification
-                 object:nil];
-#endif
     /*
     [center addObserver:self
                selector:@selector(applicationWillEnterForeground:)
@@ -349,18 +343,6 @@ static LaunchKit *_sharedInstance;
 - (void)applicationDidEnterBackground:(NSNotification *)notification
 {
     [self archiveSession];
-}
-
-// When the device is rotated, flush our tracked properties, as it includes
-// window tap info, which only makes sense against the screen size at the time
-- (void)applicationWillChangeStatusBarOrientation:(NSNotification *)notification
-{
-    // Sometimes this is called when the application resigns active, (in which case
-    // we would invalidate the timer, so check if the timer is active before flushing
-    // our properties)
-    if (self.trackingTimer != nil) {
-        [self trackProperties:nil];
-    }
 }
 
 #pragma mark - User Info
