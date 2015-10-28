@@ -10,6 +10,7 @@
 
 #import "LaunchKitShared.h"
 #import "LKLog.h"
+#import "LKUtils.h"
 #import "NSDictionary+LKFormEncoded.h"
 #import <sys/utsname.h>
 
@@ -79,7 +80,7 @@ static NSCalendar *_globalGregorianCalendar;
     params[@"build"] = self.cachedBuildNumber;
     params[@"os_version"] = self.cachedOSVersion;
     params[@"hardware"] = self.cachedHardwareModel;
-    params[@"screen"] = [LKAPIClient currentScreenInfo];
+    params[@"screen"] = [LKAPIClient currentWindowInfo];
 #if DEBUG
     // Notify LK servers when the app is running in debug mode
     params[@"debug_build"] = @(YES);
@@ -258,16 +259,9 @@ static NSCalendar *_globalGregorianCalendar;
 }
 
 // Returns a dictionary (e.g. {'width' : 414, 'height' : 736, 'scale' : 3.0})
-+ (NSDictionary *) currentScreenInfo
++ (NSDictionary *) currentWindowInfo
 {
-    UIWindow *window = [UIApplication sharedApplication].keyWindow;
-    CGSize windowSize = window.bounds.size;
-    if ([UIScreen instancesRespondToSelector:@selector(fixedCoordinateSpace)]) {
-        // iOS 8 screen bounds are converted for the orientation they are in, so
-        // hackishly convert to "portrait-up" as our canonical representation
-        windowSize = CGSizeMake(MIN(windowSize.width, windowSize.height),
-                                MAX(windowSize.width, windowSize.height));
-    }
+    CGSize windowSize = [LKUtils currentWindowSize];
     CGFloat mainScreenScale = [UIScreen mainScreen].scale;
     return @{@"width" : @(windowSize.width),
              @"height" : @(windowSize.height),
