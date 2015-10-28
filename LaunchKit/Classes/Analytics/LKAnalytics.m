@@ -65,25 +65,23 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
     [self stopDetectingTapsOnWindow];
 }
 
-- (NSDictionary *)trackableProperties
+- (NSDictionary *)commitTrackableProperties;
 {
     NSMutableDictionary *propertiesToInclude = [NSMutableDictionary dictionaryWithCapacity:2];
     if (self.viewControllersVisited.count) {
         propertiesToInclude[@"screens"] = [self.viewControllersVisited copy];
     }
-    CGSize windowSize = [LKUtils currentWindowSize];
+
+    [self commitCurrentTapsAtWindowSize:self.currentWindowSize];
     if (self.tapBatches.count) {
         propertiesToInclude[@"tapBatches"] = [self.tapBatches copy];
     }
-    return propertiesToInclude;
-}
 
-
-- (void)clearTrackableProperties
-{
     [self.viewControllersVisited removeAllObjects];
     [self.tapBatches removeAllObjects];
     [self.currentBatchTaps removeAllObjects];
+
+    return propertiesToInclude;
 }
 
 - (void) updateReportingScreens:(BOOL)shouldReport

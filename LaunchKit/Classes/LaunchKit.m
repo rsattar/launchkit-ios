@@ -248,8 +248,8 @@ static LaunchKit *_sharedInstance;
     if (properties != nil) {
         [propertiesToInclude addEntriesFromDictionary:properties];
     }
-    [propertiesToInclude addEntriesFromDictionary:self.analytics.trackableProperties];
-    [self.analytics clearTrackableProperties];
+    NSDictionary *trackedAnalytics = [self.analytics commitTrackableProperties];
+    [propertiesToInclude addEntriesFromDictionary:trackedAnalytics];
 
     __weak LaunchKit *_weakSelf = self;
     [self.apiClient trackProperties:propertiesToInclude withSuccessBlock:^(NSDictionary *responseDict) {
