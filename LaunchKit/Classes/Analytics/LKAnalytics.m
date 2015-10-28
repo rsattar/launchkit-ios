@@ -9,12 +9,14 @@
 #import "LKAnalytics.h"
 
 #import "LKLog.h"
+#import "LKUtils.h"
 
 NSString *const LKAppUserUpdatedNotificationName = @"LKAppUserUpdatedNotificationName";
 NSString *const LKPreviousAppUserKey = @"LKPreviousAppUserKey";
 NSString *const LKCurrentAppUserKey = @"LKCurrentAppUserKey";
 
 static NSUInteger const VISITED_VIEW_CONTROLLERS_BUFFER_SIZE = 50;
+static NSUInteger const TAP_BATCHES_BUFFER_SIZE = 5;
 static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 
 @interface LKAnalytics () <UIGestureRecognizerDelegate>
@@ -32,7 +34,9 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 // Detecting taps
 @property (assign, nonatomic) BOOL shouldReportTaps;
 @property (strong, nonatomic) UITapGestureRecognizer *tapRecognizer;
-@property (strong, nonatomic) NSMutableArray *recordedTaps;
+@property (strong, nonatomic) NSMutableArray *tapBatches;
+@property (assign, nonatomic) CGSize currentWindowSize;
+@property (strong, nonatomic) NSMutableArray *currentBatchTaps;
 
 // Current User Info
 @property (strong, nonatomic) LKAppUser *user;
@@ -50,7 +54,7 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
         self.shouldReportScreens = shouldReportScreens;
         self.shouldReportTaps = shouldReportTaps;
         self.viewControllersVisited = [NSMutableArray arrayWithCapacity:VISITED_VIEW_CONTROLLERS_BUFFER_SIZE];
-        self.recordedTaps = [NSMutableArray arrayWithCapacity:RECORDED_TAPS_BUFFER_SIZE];
+        self.tapBatches = [NSMutableArray arrayWithCapacity:TAP_BATCHES_BUFFER_SIZE];
     }
     return self;
 }
@@ -67,8 +71,9 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
     if (self.viewControllersVisited.count) {
         propertiesToInclude[@"screens"] = [self.viewControllersVisited copy];
     }
-    if (self.recordedTaps.count) {
-        propertiesToInclude[@"taps"] = [self.recordedTaps copy];
+    CGSize windowSize = [LKUtils currentWindowSize];
+    if (self.tapBatches.count) {
+        propertiesToInclude[@"tapBatches"] = [self.tapBatches copy];
     }
     return propertiesToInclude;
 }
@@ -77,7 +82,8 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 - (void)clearTrackableProperties
 {
     [self.viewControllersVisited removeAllObjects];
-    [self.recordedTaps removeAllObjects];
+    [self.tapBatches removeAllObjects];
+    [self.currentBatchTaps removeAllObjects];
 }
 
 - (void) updateReportingScreens:(BOOL)shouldReport
@@ -238,12 +244,16 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
         self.tapRecognizer.cancelsTouchesInView = NO;
         self.tapRecognizer.delegate = self;
     }
+    self.currentWindowSize = [LKUtils currentWindowSize];
     UIWindow *window = [UIApplication sharedApplication].keyWindow;
     [window addGestureRecognizer:self.tapRecognizer];
 }
 
 - (void)stopDetectingTapsOnWindow
 {
+    // First, commit any batches of taps we may have
+    [self commitCurrentTapsAtWindowSize:self.currentWindowSize];
+
     if (self.tapRecognizer.view) {
         [self.tapRecognizer.view removeGestureRecognizer:self.tapRecognizer];
     }
@@ -251,84 +261,95 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
     self.tapRecognizer = nil;
 }
 
+/// Will not commit if there are no taps. If commited, will reset the taps collecting array
+- (void)commitCurrentTapsAtWindowSize:(CGSize)windowSize
+{
+    if (self.currentBatchTaps.count > 0) {
+        // Commit our current batch of taps at this window size
+        NSDictionary *batch = @{@"screen" : @{@"w" : @(self.currentWindowSize.width),
+                                              @"h" : @(self.currentWindowSize.height)},
+                                @"taps" : [self.currentBatchTaps copy]};
+        [self.tapBatches addObject:batch];
+        [self.currentBatchTaps removeAllObjects];
+    }
+}
+
 - (void)handleWindowTap:(UITapGestureRecognizer *)recognizer
 {
-    static BOOL allowsMultipleAppsOnScreen = NO;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        UIWindow *window = [UIApplication sharedApplication].keyWindow;
-        BOOL isiOS9AndUp = NO;
-        if ([[NSProcessInfo processInfo] respondsToSelector:@selector(isOperatingSystemAtLeastVersion:)]) {
-            NSOperatingSystemVersion iOS9;
-            iOS9.majorVersion = 9;
-            iOS9.minorVersion = 0;
-            iOS9.patchVersion = 0;
-            isiOS9AndUp = [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:iOS9];
-        }
-        // NOTE: This incorrectly assumes *all* iPads on iOS 9 support multi-screen, which is not true
-        if (isiOS9AndUp && window.traitCollection.userInterfaceIdiom == UIUserInterfaceIdiomPad) {
-            allowsMultipleAppsOnScreen = YES;
-        }
-    });
-    if (recognizer.state == UIGestureRecognizerStateEnded) {
-        CGPoint touchPoint = [recognizer locationInView:nil];
-        CGRect frame = recognizer.view.bounds;
+    if (recognizer.state != UIGestureRecognizerStateEnded) {
+        return;
+    }
 
-        UIWindow *window = [UIApplication sharedApplication].keyWindow;
+    CGSize windowSize = [LKUtils currentWindowSize];
+
+    if (!CGSizeEqualToSize(self.currentWindowSize, windowSize)) {
+        // This new tap is in a new window size, so record our old taps into a
+        // batch, based on the old window size
+        [self commitCurrentTapsAtWindowSize:self.currentWindowSize];
+        // Update to new window size
+        self.currentWindowSize = windowSize;
+    }
+
+    if (!self.currentBatchTaps) {
+        // We've not recorded any taps until now, so start collecting them
+        self.currentBatchTaps = [NSMutableArray arrayWithCapacity:RECORDED_TAPS_BUFFER_SIZE];
+    }
+
+    CGPoint touchPoint = [recognizer locationInView:nil];
+    CGRect frame = recognizer.view.bounds;
+
+    UIWindow *window = [UIApplication sharedApplication].keyWindow;
+    if (![UIViewController instancesRespondToSelector:@selector(traitCollection)]) {
+        // iOS 7 and below...
         BOOL isLandscape = NO;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         UIInterfaceOrientation orientation = window.rootViewController.interfaceOrientation;
 #pragma GCC diagnostic pop
-        if (!allowsMultipleAppsOnScreen) {
-            isLandscape = UIInterfaceOrientationIsLandscape(orientation);
-        }
+        isLandscape = UIInterfaceOrientationIsLandscape(orientation);
 
-        if (![UIViewController instancesRespondToSelector:@selector(traitCollection)]) {
-            // We have to transform the rect ourselves for landscape
-            if (orientation != UIInterfaceOrientationPortrait) {
-                double angle = [LKAnalytics angleForInterfaceOrientation:orientation];
-                CGAffineTransform rotationTransform = CGAffineTransformMakeRotation((float)angle);
-                frame = CGRectApplyAffineTransform(frame, rotationTransform);
-                frame.origin = CGPointZero;
+        // We have to transform the rect ourselves for landscape
+        if (orientation != UIInterfaceOrientationPortrait) {
+            double angle = [LKAnalytics angleForInterfaceOrientation:orientation];
+            CGAffineTransform rotationTransform = CGAffineTransformMakeRotation((float)angle);
+            frame = CGRectApplyAffineTransform(frame, rotationTransform);
+            frame.origin = CGPointZero;
 
-                if (isLandscape) {
-                    CGFloat tmp = touchPoint.x;
-                    touchPoint.x = touchPoint.y;
-                    touchPoint.y = tmp;
-                    if (orientation == UIInterfaceOrientationLandscapeLeft) {
-                        touchPoint.x = CGRectGetWidth(frame)-touchPoint.x;
-                    } else if (orientation == UIInterfaceOrientationLandscapeRight) {
-                        touchPoint.y = CGRectGetHeight(frame)-touchPoint.y;
-                    }
-                } else if (orientation == UIInterfaceOrientationPortraitUpsideDown) {
+            if (isLandscape) {
+                CGFloat tmp = touchPoint.x;
+                touchPoint.x = touchPoint.y;
+                touchPoint.y = tmp;
+                if (orientation == UIInterfaceOrientationLandscapeLeft) {
                     touchPoint.x = CGRectGetWidth(frame)-touchPoint.x;
+                } else if (orientation == UIInterfaceOrientationLandscapeRight) {
                     touchPoint.y = CGRectGetHeight(frame)-touchPoint.y;
                 }
+            } else if (orientation == UIInterfaceOrientationPortraitUpsideDown) {
+                touchPoint.x = CGRectGetWidth(frame)-touchPoint.x;
+                touchPoint.y = CGRectGetHeight(frame)-touchPoint.y;
             }
-        } else {
+        }
+    } else {
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
-            CGPoint zeroPoint = CGPointMake(0, 0);
-            CGFloat offsetX = ABS([window convertPoint:zeroPoint fromCoordinateSpace:window.screen.coordinateSpace].x);
-            if ([window.screen respondsToSelector:@selector(fixedCoordinateSpace)]) {
-                touchPoint = [window convertPoint:touchPoint fromCoordinateSpace:window.screen.fixedCoordinateSpace];
-            }
-            touchPoint.x += offsetX;
+        CGPoint zeroPoint = CGPointMake(0, 0);
+        CGFloat offsetX = ABS([window convertPoint:zeroPoint fromCoordinateSpace:window.screen.coordinateSpace].x);
+        if ([window.screen respondsToSelector:@selector(fixedCoordinateSpace)]) {
+            touchPoint = [window convertPoint:touchPoint fromCoordinateSpace:window.screen.fixedCoordinateSpace];
+        }
+        touchPoint.x += offsetX;
 #endif
-        }
-        if (self.verboseLogging) {
-            LKLog(@"Tapped %@ within %@", NSStringFromCGPoint(touchPoint), NSStringFromCGRect(frame));
-        }
-        NSInteger numToBeOverMax = (self.recordedTaps.count+1)-RECORDED_TAPS_BUFFER_SIZE;
-        if (numToBeOverMax > 0) {
-            [self.recordedTaps removeObjectsInRange:NSMakeRange(0, numToBeOverMax)];
-        }
-        [self.recordedTaps addObject:@{@"x" : @(touchPoint.x),
-                                       @"y" : @(touchPoint.y),
-                                       @"time" : @([NSDate date].timeIntervalSince1970 + self.apiClient.serverTimeOffset),
-                                       @"orient" : (isLandscape ? @"l" : @"p")}];
-
     }
+    if (self.verboseLogging) {
+        LKLog(@"Tapped %@ within %@", NSStringFromCGPoint(touchPoint), NSStringFromCGRect(frame));
+    }
+    NSInteger numToBeOverMax = (self.currentBatchTaps.count+1)-RECORDED_TAPS_BUFFER_SIZE;
+    if (numToBeOverMax > 0) {
+        // TODO(Riz): Instead of dropping taps, maybe store another batch, or persist some to disk?
+        [self.currentBatchTaps removeObjectsInRange:NSMakeRange(0, numToBeOverMax)];
+    }
+    [self.currentBatchTaps addObject:@{@"x" : @(touchPoint.x),
+                                       @"y" : @(touchPoint.y),
+                                       @"time" : @([NSDate date].timeIntervalSince1970 + self.apiClient.serverTimeOffset)}];
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
