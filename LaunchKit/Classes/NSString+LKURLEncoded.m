@@ -12,8 +12,15 @@
 
 - (NSString*)lk_urlencoded
 {
-  NSString *result = (NSString *) CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)self, NULL, CFSTR(":/?#[]@!$&’()*+,;="), kCFStringEncodingUTF8));
-  return result;
+    static NSMutableCharacterSet *customURLCharacterSet = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSString *stringsToDefinitelyEncode = @":/?#[]@!$&’()*+,;=";
+        customURLCharacterSet = [[NSMutableCharacterSet URLQueryAllowedCharacterSet] mutableCopy];
+        [customURLCharacterSet removeCharactersInString:stringsToDefinitelyEncode];
+    });
+    NSString *result = [self stringByAddingPercentEncodingWithAllowedCharacters:customURLCharacterSet];
+    return result;
 }
 
 @end
