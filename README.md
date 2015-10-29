@@ -62,7 +62,7 @@ func application(application: UIApplication, didFinishLaunchingWithOptions launc
     ...
 }
 ```
-
+<!--
 ### Step 3 (Xcode 7 / iOS 9)
 LaunchKit access some resources in Amazon AWS, and Amazon isn't fully TLS ready (yet). They have [documented the issue](https://mobile.awsblog.com/post/Tx2QM69ZE6BGTYX/Preparing-Your-Apps-for-iOS-9).
 
@@ -115,7 +115,7 @@ SCRIPT=`/usr/bin/find "${SRCROOT}/.." -name LaunchKitRemoteBundlesScript.playgro
 xcrun -sdk macosx swift "${SCRIPT}/Contents.swift" "YOUR_API_TOKEN"
 ```
 ![](http://i.imgur.com/y9NUjpn.png =800x)
-
+-->
 
 ---
 ### Author
