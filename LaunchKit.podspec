@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
                        about how the app is being used, etc.
                        DESC
   s.homepage         = "https://github.com/LaunchKit/launchkit-ios"
-  s.license          = 'MIT'
+  s.license          = 'Apache 2.0'
   s.author           = { "Cluster Labs, Inc." => "info@getcluster.com" }
   s.source           = { :git => "https://github.com/LaunchKit/launchkit-ios.git", :tag => s.version.to_s }
   s.social_media_url = 'https://twitter.com/launchkit'
