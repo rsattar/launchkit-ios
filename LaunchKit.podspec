@@ -7,10 +7,10 @@ Pod::Spec.new do |s|
                        measuring app installs, capturing light data
                        about how the app is being used, etc.
                        DESC
-  s.homepage         = "https://github.com/clusterinc/launchkit-ios"
+  s.homepage         = "https://github.com/LaunchKit/launchkit-ios"
   s.license          = 'MIT'
   s.author           = { "Cluster Labs, Inc." => "info@getcluster.com" }
-  s.source           = { :git => "https://github.com/clusterinc/launchkit-ios.git", :tag => s.version.to_s }
+  s.source           = { :git => "https://github.com/LaunchKit/launchkit-ios.git", :tag => s.version.to_s }
   s.social_media_url = 'https://twitter.com/launchkit'
 
   s.platform     = :ios, '7.0'
