@@ -8,13 +8,14 @@
 
 #import "LKAPIClient.h"
 
+#import "LaunchKitShared.h"
 #import "LKLog.h"
+#import "LKUtils.h"
 #import "NSDictionary+LKFormEncoded.h"
 #import <sys/utsname.h>
 
 NSString* const LKAPIFailedAuthenticationChallenge = @"LKAPIFailedAuthenticationChallenge";
 
-static NSString* const API_USER_AGENT_FORMAT = @"%@ %@ (%@; %@)";
 static NSString* const API_ERROR_DOMAIN = @"LaunchKitAPI";
 
 #define LK_DEBUG_LOG_REQUESTS 0
@@ -36,7 +37,6 @@ static NSCalendar *_globalGregorianCalendar;
 @property (strong, nonatomic) NSString *cachedBuildNumber;      // E.g.: 14
 @property (strong, nonatomic) NSString *cachedOSVersion;        // E.g.: iOS 8.1.3
 @property (strong, nonatomic) NSString *cachedHardwareModel;    // E.g.: iPhone 7,1
-@property (strong, nonatomic) NSDictionary *cachedScreenInfo;   // E.g.: {'width' : 414, 'height' : 736, 'scale' : 3.0}
 
 @end
 
@@ -52,19 +52,6 @@ static NSCalendar *_globalGregorianCalendar;
         _cachedBuildNumber = [LKAPIClient buildNumber];
         _cachedOSVersion = [NSString stringWithFormat:@"iOS %@", [LKAPIClient softwareVersion]];
         _cachedHardwareModel = [LKAPIClient hardwareModel];
-
-        UIScreen *screen = [UIScreen mainScreen];
-        CGSize mainScreenSize = [UIScreen mainScreen].bounds.size;
-        if ([screen respondsToSelector:@selector(fixedCoordinateSpace)]) {
-            // iOS 8 screen bounds are converted for the orientation they are in, so
-            // hackishly convert to "portrait-up" as our canonical representation
-            mainScreenSize = CGSizeMake(MIN(mainScreenSize.width, mainScreenSize.height),
-                                        MAX(mainScreenSize.width, mainScreenSize.height));
-        }
-        CGFloat mainScreenScale = [UIScreen mainScreen].scale;
-        _cachedScreenInfo = @{@"width" : @(mainScreenSize.width),
-                              @"height" : @(mainScreenSize.height),
-                              @"scale" : @(mainScreenScale)};
 
         _urlSessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
         _urlSessionConfiguration.networkServiceType = NSURLNetworkServiceTypeBackground;
@@ -93,7 +80,13 @@ static NSCalendar *_globalGregorianCalendar;
     params[@"build"] = self.cachedBuildNumber;
     params[@"os_version"] = self.cachedOSVersion;
     params[@"hardware"] = self.cachedHardwareModel;
-    params[@"screen"] = self.cachedScreenInfo;
+    params[@"screen"] = [LKAPIClient currentWindowInfo];
+#if DEBUG
+    // Notify LK servers when the app is running in debug mode
+    params[@"debug_build"] = @(YES);
+#else
+    params[@"debug_build"] = @(NO);
+#endif
     if (self.sessionParameters.count > 0) {
         params[@"session"] = self.sessionParameters;
     }
@@ -265,15 +258,20 @@ static NSCalendar *_globalGregorianCalendar;
     [dataTask resume];
 }
 
+// Returns a dictionary (e.g. {'width' : 414, 'height' : 736, 'scale' : 3.0})
++ (NSDictionary *) currentWindowInfo
+{
+    CGSize windowSize = [LKUtils currentWindowSize];
+    CGFloat mainScreenScale = [UIScreen mainScreen].scale;
+    return @{@"width" : @(windowSize.width),
+             @"height" : @(windowSize.height),
+             @"scale" : @(mainScreenScale)};
+}
+
 
 + (NSString *) userAgentString
 {
-    NSString *version = [LKAPIClient bundleVersion];
-    NSString *bundle = [LKAPIClient bundleIdentifier];
-    NSString *hardwareModel = [LKAPIClient hardwareModel];
-    NSString *softwareVersion = [LKAPIClient softwareVersion];
-
-    NSString *userAgent = [NSString stringWithFormat:API_USER_AGENT_FORMAT, bundle, version, hardwareModel, softwareVersion];
+    NSString *userAgent = [NSString stringWithFormat:@"LaunchKit iOS SDK %@", LAUNCHKIT_VERSION];
     return userAgent;
 }
 

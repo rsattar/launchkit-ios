@@ -9,8 +9,8 @@
 #import <Foundation/Foundation.h>
 
 #import "LaunchKitShared.h"
-
-#define LAUNCHKIT_VERSION = @"0.1.0"
+#import "LKAppUser.h"
+#import "LKConfig.h"
 
 @interface LaunchKit : NSObject
 
@@ -48,6 +48,18 @@
  */
 - (nullable id)init __attribute__((unavailable("Use +launchWithToken: to initialize LaunchKit, and +sharedInstance to retrieve the shared LaunchKit instance.")));
 
+/**
+ * User-configurable parameters that you may have set in LaunchKit's Cloud Config tool. See https://launchkit.io/config
+ */
+@property (readonly, strong, nonatomic, nonnull) LKConfig *config;
+
+
+/**
+ * According to LaunchKit, what information is availabe for the current app user. See https://launchkit.io/users
+ */
+@property (readonly, nonatomic, nullable) LKAppUser *currentUser;
+
+
 /** 
  * Useful to see log statements from LaunchKit in your console. Only useful when DEBUG macro = 1
  */
@@ -57,6 +69,11 @@
  * If you want to see verbose log statements. Only useful when DEBUG macro = 1
  */
 @property (assign, nonatomic) BOOL verboseLogging;
+
+/**
+ * The version of the LaunchKit library
+ */
+@property (readonly, nonatomic, nonnull) NSString *version;
 
 
 /*!

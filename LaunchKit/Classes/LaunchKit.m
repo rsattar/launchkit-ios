@@ -19,6 +19,16 @@ static BOOL USE_LOCAL_LAUNCHKIT_SERVER = NO;
 static NSString* const BASE_API_URL_REMOTE = @"https://api.launchkit.io/";
 static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 
+
+#pragma mark - Extending LKConfig to allow LaunchKit to modify parameters
+
+@interface LKConfig (Private)
+
+@property (readwrite, strong, nonatomic, nonnull) NSDictionary *parameters;
+- (void) updateParameters:(NSDictionary * __nonnull)parameters;
+
+@end
+
 @interface LaunchKit ()
 
 @property (copy, nonatomic) NSString *apiToken;
@@ -26,14 +36,16 @@ static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 /** Long-lived, persistent dictionary that is sent up with API requests. */
 @property (copy, nonatomic) NSDictionary *sessionParameters;
 
-@property (copy, nonatomic) NSDictionary *configurationParameters;
-
 @property (strong, nonatomic) LKAPIClient *apiClient;
 @property (strong, nonatomic) NSTimer *trackingTimer;
 @property (assign, nonatomic) NSTimeInterval trackingInterval;
 
 // Analytics
 @property (strong, nonatomic) LKAnalytics *analytics;
+
+// Config
+@property (readwrite, strong, nonatomic, nonnull) LKConfig *config;
+
 @end
 
 @implementation LaunchKit
@@ -83,7 +95,7 @@ static LaunchKit *_sharedInstance;
         self.trackingInterval = DEFAULT_TRACKING_INTERVAL;
 
         self.sessionParameters = @{};
-        self.configurationParameters = @{};
+        self.config = [[LKConfig alloc] initWithParameters:nil];
         [self retrieveSessionFromArchiveIfAvailable];
 
         // Update some local settings from known session_parameter variables
@@ -127,12 +139,19 @@ static LaunchKit *_sharedInstance;
 - (void)setDebugMode:(BOOL)debugMode
 {
     _debugMode = debugMode;
+    self.analytics.debugMode = debugMode;
     LKLOG_ENABLED = _debugMode;
 }
 
 - (void)setVerboseLogging:(BOOL)verboseLogging
 {
     _verboseLogging = verboseLogging;
+    self.analytics.verboseLogging = verboseLogging;
+}
+
+- (NSString *)version
+{
+    return LAUNCHKIT_VERSION;
 }
 
 - (void)createListeners
@@ -219,12 +238,12 @@ static LaunchKit *_sharedInstance;
         LKLog(@"Tracking: %@", properties);
     }
 
-    NSMutableDictionary *propertiesToInclude = [NSMutableDictionary dictionaryWithCapacity:2];
+    NSMutableDictionary *propertiesToInclude = [NSMutableDictionary dictionaryWithCapacity:3];
     if (properties != nil) {
         [propertiesToInclude addEntriesFromDictionary:properties];
     }
-    [propertiesToInclude addEntriesFromDictionary:self.analytics.trackableProperties];
-    [self.analytics clearTrackableProperties];
+    NSDictionary *trackedAnalytics = [self.analytics commitTrackableProperties];
+    [propertiesToInclude addEntriesFromDictionary:trackedAnalytics];
 
     __weak LaunchKit *_weakSelf = self;
     [self.apiClient trackProperties:propertiesToInclude withSuccessBlock:^(NSDictionary *responseDict) {
@@ -235,11 +254,15 @@ static LaunchKit *_sharedInstance;
         for (NSDictionary *todo in todos) {
             NSString *command = todo[@"command"];
             NSDictionary *args = todo[@"args"];
-            [self handleCommand:command withArgs:args];
+            [_weakSelf handleCommand:command withArgs:args];
         }
         NSDictionary *config = responseDict[@"config"];
-        if (config != nil && ![config isEqualToDictionary:self.configurationParameters]) {
-            self.configurationParameters = [config copy];
+        if (config != nil) {
+            [_weakSelf.config updateParameters:config];
+        }
+        NSDictionary *user = responseDict[@"user"];
+        if (user != nil) {
+            [_weakSelf.analytics updateUserFromDictionary:user];
         }
     } errorBlock:^(NSError *error) {
         LKLog(@"Error tracking properties: %@", error);
@@ -335,12 +358,24 @@ static LaunchKit *_sharedInstance;
     [self trackProperties:params];
 }
 
+- (LKAppUser *) currentUser
+{
+    return self.analytics.user;
+}
+
 #pragma mark - Saving/Persisting our Session
 
 - (void)archiveSession
 {
     NSString *filePath = [self sessionArchiveFilePath];
-    BOOL success = [NSKeyedArchiver archiveRootObject:self.sessionParameters toFile:filePath];
+    NSString *directoryPath = [filePath stringByDeletingLastPathComponent];
+    NSError *directoryCreateError = nil;
+    if (![[NSFileManager defaultManager] createDirectoryAtPath:directoryPath withIntermediateDirectories:YES attributes:nil error:&directoryCreateError]) {
+        LKLogError(@"Could not create directory for session archive file: %@", directoryCreateError);
+    }
+    NSDictionary *session = @{@"sessionParameters": self.sessionParameters,
+                              @"configurationParameters": self.config.parameters};
+    BOOL success = [NSKeyedArchiver archiveRootObject:session toFile:filePath];
     if (!success) {
         LKLogError(@"Could not archive session parameters");
     }
@@ -387,9 +422,19 @@ static LaunchKit *_sharedInstance;
     }
 
     if ([unarchivedObject isKindOfClass:[NSDictionary class]]) {
-        self.sessionParameters = (NSDictionary *)unarchivedObject;
+        NSDictionary *unarchivedDict = (NSDictionary *)unarchivedObject;
+        if ([[unarchivedDict allKeys] containsObject:@"configurationParameters"]) {
+            // Dict contains both session and configuration parameters
+            self.sessionParameters = unarchivedDict[@"sessionParameters"];
+            self.config.parameters = unarchivedDict[@"configurationParameters"];
+        } else {
+            // Old way, which stored only the session parameters directly
+            self.sessionParameters = unarchivedDict;
+            self.config.parameters = @{};
+        }
     } else {
         self.sessionParameters = @{};
+        self.config.parameters = @{};
     }
 }
 
@@ -428,3 +473,35 @@ static LaunchKit *_sharedInstance;
 }
 
 @end
+
+
+#pragma mark - LKConfig Convenience Functions
+
+BOOL LKConfigBool(NSString *__nonnull key, BOOL defaultValue)
+{
+    return [[LaunchKit sharedInstance].config boolForKey:key defaultValue:defaultValue];
+}
+
+
+NSInteger LKConfigInteger(NSString *__nonnull key, NSInteger defaultValue)
+{
+    return [[LaunchKit sharedInstance].config integerForKey:key defaultValue:defaultValue];
+}
+
+double LKConfigDouble(NSString *__nonnull key, double defaultValue)
+{
+    return [[LaunchKit sharedInstance].config doubleForKey:key defaultValue:defaultValue];
+}
+
+extern NSString * __nullable LKConfigString(NSString *__nonnull key, NSString *__nullable defaultValue)
+{
+    return [[LaunchKit sharedInstance].config stringForKey:key defaultValue:defaultValue];
+}
+
+
+#pragma mark - LKAppUser Convenience Functions
+
+BOOL LKAppUserIsSuper()
+{
+    return [LaunchKit sharedInstance].currentUser.isSuper;
+}
