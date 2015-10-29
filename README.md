@@ -37,7 +37,7 @@ You can install the LaunchKit SDK manually by [cloning the repo](https://github.
 ##### _Objective C_
 Somewhere near the top of your `-applicationDidFinishLaunching:withOptions:`, add `[LaunchKit launchWithToken:@"YOUR_API_TOKEN"]`, where `YOUR_API_TOKEN` is [a special token you can get here](https://launchkit.io/account/sdk-tokens).
 
-```
+```objc
 #import <LaunchKit/LaunchKit.h>
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -51,7 +51,7 @@ Somewhere near the top of your `-applicationDidFinishLaunching:withOptions:`, ad
 
 ##### _Swift_
 
-```
+```swift
 import LaunchKit
 
 ...
