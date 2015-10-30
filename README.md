@@ -19,13 +19,20 @@ _Warning! This part of the process needs to be completed by someone with access 
 ### Step 1
 
 #### Option 1: Cocoapods
-LaunchKit is available through [CocoaPods](http://cocoapods.org/). To install it, simply add the following line to your Podfile:
+LaunchKit is available through [CocoaPods](http://cocoapods.org/). To install it, simply add the following line to your `Podfile`:
 
 ```
 pod "LaunchKit"
 ```
 
-#### Option 2: Manual Installation
+#### Option 2: Carthage
+LaunchKit is also available through [Carthage](https://github.com/Carthage/Carthage). Add the following line to your `Cartfile`:
+
+```
+github "LaunchKit/launchkit-ios"
+```
+
+#### Option 3: Manual Installation
 You can install the LaunchKit SDK manually by [cloning the repo](https://github.com/launchkit/launchkit-ios), and copy the files in:
 
   * LaunchKit/Classes
