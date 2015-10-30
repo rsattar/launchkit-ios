@@ -44,7 +44,7 @@
 
 
 /**
- *  Unavailable. Use `+sharedInstance` to retrieve the shared Fabric instance.
+ *  Unavailable. Use `+sharedInstance` to retrieve the shared LaunchKit instance.
  */
 - (nullable id)init __attribute__((unavailable("Use +launchWithToken: to initialize LaunchKit, and +sharedInstance to retrieve the shared LaunchKit instance.")));
 
