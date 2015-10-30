@@ -12,6 +12,12 @@
 #import "LKAppUser.h"
 #import "LKConfig.h"
 
+//! Project version number for LaunchKit.
+FOUNDATION_EXPORT double LaunchKitVersionNumber;
+
+//! Project version string for LaunchKit.
+FOUNDATION_EXPORT const unsigned char LaunchKitVersionString[];
+
 @interface LaunchKit : NSObject
 
 /*!
