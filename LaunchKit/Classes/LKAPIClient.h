@@ -18,6 +18,7 @@ extern NSString* const LKAPIFailedAuthenticationChallenge;
 @property (copy, nonatomic) NSString *serverURL;
 @property (copy, nonatomic) NSDictionary *sessionParameters;
 @property (readonly, nonatomic) NSTimeInterval serverTimeOffset;
+@property (assign, nonatomic) BOOL verboseLogging;
 
 #pragma mark - Tracking Calls
 - (void) trackProperties:(NSDictionary *)properties
