@@ -6,6 +6,8 @@
 //
 //
 
+#import <Foundation/Foundation.h>
+
 @interface NSString (LKURLEncoded)
 
 - (NSString*)lk_urlencoded;

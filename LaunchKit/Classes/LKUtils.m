@@ -8,6 +8,8 @@
 
 #import "LKUtils.h"
 
+#import <UIKit/UIKit.h>
+
 @implementation LKUtils
 
 + (CGSize) currentWindowSize
