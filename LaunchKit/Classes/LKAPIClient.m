@@ -176,7 +176,9 @@ static NSCalendar *_globalGregorianCalendar;
             NSError *serializationError = nil;
             body = [NSJSONSerialization dataWithJSONObject:params options:0 error:&serializationError];
             if (serializationError != nil) {
-                LKLogError(@"Could not serialize JSON: %@", serializationError);
+                if (self.verboseLogging) {
+                    LKLogError(@"Could not serialize JSON: %@", serializationError);
+                }
             }
         }
 #if LK_DEBUG_LOG_REQUESTS
@@ -211,7 +213,9 @@ static NSCalendar *_globalGregorianCalendar;
             dict = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
 
             if (jsonError != nil) {
-                LKLogError(@"Bad JSON response: %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
+                if (self.verboseLogging) {
+                    LKLogError(@"Bad JSON response: %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
+                }
                 if (failureBlock) {
                     failureBlock(jsonError);
                 }
@@ -220,9 +224,11 @@ static NSCalendar *_globalGregorianCalendar;
         }
 
         if (code != 200 || error != nil) {
-            LKLogError(@"Oh noes, an error for request to %@: %ld; %@; %@", path, (long)code, [error description], [error userInfo]);
-            if (dict) {
-                LKLogError(@"Here's the data: %@", dict);
+            if (self.verboseLogging) {
+                LKLogError(@"Oh noes, an error for request to %@: %ld; %@; %@", path, (long)code, [error description], [error userInfo]);
+                if (dict) {
+                    LKLogError(@"Here's the data: %@", dict);
+                }
             }
 
             if (failureBlock) {

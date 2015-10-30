@@ -146,6 +146,7 @@ static LaunchKit *_sharedInstance;
 - (void)setVerboseLogging:(BOOL)verboseLogging
 {
     _verboseLogging = verboseLogging;
+    self.apiClient.verboseLogging = verboseLogging;
     self.analytics.verboseLogging = verboseLogging;
 }
 
