@@ -112,17 +112,21 @@
     } else {
         CGRect bounds = self.containerView.bounds;
         CGRect maxRect = CGRectInset(bounds, 32.0, 64.0);
+        // Make our largest dimension equal to what a typical
+        // "form sheet" view size is.
+        CGSize formSheetDimensions = CGSizeMake(540, 620);
         CGSize preferredSize = maxRect.size;
         if (self.traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassRegular &&
             self.traitCollection.verticalSizeClass == UIUserInterfaceSizeClassRegular) {
-            preferredSize = CGSizeMake(540, 620);
+            preferredSize = formSheetDimensions;
         } else if (CGRectGetWidth(bounds) == 375) {
             // Ugh, hardcoded for iPhone 6 size :(
             maxRect = bounds;
             preferredSize = CGSizeMake(320, 568);
         }
-        preferredSize.width = MIN(preferredSize.width, CGRectGetWidth(maxRect));
-        preferredSize.height = MIN(preferredSize.height, CGRectGetHeight(maxRect));
+        // Pick the smallest of each dimension
+        preferredSize.width = MIN(formSheetDimensions.width, MIN(preferredSize.width, CGRectGetWidth(maxRect)));
+        preferredSize.height = MIN(formSheetDimensions.height, MIN(preferredSize.height, CGRectGetHeight(maxRect)));
         CGRect frame = CGRectMake(floor((CGRectGetWidth(bounds)-preferredSize.width)/2.0),
                                   floor((CGRectGetHeight(bounds)-preferredSize.height)/2.0),
                                   preferredSize.width,
