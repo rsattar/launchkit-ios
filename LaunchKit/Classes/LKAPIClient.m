@@ -38,6 +38,11 @@ static NSCalendar *_globalGregorianCalendar;
 @property (strong, nonatomic) NSString *cachedOSVersion;        // E.g.: iOS 8.1.3
 @property (strong, nonatomic) NSString *cachedHardwareModel;    // E.g.: iPhone 7,1
 
+// Measuring usage
+@property (assign, nonatomic) int64_t receivedBytes;
+@property (assign, nonatomic) int64_t sentBytes;
+@property (assign, nonatomic) int64_t numAPICallsMade;
+
 @end
 
 @implementation LKAPIClient
@@ -189,7 +194,13 @@ static NSCalendar *_globalGregorianCalendar;
 
     NSDate *startTime = [NSDate date];
 
+    __block NSURLSessionDataTask *dataTask;
+
     void (^completionHandler)() = ^(NSData *data, NSURLResponse *response, NSError *error) {
+        if (self.measureUsage) {
+            self.receivedBytes += dataTask.countOfBytesReceived;
+            self.sentBytes += dataTask.countOfBytesSent;
+        }
         NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
         NSInteger code = [httpResponse statusCode];
 
@@ -258,10 +269,13 @@ static NSCalendar *_globalGregorianCalendar;
         }
     };
 
-    NSURLSessionDataTask *dataTask = [self.urlSession dataTaskWithRequest:request
-                                                        completionHandler:completionHandler];
+    dataTask = [self.urlSession dataTaskWithRequest:request
+                                  completionHandler:completionHandler];
     dataTask.taskDescription = [NSString stringWithFormat:@"LaunchKit: %@ %@", method, path];
     [dataTask resume];
+    if (self.measureUsage) {
+        self.numAPICallsMade++;
+    }
 }
 
 // Returns a dictionary (e.g. {'width' : 414, 'height' : 736, 'scale' : 3.0})
@@ -325,6 +339,17 @@ static NSCalendar *_globalGregorianCalendar;
     _globalGregorianCalendar.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
     NSDate *date = [_globalGregorianCalendar dateFromComponents:components];
     return date;
+}
+
+
+#pragma mark - Measuring Usage
+
+
+- (void) resetUsageMeasurements
+{
+    self.receivedBytes = 0;
+    self.sentBytes = 0;
+    self.numAPICallsMade = 0;
 }
 
 
