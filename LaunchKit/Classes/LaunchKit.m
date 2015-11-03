@@ -289,6 +289,12 @@ static LaunchKit *_sharedInstance;
     } errorBlock:^(NSError *error) {
         LKLog(@"Error tracking properties: %@", error);
     }];
+    if (self.trackingTimer.isValid) {
+        // We have an existing tracking timer, but since we just tracked, restart it
+        // NOTE: Even if we don't restart the tracking timer here, it would still
+        // fire at the previous interval, as it is a repeating timer.
+        [self restartTrackingFireImmediately:NO];
+    }
 }
 
 #pragma mark - Handling Commands from LaunchKit server
