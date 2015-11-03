@@ -17,8 +17,6 @@
 @property (strong, nonatomic) IBOutletCollection(UIView) NSArray *formElements;
 @property (strong, nonatomic) IBInspectable NSString *formUrl;
 @property (strong, nonatomic) NSURLSession *formSubmissionSession;
-
-@property (assign, nonatomic) BOOL viewLoaded;
 @end
 
 @implementation LKViewController
@@ -52,7 +50,6 @@
     if (self.view.lk_cornerRadius != self.viewCornerRadius) {
         self.view.lk_cornerRadius = self.viewCornerRadius;
     }
-    self.viewLoaded = YES;
 }
 
 - (void)didReceiveMemoryWarning {
@@ -218,7 +215,7 @@
 - (void)setViewCornerRadius:(CGFloat)viewCornerRadius
 {
     _viewCornerRadius = viewCornerRadius;
-    if (self.viewLoaded) {
+    if (self.isViewLoaded) {
         self.view.lk_cornerRadius = _viewCornerRadius;
     }
 }
