@@ -256,6 +256,9 @@ static LaunchKit *_sharedInstance;
 - (void)beginTracking
 {
     LKLog(@"Starting Tracking");
+    if (self.trackingTimer == nil || !self.trackingTimer.isValid) {
+        LKLog(@"Starting Tracking");
+    }
     [self stopTracking];
     // Fire it the first time immediately
     [self trackingTimerFired];
