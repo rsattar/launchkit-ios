@@ -15,6 +15,7 @@
 #import "LKUIManager.h"
 
 #define DEBUG_DESTROY_BUNDLE_CACHE_ON_START 0
+#define DEBUG_MEASURE_USAGE 0
 
 static NSTimeInterval const DEFAULT_TRACKING_INTERVAL = 30.0;
 static NSTimeInterval const MIN_TRACKING_INTERVAL = 5.0;
@@ -45,6 +46,9 @@ static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 @property (assign, nonatomic) NSTimeInterval trackingInterval;
 
 @property (strong, nonatomic) NSDate *launchTime;
+
+// Usage measurement
+@property (assign, nonatomic) BOOL debugMeasureUsage;
 
 // Analytics
 @property (strong, nonatomic) LKAnalytics *analytics;
@@ -106,6 +110,11 @@ static LaunchKit *_sharedInstance;
             self.apiClient.serverURL = BASE_API_URL_REMOTE;
         }
         self.apiClient.apiToken = self.apiToken;
+
+#if DEBUG_MEASURE_USAGE
+        self.debugMeasureUsage = YES;
+        self.apiClient.measureUsage = YES;
+#endif
 
         self.bundlesManager = [[LKBundlesManager alloc] initWithAPIClient:self.apiClient];
 
@@ -265,6 +274,10 @@ static LaunchKit *_sharedInstance;
     if (self.trackingTimer.isValid) {
         LKLog(@"Stopping Tracking");
         [self.trackingTimer invalidate];
+
+        if (self.debugMeasureUsage) {
+            [self printUsageMeasurements];
+        }
     }
     self.trackingTimer = nil;
 }
@@ -591,6 +604,36 @@ static LaunchKit *_sharedInstance;
 {
     NSAssert(_sharedInstance == nil, @"An instance of LaunchKit already has been created. You can only configure whether to use a local server before you have created the shared instance");
     USE_LOCAL_LAUNCHKIT_SERVER = useLocalLaunchKitServer;
+}
+
+- (void)printUsageMeasurements
+{
+    static NSNumberFormatter *numFormatter = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        numFormatter = [[NSNumberFormatter alloc] init];
+    });
+    NSTimeInterval secondsSinceLaunch = -[self.launchTime timeIntervalSinceNow];
+    double kBytesReceivedTotal = ((double)self.apiClient.receivedBytes)/1024.0;
+    double kBytesSentTotal = ((double)self.apiClient.sentBytes)/1024.0;
+    double avgKBytesReceivedPerSecond = kBytesReceivedTotal/secondsSinceLaunch;
+    double avgKBytesSentPerSecond = kBytesSentTotal/secondsSinceLaunch;
+    LKLog(@"LK Usage: (%.2fKB sent total, %.2fKB rcvd total) over %@ [%.2fKB sent/sec], [%.2fKB rcvd/sec]. %@ API calls",
+          kBytesSentTotal,
+          kBytesReceivedTotal,
+          [self stringFromTimeInterval:secondsSinceLaunch],
+          avgKBytesSentPerSecond,
+          avgKBytesReceivedPerSecond,
+          [numFormatter stringFromNumber:@(self.apiClient.numAPICallsMade)]);
+}
+
+// Thanks, http://stackoverflow.com/a/4933139/9849
+- (NSString *) stringFromTimeInterval:(NSTimeInterval)interval {
+    NSInteger ti = (NSInteger)interval;
+    NSInteger seconds = ti % 60;
+    NSInteger minutes = (ti / 60) % 60;
+    NSInteger hours = (ti / 3600);
+    return [NSString stringWithFormat:@"%02ld:%02ld:%02ld", (long)hours, (long)minutes, (long)seconds];
 }
 
 @end

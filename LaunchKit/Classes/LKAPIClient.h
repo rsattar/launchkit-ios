@@ -20,6 +20,12 @@ extern NSString* const LKAPIFailedAuthenticationChallenge;
 @property (readonly, nonatomic) NSTimeInterval serverTimeOffset;
 @property (assign, nonatomic) BOOL verboseLogging;
 
+@property (assign, nonatomic) BOOL measureUsage;
+@property (readonly, nonatomic) int64_t receivedBytes;
+@property (readonly, nonatomic) int64_t sentBytes;
+@property (readonly, nonatomic) int64_t numAPICallsMade;
+
+
 #pragma mark - Tracking Calls
 - (void) trackProperties:(NSDictionary *)properties
         withSuccessBlock:(void (^)(NSDictionary *responseDict))successBlock
@@ -42,5 +48,8 @@ extern NSString* const LKAPIFailedAuthenticationChallenge;
              JSONparams:(BOOL)JSONparams
            successBlock:(void(^)(NSDictionary *))successBlock
            failureBlock:(void(^)(NSError *))failureBlock;
+
+#pragma mark - Measuring Usage
+- (void) resetUsageMeasurements;
 
 @end
