@@ -253,15 +253,15 @@ static LaunchKit *_sharedInstance;
 
 #pragma mark - Tracking
 
-- (void)beginTracking
+- (void)restartTrackingFireImmediately:(BOOL)fireFirstTimeImmediately
 {
-    LKLog(@"Starting Tracking");
     if (self.trackingTimer == nil || !self.trackingTimer.isValid) {
         LKLog(@"Starting Tracking");
     }
     [self stopTracking];
-    // Fire it the first time immediately
-    [self trackingTimerFired];
+    if (fireFirstTimeImmediately) {
+        [self trackingTimerFired];
+    }
     self.trackingTimer = [NSTimer scheduledTimerWithTimeInterval:self.trackingInterval
                                                           target:self
                                                         selector:@selector(trackingTimerFired)
@@ -366,7 +366,7 @@ static LaunchKit *_sharedInstance;
 
     UIApplicationState state = [UIApplication sharedApplication].applicationState;
     if (state == UIApplicationStateActive) {
-        [self beginTracking];
+        [self restartTrackingFireImmediately:YES];
     }
 
     if (self.verboseLogging) {
@@ -391,7 +391,7 @@ static LaunchKit *_sharedInstance;
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification
 {
-    [self beginTracking];
+    [self restartTrackingFireImmediately:YES];
 }
 
 - (void)applicationDidEnterBackground:(NSNotification *)notification
