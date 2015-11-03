@@ -26,13 +26,13 @@
     self = [super initWithPresentedViewController:presentedViewController presentingViewController:presentingViewController];
     if (self) {
         // NOTE(Riz): Is it safe to query the presentedViewController's .view here?
-        self.lkViewStartingCornerRadius = presentedViewController.view.layer.cornerRadius;
     }
     return self;
 }
 
 - (void)presentationTransitionWillBegin {
     [super presentationTransitionWillBegin];
+    self.lkViewStartingCornerRadius = self.presentedViewController.view.layer.cornerRadius;
     // This is in case we are about to present the very first time, we need to remove any corner radius that might be
     // set (usually through a LaunchKit remote UI storyboard :))
     if ([self shouldPresentInFullscreen]) {
