@@ -11,7 +11,7 @@
 
 #import <UIKit/UIKit.h>
 
-#define LAUNCHKIT_VERSION @"1.0.2"
+#define LAUNCHKIT_VERSION @"1.0.3"
 
 #pragma mark - LKConfig Convenience Functions
 
