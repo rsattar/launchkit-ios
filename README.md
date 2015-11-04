@@ -35,8 +35,9 @@ github "LaunchKit/launchkit-ios"
 #### Option 3: Manual Installation
 You can install the LaunchKit SDK manually by [cloning the repo](https://github.com/launchkit/launchkit-ios), and copy the files in:
 
+```
   * LaunchKit/Classes
-  * LaunchKit/Assets
+```
  
 
 ### Step 2
