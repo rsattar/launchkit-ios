@@ -42,6 +42,13 @@ typedef NS_ENUM(NSInteger, LKViewControllerFlowResult)
 
 @property (assign, nonatomic) IBInspectable CGFloat viewCornerRadius;
 
+// 'cardView' property can be set by a custom IB storyboard, but if it is not set,
+// then it will reference self.view (it is set during viewDidLoad)
+@property (strong, nonatomic, nullable) IBOutlet UIView *cardView;
+@property (assign, nonatomic) IBInspectable BOOL cardPresentationCastsShadow;
+@property (assign, nonatomic) CGFloat cardPresentationShadowRadius;
+@property (assign, nonatomic) CGFloat cardPresentationShadowAlpha;
+
 #pragma mark - Flow Delegation
 - (void) finishFlowWithResult:(LKViewControllerFlowResult)result
                      userInfo:(nullable NSDictionary *)userInfo;

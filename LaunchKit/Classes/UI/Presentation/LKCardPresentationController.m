@@ -32,11 +32,23 @@
 
 - (void)presentationTransitionWillBegin {
     [super presentationTransitionWillBegin];
-    self.lkViewStartingCornerRadius = self.presentedViewController.view.layer.cornerRadius;
+    UIView *roundView = self.presentedViewController.view;
+    // For some reason, even if it's set in IB, the main VC's view's clipToBounds is
+    // sometimes set back to YES; need to change that to support corners + shadows
+    UIView *containingView = roundView;
+    if ([self.presentedViewController isKindOfClass:[LKViewController class]]) {
+        // cardView is often the same as view, but in some cases (complex
+        // shadow + rounded corner situation), it's not
+        roundView = ((LKViewController *)self.presentedViewController).cardView;
+    }
+    self.lkViewStartingCornerRadius = roundView.layer.cornerRadius;
     // This is in case we are about to present the very first time, we need to remove any corner radius that might be
     // set (usually through a LaunchKit remote UI storyboard :))
     if ([self shouldPresentInFullscreen]) {
-        self.presentedViewController.view.layer.cornerRadius = 0.0;
+        roundView.layer.cornerRadius = 0.0;
+        containingView.clipsToBounds = YES;
+    } else {
+        containingView.clipsToBounds = NO;
     }
 
     self.dimmingView = [[UIView alloc] initWithFrame:CGRectZero];
@@ -137,11 +149,22 @@
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-    
+
+    UIView *roundView = self.presentedViewController.view;
+    UIView *containingView = roundView;
+    // For some reason, even if it's set in IB, the main VC's view's clipToBounds is
+    // sometimes set back to YES; need to change that to support corners + shadows
+    if ([self.presentedViewController isKindOfClass:[LKViewController class]]) {
+        // cardView is often the same as view, but in some cases (complex
+        // shadow + rounded corner situation), it's not
+        roundView = ((LKViewController *)self.presentedViewController).cardView;
+    }
     if ([self shouldPresentInFullscreenForSize:size]) {
-        self.presentedViewController.view.layer.cornerRadius = 0.0;
+        roundView.layer.cornerRadius = 0.0;
+        containingView.clipsToBounds = YES;
     } else {
-        self.presentedViewController.view.layer.cornerRadius = self.lkViewStartingCornerRadius;
+        roundView.layer.cornerRadius = self.lkViewStartingCornerRadius;
+        containingView.clipsToBounds = NO;
     }
 }
 

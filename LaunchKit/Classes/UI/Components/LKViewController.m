@@ -24,6 +24,8 @@
 - (void)commonInit
 {
     _statusBarStyleValue = -1;
+    _cardPresentationShadowAlpha = 0.3;
+    _cardPresentationShadowRadius = 10.0;
 }
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -46,9 +48,18 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
-    if (self.view.lk_cornerRadius != self.viewCornerRadius) {
-        self.view.lk_cornerRadius = self.viewCornerRadius;
+    if (self.cardView == nil) {
+        self.cardView = self.view;
+    }
+    // In case our properties were set before the view was loaded, set them here
+    if (self.cardView.lk_cornerRadius != self.viewCornerRadius) {
+        self.cardView.lk_cornerRadius = self.viewCornerRadius;
+    }
+    if (_cardPresentationCastsShadow && self.view.layer.shadowOpacity != _cardPresentationShadowAlpha) {
+        self.cardPresentationShadowRadius = _cardPresentationShadowRadius;
+        self.cardPresentationShadowAlpha = _cardPresentationShadowAlpha;
+        self.view.layer.shadowColor = [UIColor blackColor].CGColor;
+        self.view.layer.shadowOffset = CGSizeZero;
     }
 }
 
@@ -216,7 +227,55 @@
 {
     _viewCornerRadius = viewCornerRadius;
     if (self.isViewLoaded) {
-        self.view.lk_cornerRadius = _viewCornerRadius;
+        self.cardView.lk_cornerRadius = _viewCornerRadius;
+    }
+}
+
+
+
+#pragma mark - Shadow
+
+
+- (void)setCardPresentationCastsShadow:(BOOL)cardPresentationCastsShadow
+{
+    _cardPresentationCastsShadow = cardPresentationCastsShadow;
+    if (self.isViewLoaded) {
+        if (_cardPresentationCastsShadow) {
+            self.cardPresentationShadowRadius = _cardPresentationShadowRadius;
+            self.cardPresentationShadowAlpha = _cardPresentationShadowAlpha;
+            self.view.layer.shadowColor = [UIColor blackColor].CGColor;
+            self.view.layer.shadowOffset = CGSizeZero;
+        } else {
+            // Set them out in the view, but not in our stored properties.
+            // That way we can still make changes to the radius and alpha,
+            // and the next time we turn on castsShadow it'll be the
+            // correct value
+            self.view.layer.shadowRadius = 0.0;
+            self.view.layer.shadowOpacity = 0.0;
+            self.view.layer.shadowColor = NULL;
+        }
+    }
+}
+
+
+- (void)setCardPresentationShadowAlpha:(CGFloat)cardPresentationShadowAlpha
+{
+    _cardPresentationShadowAlpha = cardPresentationShadowAlpha;
+    if (self.isViewLoaded) {
+        if (_cardPresentationCastsShadow) {
+            self.view.layer.shadowOpacity = _cardPresentationShadowAlpha;
+        }
+    }
+}
+
+
+- (void)setCardPresentationShadowRadius:(CGFloat)cardPresentationShadowRadius
+{
+    _cardPresentationShadowRadius = cardPresentationShadowRadius;
+    if (self.isViewLoaded) {
+        if (_cardPresentationCastsShadow) {
+            self.view.layer.shadowRadius = _cardPresentationShadowRadius;
+        }
     }
 }
 
