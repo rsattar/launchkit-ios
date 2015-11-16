@@ -559,7 +559,12 @@ extern NSString * __nullable LKConfigString(NSString *__nonnull key, NSString *_
     return [[LaunchKit sharedInstance].config stringForKey:key defaultValue:defaultValue];
 }
 
-extern void LKConfigSetRefreshHandler(LKConfigRefreshHandler _Nullable refreshHandler)
+extern void LKConfigReady(LKConfigReadyHandler _Nullable readyHandler)
+{
+    [LaunchKit sharedInstance].config.readyHandler = readyHandler;
+}
+
+extern void LKConfigRefreshed(LKConfigRefreshHandler _Nullable refreshHandler)
 {
     [LaunchKit sharedInstance].config.refreshHandler = refreshHandler;
 }

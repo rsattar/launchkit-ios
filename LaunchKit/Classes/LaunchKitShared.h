@@ -20,7 +20,8 @@ extern BOOL LKConfigBool(NSString *__nonnull key, BOOL defaultValue);
 extern NSInteger LKConfigInteger(NSString *__nonnull key, NSInteger defaultValue);
 extern double LKConfigDouble(NSString *__nonnull key, double defaultValue);
 extern NSString * __nullable LKConfigString(NSString *__nonnull key, NSString *__nullable defaultValue);
-extern void LKConfigSetRefreshHandler(LKConfigRefreshHandler _Nullable refreshHandler);
+extern void LKConfigReady(LKConfigReadyHandler _Nullable readyHandler);
+extern void LKConfigRefreshed(LKConfigRefreshHandler _Nullable refreshHandler);
 
 #pragma mark - LKAppUser Convenience Functions
 
