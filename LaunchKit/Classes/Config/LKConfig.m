@@ -49,10 +49,10 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
 
 - (BOOL) updateParameters:(NSDictionary * __nonnull)parameters
 {
-    if (parameters == nil) {
-        return NO;
-    }
-    if (![parameters isEqualToDictionary:_parameters]) {
+    // Also first config-updated and refresh handler the *first* time that
+    // config is updated, whether or not it is actually different
+    static BOOL isFirstRefresh = YES;
+    if (parameters != nil && (![parameters isEqualToDictionary:_parameters] || isFirstRefresh)) {
         NSDictionary *oldParameters = self.parameters;
         self.parameters = [parameters copy];
 
@@ -64,6 +64,12 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
                                                               userInfo:@{LKConfigOldParametersKey: strippedOld,
                                                                          LKConfigNewParametersKey: strippedNew}];
         }
+        // Fire config refresh handler
+        if (self.refreshHandler != nil) {
+            self.refreshHandler(strippedOld, strippedNew);
+        }
+
+        isFirstRefresh = NO;
         return YES;
     }
     return NO;

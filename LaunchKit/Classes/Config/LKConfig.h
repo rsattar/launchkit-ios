@@ -12,12 +12,21 @@ extern NSString *const __nonnull LKConfigUpdatedNotificationName;
 extern NSString *const __nonnull LKConfigOldParametersKey;
 extern NSString *const __nonnull LKConfigNewParametersKey;
 
+typedef void (^LKConfigRefreshHandler)(NSDictionary * __nonnull oldParameters, NSDictionary * __nonnull newParameters);
+
 @interface LKConfig : NSObject
 
 /**
  * The parameters dictionary, directly accessible, if needed.
  */
 @property (readonly, strong, nonatomic, nonnull) NSDictionary *parameters;
+
+/**
+ * An optional block you can pass in, which will be called whenever the config has changed.
+ * Additionally, it will be called the *first* time config is updated from the server, even if the
+ * config values were the same as cached.
+ */
+@property (copy, nonatomic, nullable) LKConfigRefreshHandler refreshHandler;
 
 - (nonnull instancetype)initWithParameters:(nullable NSDictionary *)configParameters;
 
