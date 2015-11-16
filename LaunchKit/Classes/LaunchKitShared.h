@@ -10,6 +10,7 @@
 #define LaunchKitShared_h
 
 #import <UIKit/UIKit.h>
+#import "LKConfig.h"
 
 #define LAUNCHKIT_VERSION @"1.0.3"
 
@@ -19,6 +20,7 @@ extern BOOL LKConfigBool(NSString *__nonnull key, BOOL defaultValue);
 extern NSInteger LKConfigInteger(NSString *__nonnull key, NSInteger defaultValue);
 extern double LKConfigDouble(NSString *__nonnull key, double defaultValue);
 extern NSString * __nullable LKConfigString(NSString *__nonnull key, NSString *__nullable defaultValue);
+extern void LKConfigSetRefreshHandler(LKConfigRefreshHandler _Nullable refreshHandler);
 
 #pragma mark - LKAppUser Convenience Functions
 

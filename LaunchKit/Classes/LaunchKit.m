@@ -559,6 +559,11 @@ extern NSString * __nullable LKConfigString(NSString *__nonnull key, NSString *_
     return [[LaunchKit sharedInstance].config stringForKey:key defaultValue:defaultValue];
 }
 
+extern void LKConfigSetRefreshHandler(LKConfigRefreshHandler _Nullable refreshHandler)
+{
+    [LaunchKit sharedInstance].config.refreshHandler = refreshHandler;
+}
+
 
 #pragma mark - LKAppUser Convenience Functions
 
