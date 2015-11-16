@@ -57,6 +57,9 @@ static NSString *const LAUNCHKIT_TOKEN = @"YOUR_LAUNCHKIT_TOKEN";
         [LaunchKit launchWithToken:launchKitToken];
         [LaunchKit sharedInstance].debugMode = YES;
         [LaunchKit sharedInstance].verboseLogging = YES;
+        [LaunchKit sharedInstance].config.readyHandler = ^{
+            NSLog(@"Config is ready");
+        };
         [LaunchKit sharedInstance].config.refreshHandler = ^(NSDictionary *oldParameters, NSDictionary *newParameters) {
             NSLog(@"Config was refreshed!");
         };

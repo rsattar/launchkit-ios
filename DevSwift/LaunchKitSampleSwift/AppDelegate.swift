@@ -55,6 +55,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             LaunchKit.launchWithToken(launchKitToken)
             LaunchKit.sharedInstance().debugMode = true
             LaunchKit.sharedInstance().verboseLogging = true
+            LaunchKit.sharedInstance().config.readyHandler = {
+                print("Config is ready")
+            }
             LaunchKit.sharedInstance().config.refreshHandler = { (oldParameters, newParameters) -> Void in
                 print("Config was refreshed!")
             }
