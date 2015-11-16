@@ -12,6 +12,7 @@ extern NSString *const __nonnull LKConfigUpdatedNotificationName;
 extern NSString *const __nonnull LKConfigOldParametersKey;
 extern NSString *const __nonnull LKConfigNewParametersKey;
 
+typedef void (^LKConfigReadyHandler)();
 typedef void (^LKConfigRefreshHandler)(NSDictionary * __nonnull oldParameters, NSDictionary * __nonnull newParameters);
 
 @interface LKConfig : NSObject
@@ -20,6 +21,15 @@ typedef void (^LKConfigRefreshHandler)(NSDictionary * __nonnull oldParameters, N
  * The parameters dictionary, directly accessible, if needed.
  */
 @property (readonly, strong, nonatomic, nonnull) NSDictionary *parameters;
+
+
+/**
+ * An optional block you can pass in, which will get called on the very first
+ * update to the configuration (whether or not the configuration is different
+ * from the previous configuration). This is an easy place to do some "set once"
+ * tasks for your app.
+ */
+@property (copy, nonatomic, nullable) LKConfigReadyHandler readyHandler;
 
 /**
  * An optional block you can pass in, which will be called whenever the config has changed.

@@ -67,7 +67,11 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
                                                               userInfo:@{LKConfigOldParametersKey: strippedOld,
                                                                          LKConfigNewParametersKey: strippedNew}];
         }
-        // Fire config refresh handler
+        // Fire ready handler
+        if (isFirstRefresh && self.readyHandler != nil) {
+            self.readyHandler();
+        }
+        // Fire config refresh handler (for both updates and isFirstRefresh)
         if (self.refreshHandler != nil) {
             self.refreshHandler(strippedOld, strippedNew);
         }
