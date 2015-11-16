@@ -27,7 +27,7 @@ static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 @interface LKConfig (Private)
 
 @property (readwrite, strong, nonatomic, nonnull) NSDictionary *parameters;
-- (BOOL) updateParameters:(NSDictionary * __nonnull)parameters;
+- (BOOL) updateParameters:(NSDictionary *)parameters;
 
 @end
 
