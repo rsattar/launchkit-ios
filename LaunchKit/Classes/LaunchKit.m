@@ -288,6 +288,9 @@ static LaunchKit *_sharedInstance;
         }
     } errorBlock:^(NSError *error) {
         LKLog(@"Error tracking properties: %@", error);
+        // "Update" our config with a nil, which will trigger
+        // it to fire a refresh handler, if this is the first launch
+        [_weakSelf.config updateParameters:nil];
     }];
     if (self.trackingTimer.isValid) {
         // We have an existing tracking timer, but since we just tracked, restart it
