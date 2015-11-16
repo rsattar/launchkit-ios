@@ -47,10 +47,10 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
     return strippedDict;
 }
 
-- (void) updateParameters:(NSDictionary * __nonnull)parameters
+- (BOOL) updateParameters:(NSDictionary * __nonnull)parameters
 {
     if (parameters == nil) {
-        return;
+        return NO;
     }
     if (![parameters isEqualToDictionary:_parameters]) {
         NSDictionary *oldParameters = self.parameters;
@@ -64,7 +64,9 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
                                                               userInfo:@{LKConfigOldParametersKey: strippedOld,
                                                                          LKConfigNewParametersKey: strippedNew}];
         }
+        return YES;
     }
+    return NO;
 }
 
 - (BOOL) boolForKey:(NSString * __nonnull)key defaultValue:(BOOL)defaultValue
