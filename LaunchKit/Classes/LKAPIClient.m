@@ -26,6 +26,7 @@ static NSCalendar *_globalGregorianCalendar;
 
 @property (strong, nonatomic) NSURLSessionConfiguration *urlSessionConfiguration;
 @property (strong, nonatomic) NSURLSession *urlSession;
+@property (strong, nonatomic) NSOperationQueue *urlSessionQueue;
 
 @property (assign, nonatomic) NSTimeInterval serverTimeOffset;
 
@@ -70,9 +71,14 @@ static NSCalendar *_globalGregorianCalendar;
         _urlSessionConfiguration.networkServiceType = NSURLNetworkServiceTypeBackground;
         _urlSessionConfiguration.timeoutIntervalForRequest = 20.0; // 20 second timeout (default is 60 seconds)
         _urlSessionConfiguration.HTTPAdditionalHeaders = @{@"User-Agent" : [LKAPIClient userAgentString]};
+
+        _urlSessionQueue = [[NSOperationQueue alloc] init];
+        _urlSessionQueue.name = @"LaunchKit SDK API Queue";
+        _urlSessionQueue.qualityOfService = NSQualityOfServiceBackground;
+        _urlSessionQueue.maxConcurrentOperationCount = 1;
         _urlSession = [NSURLSession sessionWithConfiguration:_urlSessionConfiguration
                                                     delegate:nil
-                                               delegateQueue:[NSOperationQueue mainQueue]];
+                                               delegateQueue:_urlSessionQueue];
         _urlSession.sessionDescription = @"LaunchKit SDK URL Session";
     }
     return self;
@@ -238,7 +244,9 @@ static NSCalendar *_globalGregorianCalendar;
                     LKLogError(@"Bad JSON response: %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
                 }
                 if (failureBlock) {
-                    failureBlock(jsonError);
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        failureBlock(jsonError);
+                    });
                 }
                 return;
             }
@@ -257,7 +265,9 @@ static NSCalendar *_globalGregorianCalendar;
                     // is this weird?
                     error = [NSError errorWithDomain:API_ERROR_DOMAIN code:code userInfo:dict];
                 }
-                failureBlock(error);
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    failureBlock(error);
+                });
             }
 
             if ([error.domain isEqualToString:NSURLErrorDomain] &&
@@ -266,16 +276,20 @@ static NSCalendar *_globalGregorianCalendar;
                                                                        // challenge is automatically 'cancelled' since we can't
                                                                        // handle it while using the block-based NSURLConnection
                                                                        // sendAsynchronousRequest:queue:completionHandler:
-                [[NSNotificationCenter defaultCenter] postNotificationName:LKAPIFailedAuthenticationChallenge
-                                                                    object:self userInfo:@{@"path": path,
-                                                                                           @"error": error}];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[NSNotificationCenter defaultCenter] postNotificationName:LKAPIFailedAuthenticationChallenge
+                                                                        object:self userInfo:@{@"path": path,
+                                                                                               @"error": error}];
+                });
 
             }
             return;
         }
 
         if (successBlock) {
-            successBlock(dict);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                successBlock(dict);
+            });
         }
     };
 
