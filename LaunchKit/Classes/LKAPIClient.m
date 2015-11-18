@@ -37,6 +37,8 @@ static NSCalendar *_globalGregorianCalendar;
 @property (strong, nonatomic) NSString *cachedBuildNumber;      // E.g.: 14
 @property (strong, nonatomic) NSString *cachedOSVersion;        // E.g.: iOS 8.1.3
 @property (strong, nonatomic) NSString *cachedHardwareModel;    // E.g.: iPhone 7,1
+@property (strong, nonatomic) NSString *cachedLocaleIdentifier; // E.g.: en_US, system's current language + region
+@property (strong, nonatomic) NSString *cachedAppLocalization;  // E.g.: en, the localization the app is running as
 
 // Measuring usage
 @property (assign, nonatomic) int64_t receivedBytes;
@@ -57,6 +59,12 @@ static NSCalendar *_globalGregorianCalendar;
         _cachedBuildNumber = [LKAPIClient buildNumber];
         _cachedOSVersion = [NSString stringWithFormat:@"iOS %@", [LKAPIClient softwareVersion]];
         _cachedHardwareModel = [LKAPIClient hardwareModel];
+        _cachedLocaleIdentifier = [NSLocale currentLocale].localeIdentifier;
+        NSArray *preferredBundleLocalizations = [NSBundle mainBundle].preferredLocalizations;
+        _cachedAppLocalization = preferredBundleLocalizations.firstObject;
+        if (_cachedAppLocalization == nil) {
+            _cachedAppLocalization = @"en";
+        }
 
         _urlSessionConfiguration = [NSURLSessionConfiguration defaultSessionConfiguration];
         _urlSessionConfiguration.networkServiceType = NSURLNetworkServiceTypeBackground;
@@ -86,6 +94,8 @@ static NSCalendar *_globalGregorianCalendar;
     params[@"os_version"] = self.cachedOSVersion;
     params[@"hardware"] = self.cachedHardwareModel;
     params[@"screen"] = [LKAPIClient currentWindowInfo];
+    params[@"system_locale"] = _cachedLocaleIdentifier;
+    params[@"app_localization"] = _cachedAppLocalization;
 #if DEBUG
     // Notify LK servers when the app is running in debug mode
     params[@"debug_build"] = @(YES);
