@@ -59,20 +59,22 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
         NSDictionary *oldParameters = self.parameters;
         self.parameters = [parameters copy];
 
+        // Fire ready handler
+        if (isFirstRefresh && self.readyHandler != nil) {
+            self.readyHandler();
+        }
+
         NSDictionary *strippedOld = [self dictionaryWithoutLaunchKitKeys:oldParameters];
         NSDictionary *strippedNew = [self dictionaryWithoutLaunchKitKeys:parameters];
-        if (![strippedOld isEqualToDictionary:strippedNew]) {
+        BOOL appVisibleConfigsChanged = ![strippedOld isEqualToDictionary:strippedNew];
+        if (appVisibleConfigsChanged) {
             [[NSNotificationCenter defaultCenter] postNotificationName:LKConfigUpdatedNotificationName
                                                                 object:self
                                                               userInfo:@{LKConfigOldParametersKey: strippedOld,
                                                                          LKConfigNewParametersKey: strippedNew}];
         }
-        // Fire ready handler
-        if (isFirstRefresh && self.readyHandler != nil) {
-            self.readyHandler();
-        }
         // Fire config refresh handler (for both updates and isFirstRefresh)
-        if (self.refreshHandler != nil) {
+        if (self.refreshHandler != nil && (isFirstRefresh || appVisibleConfigsChanged)) {
             self.refreshHandler(strippedOld, strippedNew);
         }
 
