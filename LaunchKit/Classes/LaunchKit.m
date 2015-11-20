@@ -190,6 +190,10 @@ static LaunchKit *_sharedInstance;
                selector:@selector(applicationDidEnterBackground:)
                    name:UIApplicationDidEnterBackgroundNotification
                  object:nil];
+    [center addObserver:self
+               selector:@selector(applicationDidReceiveMemoryWarning:)
+                   name:UIApplicationDidReceiveMemoryWarningNotification
+                 object:nil];
     /*
     [center addObserver:self
                selector:@selector(applicationWillEnterForeground:)
@@ -374,6 +378,11 @@ static LaunchKit *_sharedInstance;
 - (void)applicationDidEnterBackground:(NSNotification *)notification
 {
     [self archiveSession];
+}
+
+- (void)applicationDidReceiveMemoryWarning:(NSNotification *)notification
+{
+    [self trackProperties:nil];
 }
 
 #pragma mark - User Info
