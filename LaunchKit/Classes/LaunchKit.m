@@ -110,6 +110,9 @@ static LaunchKit *_sharedInstance;
 
         self.sessionParameters = @{};
         self.config = [[LKConfig alloc] initWithParameters:nil];
+        self.analytics = [[LKAnalytics alloc] initWithAPIClient:self.apiClient
+                                                screenReporting:YES
+                                            tapReportingEnabled:YES];
         [self retrieveSessionFromArchiveIfAvailable];
 
         // Update some local settings from known session_parameter variables
@@ -123,10 +126,9 @@ static LaunchKit *_sharedInstance;
         if ([rawReportTaps isKindOfClass:[NSNumber class]]) {
             shouldReportTaps = [rawReportTaps boolValue];
         }
+        [self.analytics updateReportingScreens:shouldReportScreens];
+        [self.analytics updateReportingTaps:shouldReportTaps];
 
-        self.analytics = [[LKAnalytics alloc] initWithAPIClient:self.apiClient
-                                                screenReporting:shouldReportScreens
-                                            tapReportingEnabled:shouldReportTaps];
 
         id rawTrackingInterval = self.sessionParameters[@"track_interval"];
         if ([rawTrackingInterval isKindOfClass:[NSNumber class]]) {
