@@ -39,7 +39,7 @@ extern NSString *const LKCurrentAppUserKey;
 
 #pragma mark - Current User Data
 
-- (void) updateUserFromDictionary:(NSDictionary *)dictionary;
+- (void) updateUserFromDictionary:(NSDictionary *)dictionary reportUpdate:(BOOL)reportUpdate;
 
 @end
 

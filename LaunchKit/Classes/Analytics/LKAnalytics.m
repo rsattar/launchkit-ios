@@ -451,7 +451,7 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 #pragma mark - Current User Data
 
 
-- (void) updateUserFromDictionary:(NSDictionary *)dictionary
+- (void) updateUserFromDictionary:(NSDictionary *)dictionary reportUpdate:(BOOL)reportUpdate
 {
     if (self.user != nil && [self.lastUserDictionary isEqualToDictionary:dictionary]) {
         return;
@@ -464,16 +464,18 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
     LKAppUser *previousUser = self.user;
     self.user = currentUser;
     self.lastUserDictionary = dictionary;
-    NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithCapacity:2];
-    if (previousUser != nil) {
-        userInfo[LKPreviousAppUserKey] = previousUser;
+    if (reportUpdate) {
+        NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithCapacity:2];
+        if (previousUser != nil) {
+            userInfo[LKPreviousAppUserKey] = previousUser;
+        }
+        if (currentUser != nil) {
+            userInfo[LKCurrentAppUserKey] = currentUser;
+        }
+        [[NSNotificationCenter defaultCenter] postNotificationName:LKAppUserUpdatedNotificationName
+                                                            object:self
+                                                          userInfo:userInfo];
     }
-    if (currentUser != nil) {
-        userInfo[LKCurrentAppUserKey] = currentUser;
-    }
-    [[NSNotificationCenter defaultCenter] postNotificationName:LKAppUserUpdatedNotificationName
-                                                        object:self
-                                                      userInfo:userInfo];
 }
 
 

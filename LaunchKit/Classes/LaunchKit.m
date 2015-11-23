@@ -290,7 +290,7 @@ static LaunchKit *_sharedInstance;
         }
         NSDictionary *user = responseDict[@"user"];
         if (user != nil) {
-            [_weakSelf.analytics updateUserFromDictionary:user];
+            [_weakSelf.analytics updateUserFromDictionary:user reportUpdate:YES];
         }
         [self archiveSession];
     } errorBlock:^(NSError *error) {
