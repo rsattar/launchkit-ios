@@ -115,11 +115,10 @@ static LaunchKit *_sharedInstance;
 
         self.trackingInterval = DEFAULT_TRACKING_INTERVAL;
 
+        // Prepare the different tools and unarchive session
         self.sessionParameters = @{};
         self.config = [[LKConfig alloc] initWithParameters:nil];
-        self.analytics = [[LKAnalytics alloc] initWithAPIClient:self.apiClient
-                                                screenReporting:YES
-                                            tapReportingEnabled:YES];
+        self.analytics = [[LKAnalytics alloc] initWithAPIClient:self.apiClient];
         [self retrieveSessionFromArchiveIfAvailable];
 
         // Update some local settings from known session_parameter variables

@@ -46,13 +46,13 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 
 @implementation LKAnalytics
 
-- (instancetype)initWithAPIClient:(LKAPIClient *)apiClient screenReporting:(BOOL)shouldReportScreens tapReportingEnabled:(BOOL)shouldReportTaps
+- (instancetype)initWithAPIClient:(LKAPIClient *)apiClient
 {
     self = [super init];
     if (self) {
         self.apiClient = apiClient;
-        self.shouldReportScreens = shouldReportScreens;
-        self.shouldReportTaps = shouldReportTaps;
+        self.shouldReportScreens = YES;
+        self.shouldReportTaps = YES;
         self.viewControllersVisited = [NSMutableArray arrayWithCapacity:VISITED_VIEW_CONTROLLERS_BUFFER_SIZE];
         self.tapBatches = [NSMutableArray arrayWithCapacity:TAP_BATCHES_BUFFER_SIZE];
     }
