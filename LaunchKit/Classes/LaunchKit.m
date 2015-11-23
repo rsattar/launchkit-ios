@@ -290,6 +290,7 @@ static LaunchKit *_sharedInstance;
         if (user != nil) {
             [_weakSelf.analytics updateUserFromDictionary:user];
         }
+        [self archiveSession];
     } errorBlock:^(NSError *error) {
         LKLog(@"Error tracking properties: %@", error);
         // "Update" our config with a nil, which will trigger
@@ -330,7 +331,6 @@ static LaunchKit *_sharedInstance;
         }
         // Triggers an update
         self.sessionParameters = updatedSessionParams;
-        [self archiveSession];
     } else if ([command isEqualToString:@"log"]) {
         // Log sent from remote server.
         LKLog(@"%@ - %@", [args[@"level"] uppercaseString], args[@"message"]);
