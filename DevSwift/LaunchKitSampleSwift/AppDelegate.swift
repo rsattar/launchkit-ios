@@ -17,18 +17,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
+    // TODO: Listen for NSUserDefaultsDidChangeNotification and start launch kit again if so
+
+
+    var availableLaunchKitToken: String? {
+
+        var launchKitToken: String? = LAUNCHKIT_TOKEN
+        if let token = launchKitToken where token == "YOUR_LAUNCHKIT_TOKEN" {
+            // Otherwise fetch the launchkit token from the Settings bundle
+            if let tokenInSettings = NSUserDefaults.standardUserDefaults().objectForKey("launchKitToken") as? String {
+                launchKitToken = tokenInSettings
+            }
+        }
+        if (launchKitToken != nil && (launchKitToken!.characters.count == 0 || launchKitToken! == "YOUR_LAUNCHKIT_TOKEN")) {
+            // Our token is non-nil but is not valid (empty or unusable default)
+            return nil
+        }
+        return launchKitToken
+    }
+
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         NSUserDefaults.standardUserDefaults().registerDefaults(["launchKitToken" : LAUNCHKIT_TOKEN])
         // In case, you the developer, has directly modified the launchkit token here
-        var launchKitToken = LAUNCHKIT_TOKEN
-        if launchKitToken == "YOUR_LAUNCHKIT_TOKEN" {
-            // Otherwise fetch the launchkit token from the Settings bundle
-            if let token = NSUserDefaults.standardUserDefaults().objectForKey("launchKitToken") as? String {
-                launchKitToken = token
-            }
-        }
-        if launchKitToken.characters.count == 0 || launchKitToken == "YOUR_LAUNCHKIT_TOKEN" {
+
+        guard let launchKitToken = self.availableLaunchKitToken else {
             // We don't have a valid launchkit token, so prompt
             let title = "Set LaunchKit Token"
             let msg = "You must go to Settings and enter in your LaunchKit token."
@@ -47,22 +60,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 let alertView = UIAlertView(title: title, message: msg, delegate: nil, cancelButtonTitle: "Okay")
                 alertView.show()
             }
-        } else {
-            // Valid token, so create LaunchKit instance
-            if USE_LOCAL_LAUNCHKIT_SERVER {
-                LaunchKit.useLocalLaunchKitServer(true)
-            }
-            LaunchKit.launchWithToken(launchKitToken)
-            LaunchKit.sharedInstance().debugMode = true
-            LaunchKit.sharedInstance().verboseLogging = true
-            // Use convenience method for setting up the ready-handler
-            LKConfigReady({
-                print("Config is ready")
-            })
-            // Use the normal method for setting up the refresh handler
-            LaunchKit.sharedInstance().config.refreshHandler = { (oldParameters, newParameters) -> Void in
-                print("Config was refreshed!")
-            }
+            return true
+        }
+
+        // Valid token, so create LaunchKit instance
+        if USE_LOCAL_LAUNCHKIT_SERVER {
+            LaunchKit.useLocalLaunchKitServer(true)
+        }
+        LaunchKit.launchWithToken(launchKitToken)
+        LaunchKit.sharedInstance().debugMode = true
+        LaunchKit.sharedInstance().verboseLogging = true
+        // Use convenience method for setting up the ready-handler
+        LKConfigReady({
+            print("Config is ready")
+        })
+        // Use the normal method for setting up the refresh handler
+        LaunchKit.sharedInstance().config.refreshHandler = { (oldParameters, newParameters) -> Void in
+            print("Config was refreshed!")
         }
 
         return true
