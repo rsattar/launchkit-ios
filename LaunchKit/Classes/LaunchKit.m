@@ -31,6 +31,13 @@ static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 
 @end
 
+#pragma mark - Extension LKAnalytics to allow LaunchKit to access some parameters
+@interface LKAnalytics (Private)
+
+@property (strong, nonatomic) NSDictionary *lastUserDictionary;
+
+@end
+
 @interface LaunchKit ()
 
 @property (copy, nonatomic) NSString *apiToken;
@@ -415,8 +422,12 @@ static LaunchKit *_sharedInstance;
     if (![[NSFileManager defaultManager] createDirectoryAtPath:directoryPath withIntermediateDirectories:YES attributes:nil error:&directoryCreateError]) {
         LKLogError(@"Could not create directory for session archive file: %@", directoryCreateError);
     }
-    NSDictionary *session = @{@"sessionParameters": self.sessionParameters,
-                              @"configurationParameters": self.config.parameters};
+    NSMutableDictionary *session = [NSMutableDictionary dictionaryWithCapacity:3];
+    session[@"sessionParameters"] = self.sessionParameters;
+    session[@"configurationParameters"] = self.config.parameters;
+    if (self.analytics.lastUserDictionary) {
+        session[@"analyticsUserDictionary"] = self.analytics.lastUserDictionary;
+    }
     BOOL success = [NSKeyedArchiver archiveRootObject:session toFile:filePath];
     if (!success) {
         LKLogError(@"Could not archive session parameters");
@@ -469,6 +480,10 @@ static LaunchKit *_sharedInstance;
             // Dict contains both session and configuration parameters
             self.sessionParameters = unarchivedDict[@"sessionParameters"];
             self.config.parameters = unarchivedDict[@"configurationParameters"];
+            if ([unarchivedDict[@"analyticsUserDictionary"] isKindOfClass:[NSDictionary class]]) {
+                NSDictionary *lastUserDictionary = unarchivedDict[@"analyticsUserDictionary"];
+                [self.analytics updateUserFromDictionary:lastUserDictionary reportUpdate:NO];
+            }
         } else {
             // Old way, which stored only the session parameters directly
             self.sessionParameters = unarchivedDict;
