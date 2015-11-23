@@ -121,20 +121,6 @@ static LaunchKit *_sharedInstance;
         self.analytics = [[LKAnalytics alloc] initWithAPIClient:self.apiClient];
         [self retrieveSessionFromArchiveIfAvailable];
 
-        // Update some local settings from known session_parameter variables
-        BOOL shouldReportScreens = YES;
-        BOOL shouldReportTaps = YES;
-        id rawReportScreens = self.sessionParameters[@"report_screens"];
-        if ([rawReportScreens isKindOfClass:[NSNumber class]]) {
-            shouldReportScreens = [rawReportScreens boolValue];
-        }
-        id rawReportTaps = self.sessionParameters[@"report_taps"];
-        if ([rawReportTaps isKindOfClass:[NSNumber class]]) {
-            shouldReportTaps = [rawReportTaps boolValue];
-        }
-        [self.analytics updateReportingScreens:shouldReportScreens];
-        [self.analytics updateReportingTaps:shouldReportTaps];
-
 
         id rawTrackingInterval = self.sessionParameters[@"track_interval"];
         if ([rawTrackingInterval isKindOfClass:[NSNumber class]]) {
@@ -475,6 +461,8 @@ static LaunchKit *_sharedInstance;
 
     if ([unarchivedObject isKindOfClass:[NSDictionary class]]) {
         NSDictionary *unarchivedDict = (NSDictionary *)unarchivedObject;
+        // Check to see if our data structure uses any of the older format
+        // TODO(Riz): This can probably be removed at this point
         if ([[unarchivedDict allKeys] containsObject:@"configurationParameters"]) {
             // Dict contains both session and configuration parameters
             self.sessionParameters = unarchivedDict[@"sessionParameters"];
@@ -488,6 +476,21 @@ static LaunchKit *_sharedInstance;
             self.sessionParameters = unarchivedDict;
             self.config.parameters = @{};
         }
+
+        // Update some local settings from known session_parameter variables
+        BOOL shouldReportScreens = YES;
+        BOOL shouldReportTaps = YES;
+        id rawReportScreens = self.sessionParameters[@"report_screens"];
+        if ([rawReportScreens isKindOfClass:[NSNumber class]]) {
+            shouldReportScreens = [rawReportScreens boolValue];
+        }
+        id rawReportTaps = self.sessionParameters[@"report_taps"];
+        if ([rawReportTaps isKindOfClass:[NSNumber class]]) {
+            shouldReportTaps = [rawReportTaps boolValue];
+        }
+        [self.analytics updateReportingScreens:shouldReportScreens];
+        [self.analytics updateReportingTaps:shouldReportTaps];
+
     } else {
         self.sessionParameters = @{};
         self.config.parameters = @{};
