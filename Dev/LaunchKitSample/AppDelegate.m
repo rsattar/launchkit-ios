@@ -14,61 +14,66 @@
 
 static NSString *const LAUNCHKIT_TOKEN = @"YOUR_LAUNCHKIT_TOKEN";
 
+@interface AppDelegate ()
+
+@property (assign, nonatomic) BOOL launchKitStarted;
+// For token warnings
+@property (strong, nonatomic) UIAlertController *alertController;
+@property (strong, nonatomic) UIAlertView *alertView;
+
+@end
+
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    [self.window makeKeyAndVisible];
-    
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{@"launchKitToken" : LAUNCHKIT_TOKEN}];
-    // In case, you the developer, has directly modified the launchkit token here
+    [self.window makeKeyAndVisible];
+    [self startLaunchKitIfPossible];
+    return YES;
+}
+
+- (NSString *)availableLaunchKitToken
+{
     NSString *launchKitToken = LAUNCHKIT_TOKEN;
     if ([launchKitToken isEqualToString:@"YOUR_LAUNCHKIT_TOKEN"]) {
         // Otherwise fetch the launchkit token from the Settings bundle
         launchKitToken = [[NSUserDefaults standardUserDefaults] objectForKey:@"launchKitToken"];
     }
     if (launchKitToken.length == 0 || [launchKitToken isEqualToString:@"YOUR_LAUNCHKIT_TOKEN"]) {
-        // We don't have a valid launch kit token, so prompt
-        NSString *title = @"Set LaunchKit Token";
-        NSString *msg = @"You must go to Settings and enter "
-                         "in your LaunchKit token.";
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
-        if (NSClassFromString(@"UIAlertController") != nil) {
-
-            UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:msg preferredStyle:UIAlertControllerStyleAlert];
-            [alertController addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
-            }]];
-            [self.window.rootViewController presentViewController:alertController animated:YES completion:nil];
-            
-        } else {
-            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title message:msg delegate:nil cancelButtonTitle:@"Okay" otherButtonTitles:nil];
-            [alertView show];
-        }
-#else
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title message:msg delegate:nil cancelButtonTitle:@"Okay" otherButtonTitles:nil];
-        [alertView show];
-#endif
-    } else {
-        // Valid token, so create LaunchKit instance
-#if USE_LOCAL_LAUNCHKIT_SERVER
-        [LaunchKit useLocalLaunchKitServer:YES];
-#endif
-        [LaunchKit launchWithToken:launchKitToken];
-        [LaunchKit sharedInstance].debugMode = YES;
-        [LaunchKit sharedInstance].verboseLogging = YES;
-        // Use convenience method for setting up the ready-handler
-        LKConfigReady(^{
-            NSLog(@"Config is ready");
-        });
-        // Use the normal method for setting up the refresh handler
-        [LaunchKit sharedInstance].config.refreshHandler = ^(NSDictionary *oldParameters, NSDictionary *newParameters) {
-            NSLog(@"Config was refreshed!");
-        };
+        return nil;
     }
-    return YES;
+    // Could still be nil
+    return launchKitToken;
 }
-							
+
+- (BOOL)startLaunchKitIfPossible
+{
+    NSString *launchKitToken = [self availableLaunchKitToken];
+    if (launchKitToken == nil || self.launchKitStarted) {
+        return NO;
+    }
+
+    // Valid token, so create LaunchKit instance
+#if USE_LOCAL_LAUNCHKIT_SERVER
+    [LaunchKit useLocalLaunchKitServer:YES];
+#endif
+    [LaunchKit launchWithToken:launchKitToken];
+    [LaunchKit sharedInstance].debugMode = YES;
+    [LaunchKit sharedInstance].verboseLogging = YES;
+    // Use convenience method for setting up the ready-handler
+    LKConfigReady(^{
+        NSLog(@"Config is ready");
+    });
+    // Use the normal method for setting up the refresh handler
+    [LaunchKit sharedInstance].config.refreshHandler = ^(NSDictionary *oldParameters, NSDictionary *newParameters) {
+        NSLog(@"Config was refreshed!");
+    };
+    self.launchKitStarted = YES;
+    return YES;
+
+}
+
 - (void)applicationWillResignActive:(UIApplication *)application
 {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -89,6 +94,46 @@ static NSString *const LAUNCHKIT_TOKEN = @"YOUR_LAUNCHKIT_TOKEN";
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    if ([self availableLaunchKitToken] != nil) {
+        // We have a token, so close out any alerts
+        if (self.alertController) {
+            [self.window.rootViewController dismissViewControllerAnimated:YES completion:nil];
+        } else if (self.alertView) {
+            [self.alertView dismissWithClickedButtonIndex:self.alertView.cancelButtonIndex animated:YES];
+        }
+
+        if (!self.launchKitStarted) {
+            [self startLaunchKitIfPossible];
+        }
+    } else {
+        if (self.alertController == nil && self.alertView == nil) {
+            // We've never shown this alert before
+
+            NSString *title = @"Set LaunchKit Token";
+            NSString *msg = @"You must go to Settings and enter "
+            "in your LaunchKit token.";
+            if (NSClassFromString(@"UIAlertController") != nil) {
+
+                self.alertController = [UIAlertController alertControllerWithTitle:title
+                                                                           message:msg
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+                [self.alertController addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+                }]];
+                [self.window.rootViewController presentViewController:self.alertController
+                                                             animated:YES
+                                                           completion:nil];
+
+            } else {
+                self.alertView = [[UIAlertView alloc] initWithTitle:title
+                                                            message:msg
+                                                           delegate:nil
+                                                  cancelButtonTitle:@"Okay"
+                                                  otherButtonTitles:nil];
+                [self.alertView show];
+            }
+        }
+    }
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
