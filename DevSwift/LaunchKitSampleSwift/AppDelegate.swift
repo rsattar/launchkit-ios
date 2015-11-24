@@ -17,6 +17,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
+    var launchKitStarted = false
+
+    // token warning
+    var alertController: UIAlertController?
+    var alertView: UIAlertView?
+
     // TODO: Listen for NSUserDefaultsDidChangeNotification and start launch kit again if so
 
 
@@ -41,26 +47,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         NSUserDefaults.standardUserDefaults().registerDefaults(["launchKitToken" : LAUNCHKIT_TOKEN])
         // In case, you the developer, has directly modified the launchkit token here
 
-        guard let launchKitToken = self.availableLaunchKitToken else {
-            // We don't have a valid launchkit token, so prompt
-            let title = "Set LaunchKit Token"
-            let msg = "You must go to Settings and enter in your LaunchKit token."
+        self.startLaunchKitIfPossible()
 
-            if NSClassFromString("UIAlertController") != nil {
-                let alert = UIAlertController(title: title, message: msg, preferredStyle: .Alert)
-                alert.addAction(UIAlertAction(title: "Close", style: UIAlertActionStyle.Cancel, handler: nil))
-                alert.addAction(UIAlertAction(title: "Settings", style: .Default, handler: { (action) -> Void in
-                    UIApplication.sharedApplication().openURL(NSURL(string: UIApplicationOpenSettingsURLString)!)
-                }))
+        return true
+    }
 
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(1*Double(NSEC_PER_SEC))), dispatch_get_main_queue(), { () -> Void in
-                    self.window?.rootViewController?.presentViewController(alert, animated: true, completion: nil)
-                })
-            } else {
-                let alertView = UIAlertView(title: title, message: msg, delegate: nil, cancelButtonTitle: "Okay")
-                alertView.show()
-            }
-            return true
+    func startLaunchKitIfPossible() -> Bool {
+        guard let launchKitToken = self.availableLaunchKitToken where !self.launchKitStarted else {
+            return false
         }
 
         // Valid token, so create LaunchKit instance
@@ -78,7 +72,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         LaunchKit.sharedInstance().config.refreshHandler = { (oldParameters, newParameters) -> Void in
             print("Config was refreshed!")
         }
-
+        self.launchKitStarted = true
         return true
     }
 
@@ -98,6 +92,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationDidBecomeActive(application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+
+        if self.availableLaunchKitToken != nil {
+
+            if self.alertController != nil {
+                self.window?.rootViewController?.dismissViewControllerAnimated(true, completion: nil)
+            } else if self.alertView != nil {
+                self.alertView?.dismissWithClickedButtonIndex(self.alertView!.cancelButtonIndex, animated: true)
+            }
+
+            if !self.launchKitStarted {
+                self.startLaunchKitIfPossible()
+            }
+
+        } else {
+            if self.alertController == nil || self.alertView == nil {
+                // If we've never shown this alert before
+                let title = "Set LaunchKit Token"
+                let msg = "You must go to Settings and enter in your LaunchKit token."
+
+                if NSClassFromString("UIAlertController") != nil {
+                    self.alertController = UIAlertController(title: title, message: msg, preferredStyle: .Alert)
+                    self.alertController!.addAction(UIAlertAction(title: "Close", style: UIAlertActionStyle.Cancel, handler: nil))
+                    self.alertController!.addAction(UIAlertAction(title: "Settings", style: .Default, handler: { (action) -> Void in
+                        UIApplication.sharedApplication().openURL(NSURL(string: UIApplicationOpenSettingsURLString)!)
+                    }))
+                    self.window?.rootViewController?.presentViewController(self.alertController!, animated: true, completion: nil)
+                } else {
+                    self.alertView = UIAlertView(title: title, message: msg, delegate: nil, cancelButtonTitle: "Okay")
+                    self.alertView!.show()
+                }
+            }
+        }
     }
 
     func applicationWillTerminate(application: UIApplication) {
