@@ -48,6 +48,18 @@ FOUNDATION_EXPORT const unsigned char LaunchKitVersionString[];
  */
 + (nonnull instancetype)sharedInstance;
 
+/*!
+ @method
+
+ @abstract
+ Returns YES if LaunchKit has been launched with `+launchWithToken`.
+
+ @discussion
+ This is useful in case you need to conditionally start LaunchKit
+ and need to verify whether it's already started or not.
+ */
++ (BOOL)hasLaunched;
+
 
 /**
  *  Unavailable. Use `+sharedInstance` to retrieve the shared LaunchKit instance.

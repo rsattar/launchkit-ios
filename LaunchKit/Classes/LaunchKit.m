@@ -85,6 +85,12 @@ static LaunchKit *_sharedInstance;
 }
 
 
++ (BOOL) hasLaunched
+{
+    return (_sharedInstance != nil);
+}
+
+
 - (nonnull instancetype)initWithToken:(NSString *)apiToken
 {
     self = [super init];
