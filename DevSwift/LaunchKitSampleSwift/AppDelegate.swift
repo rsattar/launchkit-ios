@@ -13,7 +13,7 @@ let USE_LOCAL_LAUNCHKIT_SERVER = false
 let LAUNCHKIT_TOKEN: String = "YOUR_LAUNCHKIT_TOKEN"
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIAlertViewDelegate, UIApplicationDelegate {
 
     var window: UIWindow?
 
@@ -97,6 +97,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             } else if self.alertView != nil {
                 self.alertView?.dismissWithClickedButtonIndex(self.alertView!.cancelButtonIndex, animated: true)
             }
+            self.alertController = nil
+            self.alertView = nil
 
             if !LaunchKit.hasLaunched() {
                 self.startLaunchKitIfPossible()
@@ -110,13 +112,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
                 if NSClassFromString("UIAlertController") != nil {
                     self.alertController = UIAlertController(title: title, message: msg, preferredStyle: .Alert)
-                    self.alertController!.addAction(UIAlertAction(title: "Close", style: UIAlertActionStyle.Cancel, handler: nil))
-                    self.alertController!.addAction(UIAlertAction(title: "Settings", style: .Default, handler: { (action) -> Void in
+                    self.alertController!.addAction(UIAlertAction(title: "Close", style: UIAlertActionStyle.Cancel, handler: { [unowned self] (action) -> Void in
+                        self.alertController = nil
+                    }))
+                    self.alertController!.addAction(UIAlertAction(title: "Settings", style: .Default, handler: { [unowned self] (action) -> Void in
+                        self.alertController = nil
                         UIApplication.sharedApplication().openURL(NSURL(string: UIApplicationOpenSettingsURLString)!)
                     }))
                     self.window?.rootViewController?.presentViewController(self.alertController!, animated: true, completion: nil)
                 } else {
-                    self.alertView = UIAlertView(title: title, message: msg, delegate: nil, cancelButtonTitle: "Okay")
+                    self.alertView = UIAlertView(title: title, message: msg, delegate: self, cancelButtonTitle: "Okay")
                     self.alertView!.show()
                 }
             }
@@ -125,6 +130,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    }
+
+    // MARK: - UIAlertViewDelegate
+    func alertView(alertView: UIAlertView, didDismissWithButtonIndex buttonIndex: Int) {
+        self.alertView = nil
     }
 
 

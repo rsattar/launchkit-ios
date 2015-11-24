@@ -14,7 +14,7 @@
 
 static NSString *const LAUNCHKIT_TOKEN = @"YOUR_LAUNCHKIT_TOKEN";
 
-@interface AppDelegate ()
+@interface AppDelegate () <UIAlertViewDelegate>
 
 // For token warnings
 @property (strong, nonatomic) UIAlertController *alertController;
@@ -99,6 +99,8 @@ static NSString *const LAUNCHKIT_TOKEN = @"YOUR_LAUNCHKIT_TOKEN";
         } else if (self.alertView) {
             [self.alertView dismissWithClickedButtonIndex:self.alertView.cancelButtonIndex animated:YES];
         }
+        self.alertController = nil;
+        self.alertView = nil;
 
         if (![LaunchKit hasLaunched]) {
             [self startLaunchKitIfPossible];
@@ -116,7 +118,7 @@ static NSString *const LAUNCHKIT_TOKEN = @"YOUR_LAUNCHKIT_TOKEN";
                                                                            message:msg
                                                                     preferredStyle:UIAlertControllerStyleAlert];
                 __weak AppDelegate *_weakSelf = self;
-                [self.alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                [self.alertController addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
                     _weakSelf.alertController = nil;
                 }]];
                 [self.alertController addAction:[UIAlertAction actionWithTitle:@"Settings" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
@@ -130,7 +132,7 @@ static NSString *const LAUNCHKIT_TOKEN = @"YOUR_LAUNCHKIT_TOKEN";
             } else {
                 self.alertView = [[UIAlertView alloc] initWithTitle:title
                                                             message:msg
-                                                           delegate:nil
+                                                           delegate:self
                                                   cancelButtonTitle:@"Okay"
                                                   otherButtonTitles:nil];
                 [self.alertView show];
@@ -142,6 +144,13 @@ static NSString *const LAUNCHKIT_TOKEN = @"YOUR_LAUNCHKIT_TOKEN";
 - (void)applicationWillTerminate:(UIApplication *)application
 {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+}
+
+#pragma mark - UIAlertViewDelegate
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+    self.alertView = nil;
 }
 
 @end
