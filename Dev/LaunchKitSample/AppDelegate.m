@@ -115,7 +115,12 @@ static NSString *const LAUNCHKIT_TOKEN = @"YOUR_LAUNCHKIT_TOKEN";
                 self.alertController = [UIAlertController alertControllerWithTitle:title
                                                                            message:msg
                                                                     preferredStyle:UIAlertControllerStyleAlert];
-                [self.alertController addAction:[UIAlertAction actionWithTitle:@"Okay" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                __weak AppDelegate *_weakSelf = self;
+                [self.alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                    _weakSelf.alertController = nil;
+                }]];
+                [self.alertController addAction:[UIAlertAction actionWithTitle:@"Settings" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                    _weakSelf.alertController = nil;
                     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
                 }]];
                 [self.window.rootViewController presentViewController:self.alertController
