@@ -16,7 +16,6 @@ static NSString *const LAUNCHKIT_TOKEN = @"YOUR_LAUNCHKIT_TOKEN";
 
 @interface AppDelegate ()
 
-@property (assign, nonatomic) BOOL launchKitStarted;
 // For token warnings
 @property (strong, nonatomic) UIAlertController *alertController;
 @property (strong, nonatomic) UIAlertView *alertView;
@@ -50,7 +49,7 @@ static NSString *const LAUNCHKIT_TOKEN = @"YOUR_LAUNCHKIT_TOKEN";
 - (BOOL)startLaunchKitIfPossible
 {
     NSString *launchKitToken = [self availableLaunchKitToken];
-    if (launchKitToken == nil || self.launchKitStarted) {
+    if (launchKitToken == nil || [LaunchKit hasLaunched]) {
         return NO;
     }
 
@@ -69,7 +68,6 @@ static NSString *const LAUNCHKIT_TOKEN = @"YOUR_LAUNCHKIT_TOKEN";
     [LaunchKit sharedInstance].config.refreshHandler = ^(NSDictionary *oldParameters, NSDictionary *newParameters) {
         NSLog(@"Config was refreshed!");
     };
-    self.launchKitStarted = YES;
     return YES;
 
 }
@@ -102,7 +100,7 @@ static NSString *const LAUNCHKIT_TOKEN = @"YOUR_LAUNCHKIT_TOKEN";
             [self.alertView dismissWithClickedButtonIndex:self.alertView.cancelButtonIndex animated:YES];
         }
 
-        if (!self.launchKitStarted) {
+        if (![LaunchKit hasLaunched]) {
             [self startLaunchKitIfPossible];
         }
     } else {

@@ -17,8 +17,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    var launchKitStarted = false
-
     // token warning
     var alertController: UIAlertController?
     var alertView: UIAlertView?
@@ -53,7 +51,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func startLaunchKitIfPossible() -> Bool {
-        guard let launchKitToken = self.availableLaunchKitToken where !self.launchKitStarted else {
+        guard let launchKitToken = self.availableLaunchKitToken where !LaunchKit.hasLaunched() else {
             return false
         }
 
@@ -72,7 +70,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         LaunchKit.sharedInstance().config.refreshHandler = { (oldParameters, newParameters) -> Void in
             print("Config was refreshed!")
         }
-        self.launchKitStarted = true
         return true
     }
 
@@ -101,12 +98,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 self.alertView?.dismissWithClickedButtonIndex(self.alertView!.cancelButtonIndex, animated: true)
             }
 
-            if !self.launchKitStarted {
+            if !LaunchKit.hasLaunched() {
                 self.startLaunchKitIfPossible()
             }
 
         } else {
-            if self.alertController == nil || self.alertView == nil {
+            if self.alertController == nil && self.alertView == nil {
                 // If we've never shown this alert before
                 let title = "Set LaunchKit Token"
                 let msg = "You must go to Settings and enter in your LaunchKit token."
