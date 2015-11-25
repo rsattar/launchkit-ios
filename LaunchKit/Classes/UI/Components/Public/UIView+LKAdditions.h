@@ -11,5 +11,7 @@
 @interface UIView (LKAdditions)
 
 @property (assign, nonatomic) CGFloat lk_cornerRadius;
+@property (assign, nonatomic) CGFloat lk_borderWidth;
+@property (strong, nonatomic, nullable) UIColor *lk_borderColor;
 
 @end

@@ -25,4 +25,39 @@
     }
 }
 
+- (CGFloat)lk_borderWidth
+{
+    if ([self.layer respondsToSelector:@selector(borderWidth)]) {
+        return [self.layer borderWidth];
+    }
+    return 0.0;
+}
+
+- (void)setLk_borderWidth:(CGFloat)lk_borderWidth
+{
+    if ([self.layer respondsToSelector:@selector(setBorderWidth:)]) {
+        self.layer.borderWidth = lk_borderWidth;
+    }
+}
+
+- (UIColor *)lk_borderColor
+{
+    if ([self.layer respondsToSelector:@selector(borderColor)]) {
+        CGColorRef borderColorRef = self.layer.borderColor;
+        if (borderColorRef != NULL) {
+            return [UIColor colorWithCGColor:borderColorRef];
+        }
+    }
+    return nil;
+}
+
+- (void)setLk_borderColor:(UIColor *)lk_borderColor
+{
+    if ([self.layer respondsToSelector:@selector(setBorderColor:)]) {
+        self.layer.borderColor = lk_borderColor.CGColor;
+    }
+}
+
+
+
 @end
