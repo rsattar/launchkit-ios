@@ -24,8 +24,8 @@
 - (void)commonInit
 {
     _statusBarStyleValue = -1;
-    _cardPresentationShadowAlpha = 0.3;
-    _cardPresentationShadowRadius = 10.0;
+    _cardPresentationShadowAlpha = 0.4;
+    _cardPresentationShadowRadius = 4.0;
 }
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
