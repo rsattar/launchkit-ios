@@ -38,6 +38,14 @@ static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 
 @end
 
+#pragma mark - Extend LKAppUser to allow debugging super user status
+@interface LKAppUser (Private)
++ (BOOL)debugUserIsAlwaysSuper;
++ (void)setDebugUserIsAlwaysSuper:(BOOL)alwaysSuper;
+@end
+
+#pragma mark - LaunchKit Implementation
+
 @interface LaunchKit ()
 
 @property (copy, nonatomic) NSString *apiToken;
@@ -401,6 +409,16 @@ static LaunchKit *_sharedInstance;
 - (LKAppUser *) currentUser
 {
     return self.analytics.user;
+}
+
+- (void)setDebugAppUserIsAlwaysSuper:(BOOL)debugAppUserIsAlwaysSuper
+{
+    [LKAppUser setDebugUserIsAlwaysSuper:debugAppUserIsAlwaysSuper];
+}
+
+- (BOOL)debugAppUserIsAlwaysSuper
+{
+    return [LKAppUser debugUserIsAlwaysSuper];
 }
 
 #pragma mark - Saving/Persisting our Session

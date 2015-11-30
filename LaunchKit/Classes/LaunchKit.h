@@ -77,6 +77,12 @@ FOUNDATION_EXPORT const unsigned char LaunchKitVersionString[];
  */
 @property (readonly, nonatomic, nullable) LKAppUser *currentUser;
 
+/**
+ * If true, LKAppUserIsSuper() will always return true, ignoring the value from the server.
+ * @discussion This only works when debugging (i.e. when DEBUG = 1)
+ */
+@property (assign, nonatomic) BOOL debugAppUserIsAlwaysSuper;
+
 
 /** 
  * Useful to see log statements from LaunchKit in your console. Only useful when DEBUG macro = 1
