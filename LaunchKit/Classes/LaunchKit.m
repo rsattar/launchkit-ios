@@ -433,20 +433,20 @@ static LaunchKit *_sharedInstance;
 
 #pragma mark - What's New
 
-- (void) presentAppUpdateNotesFromViewController:(nonnull UIViewController *)viewController
-                                      completion:(nullable LKUpdateNotesCompletionHandler)completion
+- (void) presentAppReleaseNotesFromViewController:(nonnull UIViewController *)viewController
+                                       completion:(nullable LKUpdateNotesCompletionHandler)completion
 {
     // WhatsNew feature is enabled on LaunchKit
     BOOL whatsNewEnabled = LKConfigBool(@"io.launchkit.whatsNewEnabled", YES);
     // We have shown this UI before (for this app version)
     BOOL alreadyPresented = [self.uiManager remoteUIPresentedForThisAppVersion:@"WhatsNew"];
     // This session has upgraded app versions at least once
-    BOOL lkSessionHasSeenAppUpdateAtLeastOnce = [self.config.parameters[@"io.launchkit.currentVersionDuration"] isKindOfClass:[NSNumber class]];
+    BOOL lkSessionHasSeenAppReleaseNotesAtLeastOnce = [self.config.parameters[@"io.launchkit.currentVersionDuration"] isKindOfClass:[NSNumber class]];
     BOOL forceDisplay = NO;
 #if DEBUG
-    forceDisplay = self.debugAlwaysPresentAppUpdateNotes;
+    forceDisplay = self.debugAlwaysPresentAppReleaseNotes;
 #endif
-    if ((whatsNewEnabled && !alreadyPresented && lkSessionHasSeenAppUpdateAtLeastOnce) || forceDisplay) {
+    if ((whatsNewEnabled && !alreadyPresented && lkSessionHasSeenAppReleaseNotesAtLeastOnce) || forceDisplay) {
 
         // TODO(Riz): Mark our app-launch current and previous versions, so we know if we have upgraded or not
         [self showUIWithName:@"WhatsNew" fromViewController:viewController completion:^(LKViewControllerFlowResult flowResult, NSError *error) {

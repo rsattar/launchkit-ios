@@ -72,7 +72,7 @@
  * @discussion Note that your LaunchKit account should have Update Notes configured
  * for this version of your app, or nothing will be shown.
  */
-@property (assign, nonatomic) BOOL debugAlwaysPresentAppUpdateNotes;
+@property (assign, nonatomic) BOOL debugAlwaysPresentAppReleaseNotes;
 
 
 /*!
@@ -94,10 +94,10 @@
 - (void) setUserIdentifier:(nullable NSString *)userIdentifier email:(nullable NSString *)userEmail name:(nullable NSString *)userName;
 
 
-#pragma mark - What's New
+#pragma mark - Release Notes
 
-- (void) presentAppUpdateNotesFromViewController:(nonnull UIViewController *)viewController
-                                      completion:(nullable LKUpdateNotesCompletionHandler)completion;
+- (void) presentAppReleaseNotesFromViewController:(nonnull UIViewController *)viewController
+                                       completion:(nullable LKUpdateNotesCompletionHandler)completion;
 
 
 #pragma mark - Remote UI

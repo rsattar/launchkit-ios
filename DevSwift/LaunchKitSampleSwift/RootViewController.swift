@@ -18,7 +18,9 @@ class RootViewController: UIViewController {
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
 
-        self.showUIWithName("WhatsNew")
+        LaunchKit.sharedInstance().presentAppReleaseNotesFromViewController(self) { (success) -> Void in
+            print("Release notes finished with success: \(success)")
+        }
 
     }
 
