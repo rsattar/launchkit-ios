@@ -350,7 +350,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "SCRIPT=`/usr/bin/find \"${SRCROOT}/..\" -name LaunchKitRemoteBundlesScript.playground | head -n 1`\nxcrun -sdk macosx swift \"${SCRIPT}/Contents.swift\" \"WwRpLHVdbIsQDMAVZbB-7txnBuv4vq6EeBaXgh6cRGxK\" \"-local\"";
+			shellScript = "# Commented out for now, until we make this better\n# SCRIPT=`/usr/bin/find \"${SRCROOT}/..\" -name LaunchKitRemoteBundlesScript.playground | head -n 1`\n# xcrun -sdk macosx swift \"${SCRIPT}/Contents.swift\" \"YOUR_API_TOKEN\" \"-local\"";
 			showEnvVarsInLog = 0;
 		};
 		7C7F2282B9FFC599FAE9F109 /* Embed Pods Frameworks */ = {
