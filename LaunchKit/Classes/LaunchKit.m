@@ -325,7 +325,7 @@ static LaunchKit *_sharedInstance;
             [_weakSelf.config updateParameters:config];
         }
         NSDictionary *user = responseDict[@"user"];
-        if ([user isKindOfClass:[NSDictionary class]] {
+        if ([user isKindOfClass:[NSDictionary class]]) {
             [_weakSelf.analytics updateUserFromDictionary:user reportUpdate:YES];
         }
         [self archiveSession];
