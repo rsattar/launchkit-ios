@@ -3,7 +3,7 @@ import Foundation
 
 // EXIT IF NOT RUNNING WITH PARAM
 if Process.arguments.count <= 1 {
-    print("No apiToken supplied. Supply apiToken as first parameter. Get an api token at https://launchkit.io/my-apps")
+    print("No API token supplied. Supply API token as first parameter. Get an api token at https://launchkit.io/account/sdk-tokens")
     exit(EXIT_FAILURE)
 }
 
