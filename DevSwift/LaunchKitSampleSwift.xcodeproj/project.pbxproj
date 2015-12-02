@@ -166,7 +166,7 @@
 				65DA47CD1B619F9D00A048AF /* Frameworks */,
 				65DA47CE1B619F9D00A048AF /* Resources */,
 				3C2BDDF71746A9D0B79436C6 /* Copy Pods Resources */,
-				ED30E157F25DE8E8FCF4EBED /* Embed Pods Frameworks */,
+				8AC46113DB3980103904BCF2 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -186,7 +186,7 @@
 				65DA47E21B619F9D00A048AF /* Frameworks */,
 				65DA47E31B619F9D00A048AF /* Resources */,
 				EB7A36190368C7BE2D95CF7A /* Copy Pods Resources */,
-				9695A3337D84693AC2588F77 /* Embed Pods Frameworks */,
+				6E0C02BAC595084BB4D27C95 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -204,8 +204,9 @@
 		65DA47C81B619F9D00A048AF /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftMigration = 0700;
 				LastSwiftUpdateCheck = 0700;
-				LastUpgradeCheck = 0640;
+				LastUpgradeCheck = 0710;
 				ORGANIZATIONNAME = "Cluster Labs, Inc.";
 				TargetAttributes = {
 					65DA47CF1B619F9D00A048AF = {
@@ -304,7 +305,7 @@
 			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
-		9695A3337D84693AC2588F77 /* Embed Pods Frameworks */ = {
+		6E0C02BAC595084BB4D27C95 /* Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -317,6 +318,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LaunchKitSampleSwiftTests/Pods-LaunchKitSampleSwiftTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8AC46113DB3980103904BCF2 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LaunchKitSampleSwift/Pods-LaunchKitSampleSwift-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		EB7A36190368C7BE2D95CF7A /* Copy Pods Resources */ = {
@@ -332,21 +348,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LaunchKitSampleSwiftTests/Pods-LaunchKitSampleSwiftTests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		ED30E157F25DE8E8FCF4EBED /* Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LaunchKitSampleSwift/Pods-LaunchKitSampleSwift-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -420,6 +421,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -489,6 +491,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = LaunchKitSampleSwift/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.launchkit.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -500,6 +503,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = LaunchKitSampleSwift/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.launchkit.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -509,16 +513,13 @@
 			baseConfigurationReference = DA11ED9B2AB35592FD02B2A1 /* Pods-LaunchKitSampleSwiftTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = LaunchKitSampleSwiftTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.launchkit.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LaunchKitSampleSwift.app/LaunchKitSampleSwift";
 			};
@@ -529,12 +530,9 @@
 			baseConfigurationReference = 9DD864A59EA74E4FA48415FF /* Pods-LaunchKitSampleSwiftTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
 				INFOPLIST_FILE = LaunchKitSampleSwiftTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.launchkit.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LaunchKitSampleSwift.app/LaunchKitSampleSwift";
 			};

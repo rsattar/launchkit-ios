@@ -1,6 +1,6 @@
 //
 //  LaunchKit.h
-//  Pods
+//  LaunchKit
 //
 //  Created by Cluster Labs, Inc. on 1/13/15.
 //
@@ -81,6 +81,13 @@ FOUNDATION_EXPORT const unsigned char LaunchKitVersionString[];
  */
 @property (readonly, nonatomic, nonnull) NSString *version;
 
+/**
+ * Always present App Update Notes, for testing. (Only valid for debug builds).
+ * @discussion Note that your LaunchKit account should have Update Notes configured
+ * for this version of your app, or nothing will be shown.
+ */
+@property (assign, nonatomic) BOOL debugAlwaysPresentAppReleaseNotes;
+
 
 /*!
  @method
@@ -99,6 +106,53 @@ FOUNDATION_EXPORT const unsigned char LaunchKitVersionString[];
 
  */
 - (void) setUserIdentifier:(nullable NSString *)userIdentifier email:(nullable NSString *)userEmail name:(nullable NSString *)userName;
+
+
+#pragma mark - Release Notes
+
+- (void) presentAppReleaseNotesFromViewController:(nonnull UIViewController *)viewController
+                                       completion:(nullable LKUpdateNotesCompletionHandler)completion;
+
+
+#pragma mark - Remote UI
+/*!
+ @method
+
+ @abstract
+ Loads remote UI (generally cached to disk) you have configured at launchkit.io to work with this app.
+
+ @discussion
+ Given an id, LaunchKit will look for a UI with that id within its remote UI cache, and perhaps retrieve it
+ on demand. The view controller returned is a special view controller that is designed to work with the remote
+ nibs retrieved from LaunchKit. You can tell LaunchKit to present this view controller using
+ -presentRemoteUIViewController:fromViewController:animated:dismissalHandler
+
+ @param remoteUIId A string representing the id of the UI you want to load. This is configured at launchkit.io.
+ @param completion When the remote UI is available, an instance of the view controller is returned. If an error occurred,
+ the error is returned as well. You should ret
+
+ */
+- (void)loadRemoteUIWithId:(nonnull NSString *)remoteUIId completion:(nonnull LKRemoteUILoadHandler)completion;
+
+/*!
+ @method
+
+ @abstract
+ Presents loaded remote UI on behalf of the presentingViewController, handling its dismissal.
+
+ @discussion
+ Once remote UI is loaded (see -loadRemoteUIWithId:completion:), you should pass it to this method to present it.
+
+ @param viewController The LaunchKit view controller that is generally loaded on demand
+ @param presentingViewController The view controller to present the remote UI from.
+ @param animated Whether to animate the modal presentation
+ @param dismissalHandler When the remote UI has finished its flow, the UI is dismissed, and then this handler
+ is called, in case you want to take action after its dismissal.
+ */
+- (void)presentRemoteUIViewController:(nonnull LKViewController *)viewController
+                   fromViewController:(nonnull UIViewController *)presentingViewController
+                             animated:(BOOL)animated
+                     dismissalHandler:(nullable LKRemoteUIDismissalHandler)dismissalHandler;
 
 
 #pragma mark - Debugging (for LaunchKit developers :D)

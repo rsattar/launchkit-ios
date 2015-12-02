@@ -1,6 +1,6 @@
 //
 //  LaunchKit.m
-//  Pods
+//  LaunchKit
 //
 //  Created by Cluster Labs, Inc. on 1/13/15.
 //
@@ -10,8 +10,11 @@
 
 #import "LKAnalytics.h"
 #import "LKAPIClient.h"
+#import "LKBundlesManager.h"
 #import "LKLog.h"
+#import "LKUIManager.h"
 
+#define DEBUG_DESTROY_BUNDLE_CACHE_ON_START 0
 #define DEBUG_MEASURE_USAGE 0
 
 static NSTimeInterval const DEFAULT_TRACKING_INTERVAL = 30.0;
@@ -31,7 +34,7 @@ static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 
 @end
 
-@interface LaunchKit ()
+@interface LaunchKit () <LKUIManagerDelegate>
 
 @property (copy, nonatomic) NSString *apiToken;
 
@@ -52,6 +55,13 @@ static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 
 // Config
 @property (readwrite, strong, nonatomic, nonnull) LKConfig *config;
+
+
+// Displaying UI
+@property (strong, nonatomic) LKUIManager *uiManager;
+
+// Bundles Manager
+@property (strong, nonatomic) LKBundlesManager *bundlesManager;
 
 @end
 
@@ -106,7 +116,12 @@ static LaunchKit *_sharedInstance;
         self.apiClient.measureUsage = YES;
 #endif
 
+        self.bundlesManager = [[LKBundlesManager alloc] initWithAPIClient:self.apiClient];
+
         self.trackingInterval = DEFAULT_TRACKING_INTERVAL;
+
+        self.uiManager = [[LKUIManager alloc] initWithBundlesManager:self.bundlesManager];
+        self.uiManager.delegate = self;
 
         self.sessionParameters = @{};
         self.config = [[LKConfig alloc] initWithParameters:nil];
@@ -141,6 +156,19 @@ static LaunchKit *_sharedInstance;
         }
 
         [self createListeners];
+
+#if DEBUG_DESTROY_BUNDLE_CACHE_ON_START
+        [LKBundlesManager deleteBundlesCacheDirectory];
+#endif
+
+        [self.bundlesManager rebuildLocalBundlesMap];
+        [self.bundlesManager retrieveAndCacheAvailableRemoteBundlesWithCompletion:^(NSError *error) {
+            if (error) {
+                LKLogWarning(@"Received error downloading and caching remote bundles: %@", error);
+            } else {
+                LKLog(@"Remote bundles downloaded and cached.");
+            }
+        }];
     }
     return self;
 }
@@ -155,6 +183,7 @@ static LaunchKit *_sharedInstance;
     _debugMode = debugMode;
     self.analytics.debugMode = debugMode;
     LKLOG_ENABLED = _debugMode;
+    self.bundlesManager.debugMode = debugMode;
 }
 
 - (void)setVerboseLogging:(BOOL)verboseLogging
@@ -162,6 +191,7 @@ static LaunchKit *_sharedInstance;
     _verboseLogging = verboseLogging;
     self.apiClient.verboseLogging = verboseLogging;
     self.analytics.verboseLogging = verboseLogging;
+    self.bundlesManager.verboseLogging = verboseLogging;
 }
 
 - (NSString *)version
@@ -389,6 +419,82 @@ static LaunchKit *_sharedInstance;
 - (LKAppUser *) currentUser
 {
     return self.analytics.user;
+}
+
+
+#pragma mark - What's New
+
+- (void) presentAppReleaseNotesFromViewController:(nonnull UIViewController *)viewController
+                                       completion:(nullable LKUpdateNotesCompletionHandler)completion
+{
+    // WhatsNew feature is enabled on LaunchKit
+    BOOL whatsNewEnabled = LKConfigBool(@"io.launchkit.whatsNewEnabled", YES);
+    // We have shown this UI before (for this app version)
+    BOOL alreadyPresented = [self.uiManager remoteUIPresentedForThisAppVersion:@"WhatsNew"];
+    // This session has upgraded app versions at least once
+    BOOL lkSessionHasSeenAppReleaseNotesAtLeastOnce = [self.config.parameters[@"io.launchkit.currentVersionDuration"] isKindOfClass:[NSNumber class]];
+    BOOL forceDisplay = NO;
+#if DEBUG
+    forceDisplay = self.debugAlwaysPresentAppReleaseNotes;
+#endif
+    if ((whatsNewEnabled && !alreadyPresented && lkSessionHasSeenAppReleaseNotesAtLeastOnce) || forceDisplay) {
+
+        // TODO(Riz): Mark our app-launch current and previous versions, so we know if we have upgraded or not
+        [self showUIWithName:@"WhatsNew" fromViewController:viewController completion:^(LKViewControllerFlowResult flowResult, NSError *error) {
+            BOOL didPresent = flowResult == LKViewControllerFlowResultCompleted || flowResult == LKViewControllerFlowResultCancelled;
+            if (completion) {
+                completion(didPresent);
+            }
+        }];
+    } else {
+        if (completion) {
+            completion(NO);
+        }
+    }
+}
+
+- (void)showUIWithName:(NSString *)uiName fromViewController:(UIViewController *)presentingViewController completion:(void (^)(LKViewControllerFlowResult flowResult, NSError *error))completion
+{
+    [[LaunchKit sharedInstance] loadRemoteUIWithId:uiName completion:^(LKViewController *viewController, NSError *error) {
+        if (viewController) {
+            [[LaunchKit sharedInstance] presentRemoteUIViewController:viewController fromViewController:presentingViewController animated:YES dismissalHandler:^(LKViewControllerFlowResult flowResult) {
+                if (completion) {
+                    completion(flowResult, nil);
+                }
+            }];
+        } else {
+            if (completion) {
+                completion(LKViewControllerFlowResultFailed, error);
+            }
+        }
+    }];
+}
+
+#pragma mark - Remote UI
+
+- (void)loadRemoteUIWithId:(nonnull NSString *)remoteUIId completion:(nonnull LKRemoteUILoadHandler)completion
+{
+    [self.uiManager loadRemoteUIWithId:remoteUIId completion:completion];
+}
+
+
+- (void)presentRemoteUIViewController:(nonnull LKViewController *)viewController
+                   fromViewController:(nonnull UIViewController *)presentingViewController
+                             animated:(BOOL)animated
+                     dismissalHandler:(nullable LKRemoteUIDismissalHandler)dismissalHandler
+{
+    [self.uiManager presentRemoteUIViewController:viewController
+                               fromViewController:presentingViewController
+                                         animated:animated
+                                 dismissalHandler:dismissalHandler];
+    // Notify LaunchKit that this view controller has been displayed"
+    if (viewController.bundleInfo != nil) {
+        NSMutableDictionary *params = [NSMutableDictionary dictionary];
+        params[@"command"] = @"ui-shown";
+        params[@"ui_name"] = viewController.bundleInfo.name;
+        params[@"ui_version"] = viewController.bundleInfo.version;
+        [self trackProperties:params];
+    }
 }
 
 #pragma mark - Saving/Persisting our Session

@@ -1,6 +1,6 @@
 //
 //  LKAPIClient.m
-//  Pods
+//  LaunchKit
 //
 //  Created by Cluster Labs, Inc. on 1/16/15.
 //
@@ -102,6 +102,43 @@ static NSCalendar *_globalGregorianCalendar;
     [self objectFromPath:@"v1/track" method:@"POST" params:params successBlock:^(NSDictionary *responseDict) {
         if (successBlock) {
             successBlock(responseDict);
+        }
+    } failureBlock:errorBlock];
+}
+
+
+#pragma mark - Remote Bundles Loading
+
+
+- (void) retrieveBundlesManifestWithSuccessBlock:(void (^)(NSArray *bundleInfos))successBlock
+                                             errorBlock:(void(^)(NSError *error))errorBlock
+{
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    params[@"token"] = self.apiToken;
+    params[@"bundle_id"] = self.cachedBundleIdentifier;
+    params[@"version"] = self.cachedBundleVersion;
+    params[@"build"] = self.cachedBuildNumber;
+    params[@"os_version"] = self.cachedOSVersion;
+    params[@"hardware"] = self.cachedHardwareModel;
+    // TODO(Riz): maybe send cachedScreenInfo? Would need to
+    // convert it to usable url-params though (can't post as
+    // JSON)
+#if DEBUG
+    // Notify LK servers when the app is running in debug mode
+    params[@"debug_build"] = @(YES);
+#else
+    params[@"debug_build"] = @(NO);
+#endif
+    [self objectFromPath:@"v1/bundles" method:@"GET" params:params successBlock:^(NSDictionary *responseDict) {
+        // TODO: (Riz) Actually make ObjC models for the data, rather than returning raw dictionary
+        NSArray *rawBundleInfos = responseDict[@"bundles"];
+        NSMutableArray *bundleInfos = [NSMutableArray arrayWithCapacity:rawBundleInfos.count];
+        for (NSDictionary *rawBundleInfo in rawBundleInfos) {
+            LKBundleInfo *bundleInfo = [[LKBundleInfo alloc] initWithAPIDictionary:rawBundleInfo];
+            [bundleInfos addObject:bundleInfo];
+        }
+        if (successBlock) {
+            successBlock(bundleInfos);
         }
     } failureBlock:errorBlock];
 }

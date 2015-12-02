@@ -1,12 +1,14 @@
 //
 //  LKAPIClient.h
-//  Pods
+//  LaunchKit
 //
 //  Created by Cluster Labs, Inc. on 1/16/15.
 //
 //
 
 #import <Foundation/Foundation.h>
+
+#import "LKBundleInfo.h"
 
 extern NSString* const LKAPIFailedAuthenticationChallenge;
 
@@ -28,6 +30,10 @@ extern NSString* const LKAPIFailedAuthenticationChallenge;
 - (void) trackProperties:(NSDictionary *)properties
         withSuccessBlock:(void (^)(NSDictionary *responseDict))successBlock
               errorBlock:(void(^)(NSError *error))errorBlock;
+
+#pragma mark - Remote UI Loading
+- (void) retrieveBundlesManifestWithSuccessBlock:(void (^)(NSArray *bundleInfos))successBlock
+                                             errorBlock:(void(^)(NSError *error))errorBlock;
 
 #pragma mark - Sending requests
 - (void) objectFromPath:(NSString*)path

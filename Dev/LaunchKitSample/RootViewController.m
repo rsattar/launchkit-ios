@@ -25,6 +25,11 @@
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
+
+    [[LaunchKit sharedInstance] presentAppUpdateNotesFromViewController:self completion:^(BOOL didPresent) {
+        NSLog(@"Did present: %d", didPresent);
+    }];
+
 }
 
 - (void)didReceiveMemoryWarning

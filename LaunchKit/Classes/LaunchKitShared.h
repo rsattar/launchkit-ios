@@ -10,6 +10,7 @@
 #define LaunchKitShared_h
 
 #import <UIKit/UIKit.h>
+#import "LKViewController.h"
 
 #define LAUNCHKIT_VERSION @"1.0.3"
 
@@ -21,7 +22,11 @@ extern double LKConfigDouble(NSString *__nonnull key, double defaultValue);
 extern NSString * __nullable LKConfigString(NSString *__nonnull key, NSString *__nullable defaultValue);
 
 #pragma mark - LKAppUser Convenience Functions
-
 extern BOOL LKAppUserIsSuper();
+
+#pragma mark - Remote UI
+typedef void (^LKUpdateNotesCompletionHandler)(BOOL didPresent);
+typedef void (^LKRemoteUILoadHandler)(LKViewController *__nullable viewController, NSError *__nullable error);
+typedef void (^LKRemoteUIDismissalHandler)(LKViewControllerFlowResult flowResult);
 
 #endif

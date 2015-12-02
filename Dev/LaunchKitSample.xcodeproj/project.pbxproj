@@ -78,7 +78,7 @@
 		8221CF9464CF4F5B64641E4A /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		9D04F8B845BD57AAC50E3026 /* Pods-Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-Tests/Pods-Tests.release.xcconfig"; sourceTree = "<group>"; };
 		B7FE16FED0945D647AD5FC35 /* libPods-LaunchKit.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-LaunchKit.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		DA3C9FDB42CA77CE35739287 /* LaunchKit.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LaunchKit.podspec; path = ../LaunchKit.podspec; sourceTree = "<group>"; };
+		DA3C9FDB42CA77CE35739287 /* LaunchKit.podspec */ = {isa = PBXFileReference; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = LaunchKit.podspec; path = ../LaunchKit.podspec; sourceTree = "<group>"; tabWidth = 2; };
 		DD523CABF06003EADC9AF176 /* Pods-LaunchKitSample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LaunchKitSample.debug.xcconfig"; path = "Pods/Target Support Files/Pods-LaunchKitSample/Pods-LaunchKitSample.debug.xcconfig"; sourceTree = "<group>"; };
 		E00B380F1D175E2E5FC274C1 /* Pods-LaunchKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LaunchKit.release.xcconfig"; path = "Pods/Target Support Files/Pods-LaunchKit/Pods-LaunchKit.release.xcconfig"; sourceTree = "<group>"; };
 		E8C4F62AD8274F15CEEBC408 /* libPods-Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -233,7 +233,8 @@
 				6003F587195388D20070C39A /* Frameworks */,
 				6003F588195388D20070C39A /* Resources */,
 				BBE3E9E11CFBB0967911C25D /* Copy Pods Resources */,
-				3D5A307438421518711287F3 /* Embed Pods Frameworks */,
+				650AC9D41B91260F0004F0D6 /* Cache LaunchKit Resources */,
+				C11712004C2480A87FA98F23 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -253,7 +254,7 @@
 				6003F5AB195388D20070C39A /* Frameworks */,
 				6003F5AC195388D20070C39A /* Resources */,
 				86BB648E84ADBB68B276FD3E /* Copy Pods Resources */,
-				7BFE7DBCBB24873276DA70EF /* Embed Pods Frameworks */,
+				7C7F2282B9FFC599FAE9F109 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -272,7 +273,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = "";
-				LastUpgradeCheck = 0510;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Cluster Labs, Inc.";
 				TargetAttributes = {
 					6003F5AD195388D20070C39A = {
@@ -337,22 +338,22 @@
 			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
-		3D5A307438421518711287F3 /* Embed Pods Frameworks */ = {
+		650AC9D41B91260F0004F0D6 /* Cache LaunchKit Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Embed Pods Frameworks";
+			name = "Cache LaunchKit Resources";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LaunchKitSample/Pods-LaunchKitSample-frameworks.sh\"\n";
+			shellScript = "SCRIPT=`/usr/bin/find \"${SRCROOT}/..\" -name LaunchKitRemoteBundlesScript.playground | head -n 1`\nxcrun -sdk macosx swift \"${SCRIPT}/Contents.swift\" \"WwRpLHVdbIsQDMAVZbB-7txnBuv4vq6EeBaXgh6cRGxK\" \"-local\"";
 			showEnvVarsInLog = 0;
 		};
-		7BFE7DBCBB24873276DA70EF /* Embed Pods Frameworks */ = {
+		7C7F2282B9FFC599FAE9F109 /* Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -410,6 +411,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LaunchKitSample/Pods-LaunchKitSample-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C11712004C2480A87FA98F23 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-LaunchKitSample/Pods-LaunchKitSample-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -493,6 +509,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -556,6 +573,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LaunchKitSample/LaunchKitSample-Prefix.pch";
 				INFOPLIST_FILE = "LaunchKitSample/LaunchKitSample-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.getcluster.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = LaunchKitSample;
 				WRAPPER_EXTENSION = app;
 			};
@@ -570,6 +588,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "LaunchKitSample/LaunchKitSample-Prefix.pch";
 				INFOPLIST_FILE = "LaunchKitSample/LaunchKitSample-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.getcluster.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = LaunchKitSample;
 				WRAPPER_EXTENSION = app;
 			};
@@ -592,6 +611,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "Tests/Tests-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
@@ -611,6 +631,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Tests/Tests-Prefix.pch";
 				INFOPLIST_FILE = "Tests/Tests-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
