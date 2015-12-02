@@ -22,7 +22,7 @@ _Warning! This part of the process needs to be completed by someone with access 
 LaunchKit is available through [CocoaPods](http://cocoapods.org/). To install it, simply add the following line to your `Podfile`:
 
 ```
-pod "LaunchKit"
+pod 'LaunchKit'
 ```
 
 #### Option 2: Carthage

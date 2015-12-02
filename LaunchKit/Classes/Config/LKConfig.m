@@ -47,24 +47,41 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
     return strippedDict;
 }
 
-- (void) updateParameters:(NSDictionary * __nonnull)parameters
+- (BOOL) updateParameters:(NSDictionary *)parameters
 {
+    // Also first config-updated and refresh handler the *first* time that
+    // config is updated, whether or not it is actually different
+    static BOOL isFirstRefresh = YES;
     if (parameters == nil) {
-        return;
+        parameters = self.parameters;
     }
-    if (![parameters isEqualToDictionary:_parameters]) {
+    if (![parameters isEqualToDictionary:_parameters] || isFirstRefresh) {
         NSDictionary *oldParameters = self.parameters;
         self.parameters = [parameters copy];
 
+        // Fire ready handler
+        if (isFirstRefresh && self.readyHandler != nil) {
+            self.readyHandler();
+        }
+
         NSDictionary *strippedOld = [self dictionaryWithoutLaunchKitKeys:oldParameters];
         NSDictionary *strippedNew = [self dictionaryWithoutLaunchKitKeys:parameters];
-        if (![strippedOld isEqualToDictionary:strippedNew]) {
+        BOOL appVisibleConfigsChanged = ![strippedOld isEqualToDictionary:strippedNew];
+        if (appVisibleConfigsChanged) {
             [[NSNotificationCenter defaultCenter] postNotificationName:LKConfigUpdatedNotificationName
                                                                 object:self
                                                               userInfo:@{LKConfigOldParametersKey: strippedOld,
                                                                          LKConfigNewParametersKey: strippedNew}];
         }
+        // Fire config refresh handler (for both updates and isFirstRefresh)
+        if (self.refreshHandler != nil && (isFirstRefresh || appVisibleConfigsChanged)) {
+            self.refreshHandler(strippedOld, strippedNew);
+        }
+
+        isFirstRefresh = NO;
+        return YES;
     }
+    return NO;
 }
 
 - (BOOL) boolForKey:(NSString * __nonnull)key defaultValue:(BOOL)defaultValue

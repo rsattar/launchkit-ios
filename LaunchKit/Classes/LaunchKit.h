@@ -48,6 +48,18 @@ FOUNDATION_EXPORT const unsigned char LaunchKitVersionString[];
  */
 + (nonnull instancetype)sharedInstance;
 
+/*!
+ @method
+
+ @abstract
+ Returns YES if LaunchKit has been launched with `+launchWithToken`.
+
+ @discussion
+ This is useful in case you need to conditionally start LaunchKit
+ and need to verify whether it's already started or not.
+ */
++ (BOOL)hasLaunched;
+
 
 /**
  *  Unavailable. Use `+sharedInstance` to retrieve the shared LaunchKit instance.
@@ -64,6 +76,12 @@ FOUNDATION_EXPORT const unsigned char LaunchKitVersionString[];
  * According to LaunchKit, what information is availabe for the current app user. See https://launchkit.io/users
  */
 @property (readonly, nonatomic, nullable) LKAppUser *currentUser;
+
+/**
+ * If true, LKAppUserIsSuper() will always return true, ignoring the value from the server.
+ * @discussion This only works when debugging (i.e. when DEBUG = 1)
+ */
+@property (assign, nonatomic) BOOL debugAppUserIsAlwaysSuper;
 
 
 /** 

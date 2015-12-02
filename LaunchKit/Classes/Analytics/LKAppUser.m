@@ -8,6 +8,8 @@
 
 #import "LKAppUser.h"
 
+#import "LKLog.h"
+
 @interface LKAppUserStat ()
 
 // Definition of readonly properties
@@ -35,6 +37,9 @@
 @end
 
 static NSString *const LKAppUserLabelSuper = @"super";
+#if DEBUG
+static BOOL debug_appUserIsAlwaysSuper = NO;
+#endif
 
 @interface LKAppUser ()
 
@@ -85,7 +90,30 @@ static NSString *const LKAppUserLabelSuper = @"super";
 
 - (BOOL)isSuper
 {
+#if DEBUG
+    if (debug_appUserIsAlwaysSuper) {
+        return YES;
+    }
+#endif
     return [self.labels member:LKAppUserLabelSuper] != nil;
+}
+
++ (void)setDebugUserIsAlwaysSuper:(BOOL)alwaysSuper
+{
+#if DEBUG
+    if (alwaysSuper) {
+        LKLogWarning(@"Debugging: Always treating current user as a \"super user\".");
+    }
+    debug_appUserIsAlwaysSuper = alwaysSuper;
+#endif
+}
+
++ (BOOL)debugUserIsAlwaysSuper
+{
+#if DEBUG
+    return debug_appUserIsAlwaysSuper;
+#endif
+    return NO;
 }
 
 

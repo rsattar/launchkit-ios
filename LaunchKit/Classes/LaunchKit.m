@@ -30,9 +30,24 @@ static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 @interface LKConfig (Private)
 
 @property (readwrite, strong, nonatomic, nonnull) NSDictionary *parameters;
-- (void) updateParameters:(NSDictionary * __nonnull)parameters;
+- (BOOL) updateParameters:(NSDictionary *)parameters;
 
 @end
+
+#pragma mark - Extension LKAnalytics to allow LaunchKit to access some parameters
+@interface LKAnalytics (Private)
+
+@property (strong, nonatomic) NSDictionary *lastUserDictionary;
+
+@end
+
+#pragma mark - Extend LKAppUser to allow debugging super user status
+@interface LKAppUser (Private)
++ (BOOL)debugUserIsAlwaysSuper;
++ (void)setDebugUserIsAlwaysSuper:(BOOL)alwaysSuper;
+@end
+
+#pragma mark - LaunchKit Implementation
 
 @interface LaunchKit () <LKUIManagerDelegate>
 
@@ -88,6 +103,12 @@ static LaunchKit *_sharedInstance;
 }
 
 
++ (BOOL) hasLaunched
+{
+    return (_sharedInstance != nil);
+}
+
+
 - (nonnull instancetype)initWithToken:(NSString *)apiToken
 {
     self = [super init];
@@ -123,25 +144,12 @@ static LaunchKit *_sharedInstance;
         self.uiManager = [[LKUIManager alloc] initWithBundlesManager:self.bundlesManager];
         self.uiManager.delegate = self;
 
+        // Prepare the different tools and unarchive session
         self.sessionParameters = @{};
         self.config = [[LKConfig alloc] initWithParameters:nil];
+        self.analytics = [[LKAnalytics alloc] initWithAPIClient:self.apiClient];
         [self retrieveSessionFromArchiveIfAvailable];
 
-        // Update some local settings from known session_parameter variables
-        BOOL shouldReportScreens = YES;
-        BOOL shouldReportTaps = YES;
-        id rawReportScreens = self.sessionParameters[@"report_screens"];
-        if ([rawReportScreens isKindOfClass:[NSNumber class]]) {
-            shouldReportScreens = [rawReportScreens boolValue];
-        }
-        id rawReportTaps = self.sessionParameters[@"report_taps"];
-        if ([rawReportTaps isKindOfClass:[NSNumber class]]) {
-            shouldReportTaps = [rawReportTaps boolValue];
-        }
-
-        self.analytics = [[LKAnalytics alloc] initWithAPIClient:self.apiClient
-                                                screenReporting:shouldReportScreens
-                                            tapReportingEnabled:shouldReportTaps];
 
         id rawTrackingInterval = self.sessionParameters[@"track_interval"];
         if ([rawTrackingInterval isKindOfClass:[NSNumber class]]) {
@@ -219,6 +227,10 @@ static LaunchKit *_sharedInstance;
     [center addObserver:self
                selector:@selector(applicationDidEnterBackground:)
                    name:UIApplicationDidEnterBackgroundNotification
+                 object:nil];
+    [center addObserver:self
+               selector:@selector(applicationDidReceiveMemoryWarning:)
+                   name:UIApplicationDidReceiveMemoryWarningNotification
                  object:nil];
     /*
     [center addObserver:self
@@ -314,10 +326,14 @@ static LaunchKit *_sharedInstance;
         }
         NSDictionary *user = responseDict[@"user"];
         if (user != nil) {
-            [_weakSelf.analytics updateUserFromDictionary:user];
+            [_weakSelf.analytics updateUserFromDictionary:user reportUpdate:YES];
         }
+        [self archiveSession];
     } errorBlock:^(NSError *error) {
         LKLog(@"Error tracking properties: %@", error);
+        // "Update" our config with a nil, which will trigger
+        // it to fire a refresh handler, if this is the first launch
+        [_weakSelf.config updateParameters:nil];
     }];
     if (self.trackingTimer.isValid) {
         // We have an existing tracking timer, but since we just tracked, restart it
@@ -353,7 +369,6 @@ static LaunchKit *_sharedInstance;
         }
         // Triggers an update
         self.sessionParameters = updatedSessionParams;
-        [self archiveSession];
     } else if ([command isEqualToString:@"log"]) {
         // Log sent from remote server.
         LKLog(@"%@ - %@", [args[@"level"] uppercaseString], args[@"message"]);
@@ -403,6 +418,11 @@ static LaunchKit *_sharedInstance;
     [self archiveSession];
 }
 
+- (void)applicationDidReceiveMemoryWarning:(NSNotification *)notification
+{
+    [self trackProperties:nil];
+}
+
 #pragma mark - User Info
 
 - (void) setUserIdentifier:(nullable NSString *)userIdentifier email:(nullable NSString *)userEmail name:(nullable NSString *)userName
@@ -421,6 +441,15 @@ static LaunchKit *_sharedInstance;
     return self.analytics.user;
 }
 
+- (void)setDebugAppUserIsAlwaysSuper:(BOOL)debugAppUserIsAlwaysSuper
+{
+    [LKAppUser setDebugUserIsAlwaysSuper:debugAppUserIsAlwaysSuper];
+}
+
+- (BOOL)debugAppUserIsAlwaysSuper
+{
+    return [LKAppUser debugUserIsAlwaysSuper];
+}
 
 #pragma mark - What's New
 
@@ -507,8 +536,12 @@ static LaunchKit *_sharedInstance;
     if (![[NSFileManager defaultManager] createDirectoryAtPath:directoryPath withIntermediateDirectories:YES attributes:nil error:&directoryCreateError]) {
         LKLogError(@"Could not create directory for session archive file: %@", directoryCreateError);
     }
-    NSDictionary *session = @{@"sessionParameters": self.sessionParameters,
-                              @"configurationParameters": self.config.parameters};
+    NSMutableDictionary *session = [NSMutableDictionary dictionaryWithCapacity:3];
+    session[@"sessionParameters"] = self.sessionParameters;
+    session[@"configurationParameters"] = self.config.parameters;
+    if (self.analytics.lastUserDictionary) {
+        session[@"analyticsUserDictionary"] = self.analytics.lastUserDictionary;
+    }
     BOOL success = [NSKeyedArchiver archiveRootObject:session toFile:filePath];
     if (!success) {
         LKLogError(@"Could not archive session parameters");
@@ -557,15 +590,36 @@ static LaunchKit *_sharedInstance;
 
     if ([unarchivedObject isKindOfClass:[NSDictionary class]]) {
         NSDictionary *unarchivedDict = (NSDictionary *)unarchivedObject;
+        // Check to see if our data structure uses any of the older format
+        // TODO(Riz): This can probably be removed at this point
         if ([[unarchivedDict allKeys] containsObject:@"configurationParameters"]) {
             // Dict contains both session and configuration parameters
             self.sessionParameters = unarchivedDict[@"sessionParameters"];
             self.config.parameters = unarchivedDict[@"configurationParameters"];
+            if ([unarchivedDict[@"analyticsUserDictionary"] isKindOfClass:[NSDictionary class]]) {
+                NSDictionary *lastUserDictionary = unarchivedDict[@"analyticsUserDictionary"];
+                [self.analytics updateUserFromDictionary:lastUserDictionary reportUpdate:NO];
+            }
         } else {
             // Old way, which stored only the session parameters directly
             self.sessionParameters = unarchivedDict;
             self.config.parameters = @{};
         }
+
+        // Update some local settings from known session_parameter variables
+        BOOL shouldReportScreens = YES;
+        BOOL shouldReportTaps = YES;
+        id rawReportScreens = self.sessionParameters[@"report_screens"];
+        if ([rawReportScreens isKindOfClass:[NSNumber class]]) {
+            shouldReportScreens = [rawReportScreens boolValue];
+        }
+        id rawReportTaps = self.sessionParameters[@"report_taps"];
+        if ([rawReportTaps isKindOfClass:[NSNumber class]]) {
+            shouldReportTaps = [rawReportTaps boolValue];
+        }
+        [self.analytics updateReportingScreens:shouldReportScreens];
+        [self.analytics updateReportingTaps:shouldReportTaps];
+
     } else {
         self.sessionParameters = @{};
         self.config.parameters = @{};
@@ -660,6 +714,16 @@ double LKConfigDouble(NSString *__nonnull key, double defaultValue)
 extern NSString * __nullable LKConfigString(NSString *__nonnull key, NSString *__nullable defaultValue)
 {
     return [[LaunchKit sharedInstance].config stringForKey:key defaultValue:defaultValue];
+}
+
+extern void LKConfigReady(LKConfigReadyHandler _Nullable readyHandler)
+{
+    [LaunchKit sharedInstance].config.readyHandler = readyHandler;
+}
+
+extern void LKConfigRefreshed(LKConfigRefreshHandler _Nullable refreshHandler)
+{
+    [LaunchKit sharedInstance].config.refreshHandler = refreshHandler;
 }
 
 

@@ -27,7 +27,7 @@ extern NSString *const LKCurrentAppUserKey;
 
 @property (readonly, strong, nonatomic, nullable) LKAppUser *user;
 
-- (instancetype)initWithAPIClient:(LKAPIClient *)apiClient screenReporting:(BOOL)shouldReportScreens tapReportingEnabled:(BOOL)shouldReportTaps;
+- (instancetype)initWithAPIClient:(LKAPIClient *)apiClient;
 
 - (NSDictionary *)commitTrackableProperties;
 
@@ -39,7 +39,7 @@ extern NSString *const LKCurrentAppUserKey;
 
 #pragma mark - Current User Data
 
-- (void) updateUserFromDictionary:(NSDictionary *)dictionary;
+- (void) updateUserFromDictionary:(NSDictionary *)dictionary reportUpdate:(BOOL)reportUpdate;
 
 @end
 

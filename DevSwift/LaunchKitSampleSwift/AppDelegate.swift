@@ -13,50 +13,67 @@ let USE_LOCAL_LAUNCHKIT_SERVER = false
 let LAUNCHKIT_TOKEN: String = "YOUR_LAUNCHKIT_TOKEN"
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIAlertViewDelegate, UIApplicationDelegate {
 
     var window: UIWindow?
+
+    // token warning
+    var alertController: UIAlertController?
+    var alertView: UIAlertView?
+
+    // TODO: Listen for NSUserDefaultsDidChangeNotification and start launch kit again if so
+
+
+    var availableLaunchKitToken: String? {
+
+        var launchKitToken: String? = LAUNCHKIT_TOKEN
+        if let token = launchKitToken where token == "YOUR_LAUNCHKIT_TOKEN" {
+            // Otherwise fetch the launchkit token from the Settings bundle
+            if let tokenInSettings = NSUserDefaults.standardUserDefaults().objectForKey("launchKitToken") as? String {
+                launchKitToken = tokenInSettings
+            }
+        }
+        if (launchKitToken != nil && (launchKitToken!.characters.count == 0 || launchKitToken! == "YOUR_LAUNCHKIT_TOKEN")) {
+            // Our token is non-nil but is not valid (empty or unusable default)
+            return nil
+        }
+        return launchKitToken
+    }
 
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         NSUserDefaults.standardUserDefaults().registerDefaults(["launchKitToken" : LAUNCHKIT_TOKEN])
         // In case, you the developer, has directly modified the launchkit token here
-        var launchKitToken = LAUNCHKIT_TOKEN
-        if launchKitToken == "YOUR_LAUNCHKIT_TOKEN" {
-            // Otherwise fetch the launchkit token from the Settings bundle
-            if let token = NSUserDefaults.standardUserDefaults().objectForKey("launchKitToken") as? String {
-                launchKitToken = token
-            }
-        }
-        if launchKitToken.characters.count == 0 || launchKitToken == "YOUR_LAUNCHKIT_TOKEN" {
-            // We don't have a valid launchkit token, so prompt
-            let title = "Set LaunchKit Token"
-            let msg = "You must go to Settings and enter in your LaunchKit token."
 
-            if NSClassFromString("UIAlertController") != nil {
-                let alert = UIAlertController(title: title, message: msg, preferredStyle: .Alert)
-                alert.addAction(UIAlertAction(title: "Close", style: UIAlertActionStyle.Cancel, handler: nil))
-                alert.addAction(UIAlertAction(title: "Settings", style: .Default, handler: { (action) -> Void in
-                    UIApplication.sharedApplication().openURL(NSURL(string: UIApplicationOpenSettingsURLString)!)
-                }))
+        self.startLaunchKitIfPossible()
 
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(1*Double(NSEC_PER_SEC))), dispatch_get_main_queue(), { () -> Void in
-                    self.window?.rootViewController?.presentViewController(alert, animated: true, completion: nil)
-                })
-            } else {
-                let alertView = UIAlertView(title: title, message: msg, delegate: nil, cancelButtonTitle: "Okay")
-                alertView.show()
-            }
-        } else {
-            // Valid token, so create LaunchKit instance
-            if USE_LOCAL_LAUNCHKIT_SERVER {
-                LaunchKit.useLocalLaunchKitServer(true)
-            }
-            LaunchKit.launchWithToken(launchKitToken)
-            LaunchKit.sharedInstance().debugMode = true
-            LaunchKit.sharedInstance().verboseLogging = true
+        return true
+    }
+
+    func startLaunchKitIfPossible() -> Bool {
+        guard let launchKitToken = self.availableLaunchKitToken where !LaunchKit.hasLaunched() else {
+            return false
         }
 
+        // Valid token, so create LaunchKit instance
+        if USE_LOCAL_LAUNCHKIT_SERVER {
+            LaunchKit.useLocalLaunchKitServer(true)
+        }
+        LaunchKit.launchWithToken(launchKitToken)
+        LaunchKit.sharedInstance().debugMode = true
+        LaunchKit.sharedInstance().verboseLogging = true
+        LaunchKit.sharedInstance().debugAppUserIsAlwaysSuper = true
+        // Use convenience method for setting up the ready-handler
+        LKConfigReady({
+            print("Config is ready")
+        })
+        // Use the normal method for setting up the refresh handler
+        LaunchKit.sharedInstance().config.refreshHandler = { (oldParameters, newParameters) -> Void in
+            print("Config was refreshed!")
+            if LKAppUserIsSuper() {
+                print("User is considered super!")
+            }
+        }
         return true
     }
 
@@ -76,10 +93,52 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationDidBecomeActive(application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+
+        if self.availableLaunchKitToken != nil {
+
+            if self.alertController != nil {
+                self.window?.rootViewController?.dismissViewControllerAnimated(true, completion: nil)
+            } else if self.alertView != nil {
+                self.alertView?.dismissWithClickedButtonIndex(self.alertView!.cancelButtonIndex, animated: true)
+            }
+            self.alertController = nil
+            self.alertView = nil
+
+            if !LaunchKit.hasLaunched() {
+                self.startLaunchKitIfPossible()
+            }
+
+        } else {
+            if self.alertController == nil && self.alertView == nil {
+                // If we've never shown this alert before
+                let title = "Set LaunchKit Token"
+                let msg = "You must go to Settings and enter in your LaunchKit token."
+
+                if NSClassFromString("UIAlertController") != nil {
+                    self.alertController = UIAlertController(title: title, message: msg, preferredStyle: .Alert)
+                    self.alertController!.addAction(UIAlertAction(title: "Close", style: UIAlertActionStyle.Cancel, handler: { [unowned self] (action) -> Void in
+                        self.alertController = nil
+                    }))
+                    self.alertController!.addAction(UIAlertAction(title: "Settings", style: .Default, handler: { [unowned self] (action) -> Void in
+                        self.alertController = nil
+                        UIApplication.sharedApplication().openURL(NSURL(string: UIApplicationOpenSettingsURLString)!)
+                    }))
+                    self.window?.rootViewController?.presentViewController(self.alertController!, animated: true, completion: nil)
+                } else {
+                    self.alertView = UIAlertView(title: title, message: msg, delegate: self, cancelButtonTitle: "Okay")
+                    self.alertView!.show()
+                }
+            }
+        }
     }
 
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    }
+
+    // MARK: - UIAlertViewDelegate
+    func alertView(alertView: UIAlertView, didDismissWithButtonIndex buttonIndex: Int) {
+        self.alertView = nil
     }
 
 
