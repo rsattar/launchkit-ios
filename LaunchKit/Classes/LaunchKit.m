@@ -321,11 +321,11 @@ static LaunchKit *_sharedInstance;
             [_weakSelf handleCommand:command withArgs:args];
         }
         NSDictionary *config = responseDict[@"config"];
-        if (config != nil) {
+        if ([config isKindOfClass:[NSDictionary class]]) {
             [_weakSelf.config updateParameters:config];
         }
         NSDictionary *user = responseDict[@"user"];
-        if (user != nil) {
+        if ([user isKindOfClass:[NSDictionary class]] {
             [_weakSelf.analytics updateUserFromDictionary:user reportUpdate:YES];
         }
         [self archiveSession];
