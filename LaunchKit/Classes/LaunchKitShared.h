@@ -40,8 +40,5 @@ extern void LKConfigRefreshed(LKConfigRefreshHandler _Nullable refreshHandler);
 extern BOOL LKAppUserIsSuper();
 
 #pragma mark - Remote UI
-typedef void (^LKUpdateNotesCompletionHandler)(BOOL didPresent);
-typedef void (^LKRemoteUILoadHandler)(LKViewController *__nullable viewController, NSError *__nullable error);
-typedef void (^LKRemoteUIDismissalHandler)(LKViewControllerFlowResult flowResult);
 
 #endif

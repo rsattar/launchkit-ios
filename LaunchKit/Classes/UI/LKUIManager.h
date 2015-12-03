@@ -12,12 +12,14 @@
 #import "LKBundlesManager.h"
 #import "LKViewController.h"
 
+typedef void (^LKReleaseNotesCompletionHandler)(BOOL didPresent);
+typedef void (^LKRemoteUILoadHandler)(LKViewController *viewController, NSError *error);
+typedef void (^LKRemoteUIDismissalHandler)(LKViewControllerFlowResult flowResult);
+
 @class LKUIManager;
 @protocol LKUIManagerDelegate <NSObject>
 
 @end
-
-
 
 
 @interface LKUIManager : NSObject

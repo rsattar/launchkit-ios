@@ -11,6 +11,7 @@
 #import "LaunchKitShared.h"
 #import "LKAppUser.h"
 #import "LKConfig.h"
+#import "LKUIManager.h"
 
 //! Project version number for LaunchKit.
 FOUNDATION_EXPORT double LaunchKitVersionNumber;
@@ -129,7 +130,7 @@ FOUNDATION_EXPORT const unsigned char LaunchKitVersionString[];
 #pragma mark - Release Notes
 
 - (void) presentAppReleaseNotesFromViewController:(nonnull UIViewController *)viewController
-                                       completion:(nullable LKUpdateNotesCompletionHandler)completion;
+                                       completion:(nullable LKReleaseNotesCompletionHandler)completion;
 
 
 #pragma mark - Remote UI
