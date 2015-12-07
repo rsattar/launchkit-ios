@@ -60,6 +60,9 @@ static BOOL debug_appUserIsAlwaysSuper = NO;
 {
     self = [super init];
     if (self) {
+        if (![dictionary isKindOfClass:[NSDictionary class]]) {
+            dictionary = @{};
+        }
         if ([dictionary[@"email"] isKindOfClass:[NSString class]]) {
             self.email = dictionary[@"email"];
         }
