@@ -453,6 +453,10 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 
 - (void) updateUserFromDictionary:(NSDictionary *)dictionary reportUpdate:(BOOL)reportUpdate
 {
+    // Sanity check, in case we get a bad parameter (e.g. NSNull from bad JSON)
+    if (![dictionary isKindOfClass:[NSDictionary class]]) {
+        return;
+    }
     if (self.user != nil && [self.lastUserDictionary isEqualToDictionary:dictionary]) {
         return;
     }

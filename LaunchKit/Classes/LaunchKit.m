@@ -315,10 +315,15 @@ static LaunchKit *_sharedInstance;
             LKLog(@"Tracking response: %@", responseDict);
         }
         NSArray *todos = responseDict[@"do"];
-        for (NSDictionary *todo in todos) {
-            NSString *command = todo[@"command"];
-            NSDictionary *args = todo[@"args"];
-            [_weakSelf handleCommand:command withArgs:args];
+        if ([todos isKindOfClass:[NSArray class]]) {
+            for (NSDictionary *todo in todos) {
+                if (![todo isKindOfClass:[NSDictionary class]]) {
+                    continue;
+                }
+                NSString *command = todo[@"command"];
+                NSDictionary *args = todo[@"args"];
+                [_weakSelf handleCommand:command withArgs:args];
+            }
         }
         NSDictionary *config = responseDict[@"config"];
         if ([config isKindOfClass:[NSDictionary class]]) {
@@ -598,7 +603,9 @@ static LaunchKit *_sharedInstance;
             self.config.parameters = unarchivedDict[@"configurationParameters"];
             if ([unarchivedDict[@"analyticsUserDictionary"] isKindOfClass:[NSDictionary class]]) {
                 NSDictionary *lastUserDictionary = unarchivedDict[@"analyticsUserDictionary"];
-                [self.analytics updateUserFromDictionary:lastUserDictionary reportUpdate:NO];
+                if ([lastUserDictionary isKindOfClass:[NSDictionary class]]) {
+                    [self.analytics updateUserFromDictionary:lastUserDictionary reportUpdate:NO];
+                }
             }
         } else {
             // Old way, which stored only the session parameters directly

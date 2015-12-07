@@ -55,6 +55,10 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
     if (parameters == nil) {
         parameters = self.parameters;
     }
+    // Sanity check, in case we get a bad parameter (e.g. NSNull from bad JSON)
+    if (![parameters isKindOfClass:[NSDictionary class]]) {
+        return NO;
+    }
     if (![parameters isEqualToDictionary:_parameters] || isFirstRefresh) {
         NSDictionary *oldParameters = self.parameters;
         self.parameters = [parameters copy];
