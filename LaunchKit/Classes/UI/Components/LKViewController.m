@@ -106,7 +106,6 @@
     // Determine the actual view controller to finish with
     [self finishFlowWithResult:LKViewControllerFlowResultFailed userInfo:nil];
 }
-}
 
 
 - (UIStoryboardSegue *) segueForUnwindingToViewController:(UIViewController *)toViewController fromViewController:(UIViewController *)fromViewController identifier:(NSString *)identifier
