@@ -89,19 +89,23 @@
 
 - (IBAction)finishFlowWithSuccess:(UIStoryboardSegue *)segue
 {
-    [self.flowDelegate launchKitController:self didFinishWithResult:LKViewControllerFlowResultCompleted userInfo:nil];
+    // Determine the actual view controller to finish with
+    [self finishFlowWithResult:LKViewControllerFlowResultCompleted userInfo:nil];
 }
 
 
 - (IBAction)finishFlowWithCancellation:(UIStoryboardSegue *)segue
 {
+    // Determine the actual view controller to finish with
     [self finishFlowWithResult:LKViewControllerFlowResultCancelled userInfo:nil];
 }
 
 
 - (IBAction)finishFlowWithFailure:(UIStoryboardSegue *)segue
 {
-    [self.flowDelegate launchKitController:self didFinishWithResult:LKViewControllerFlowResultFailed userInfo:nil];
+    // Determine the actual view controller to finish with
+    [self finishFlowWithResult:LKViewControllerFlowResultFailed userInfo:nil];
+}
 }
 
 
@@ -122,6 +126,8 @@
 
 #pragma mark - Flow Delegation
 
+/// This will finish the flow with the earliest LKViewController in the stack, that
+/// has a non-nil flowDelegate
 - (void) finishFlowWithResult:(LKViewControllerFlowResult)result userInfo:(nullable NSDictionary *)userInfo
 {
     UIViewController *viewController = self;
