@@ -12,10 +12,15 @@
 
 @property (strong, nonatomic) NSMutableArray *stackedSubviews;
 
+// The constraint tying the first arranged subview to the superview, along the axis
 @property (strong, nonatomic) NSLayoutConstraint *firstAxisConstraint;
+// List of all the axis-aligned constraints between arranged subviews
 @property (strong, nonatomic) NSMutableArray *spacingConstraints;
+// Constraints on all arranged subviews aligning along axis
 @property (strong, nonatomic) NSMutableArray *alignmentConstraints;
+// Constraints being applied along axis to make some subviews bigger than others
 @property (strong, nonatomic) NSMutableArray *distributionConstraints;
+// The constraint tying the last arranged subview to the superview, along the axis
 @property (strong, nonatomic) NSLayoutConstraint *lastAxisConstraint;
 
 @property (assign, nonatomic) BOOL shouldRebuildLayout;
