@@ -10,7 +10,7 @@
 #define _LK_SSZIPARCHIVE_H
 
 #import <Foundation/Foundation.h>
-#include "unzip.h"
+#include "lk_unzip.h"
 
 @protocol LK_SSZipArchiveDelegate;
 

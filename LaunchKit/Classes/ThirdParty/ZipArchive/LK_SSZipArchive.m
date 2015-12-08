@@ -7,7 +7,7 @@
 //
 
 #import "LK_SSZipArchive.h"
-#include "zip.h"
+#include "lk_zip.h"
 #import "zlib.h"
 #import "zconf.h"
 
@@ -24,9 +24,9 @@
 	NSString *_path;
 	NSString *_filename;
     zipFile _zip;
-}
 
 #pragma mark - Unzipping
+}
 
 + (BOOL)unzipFileAtPath:(NSString *)path toDestination:(NSString *)destination
 {

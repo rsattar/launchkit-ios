@@ -73,7 +73,7 @@
 //#endif
 
 #include "zlib.h"
-#include "unzip.h"
+#include "lk_unzip.h"
 
 #ifdef STDC
 #  include <stddef.h>
@@ -194,7 +194,7 @@ typedef struct
 
 
 #ifndef NOUNCRYPT
-#include "crypt.h"
+#include "lk_crypt.h"
 #endif
 
 /* ===========================================================================

@@ -15,17 +15,17 @@ extern "C" {
 #include "zlib.h"
 #endif
 
-#include "unzip.h"
+#include "lk_unzip.h"
 
 /* Repair a ZIP file (missing central directory)
    file: file to recover
    fileOut: output file after recovery
    fileOutTmp: temporary file name used for recovery
-*/
-extern int ZEXPORT unzRepair(const char* file,
-                             const char* fileOut,
-                             const char* fileOutTmp,
-                             uLong* nRecovered,
-                             uLong* bytesRecovered);
+ */
+    extern int ZEXPORT lk_unzRepair(const char* file,
+                                    const char* fileOut,
+                                    const char* fileOutTmp,
+                                    uLong* nRecovered,
+                                    uLong* bytesRecovered);
 
 #endif
