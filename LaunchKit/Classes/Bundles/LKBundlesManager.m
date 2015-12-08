@@ -69,6 +69,27 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     return self;
 }
 
+- (void)updateFromPreviousState:(NSDictionary *)state
+{
+    if (![state isKindOfClass:[NSDictionary class]]) {
+        return;
+    }
+
+    NSDate *lastManifestRetrievalTime = state[@"lastManifestRetrievalTime"];
+    if ([lastManifestRetrievalTime isKindOfClass:[NSDate class]]) {
+        self.lastManifestRetrievalTime = lastManifestRetrievalTime;
+    }
+}
+
+- (NSDictionary *)stateDictionary
+{
+    NSMutableDictionary *state = [NSMutableDictionary dictionary];
+    if (self.lastManifestRetrievalTime) {
+        state[@"lastManifestRetrievalTime"] = self.lastManifestRetrievalTime;
+    }
+    return state;
+}
+
 - (BOOL)retrievingRemoteBundles
 {
     return self.retrievingRemoteBundlesManifest || self.downloadingRemoteBundles;

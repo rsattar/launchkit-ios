@@ -47,6 +47,12 @@ static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 + (void)setDebugUserIsAlwaysSuper:(BOOL)alwaysSuper;
 @end
 
+#pragma mark - Extend LKBundlesManager to allow access to some methods
+@interface LKBundlesManager (Private)
+- (void)updateFromPreviousState:(nullable NSDictionary *)state;
+- (nonnull NSDictionary *)stateDictionary;
+@end
+
 #pragma mark - LaunchKit Implementation
 
 @interface LaunchKit () <LKUIManagerDelegate>
@@ -547,6 +553,9 @@ static LaunchKit *_sharedInstance;
     if (self.analytics.lastUserDictionary) {
         session[@"analyticsUserDictionary"] = self.analytics.lastUserDictionary;
     }
+    if (self.bundlesManager) {
+        session[@"bundlesManagerState"] = self.bundlesManager.stateDictionary;
+    }
     BOOL success = [NSKeyedArchiver archiveRootObject:session toFile:filePath];
     if (!success) {
         LKLogError(@"Could not archive session parameters");
@@ -606,6 +615,10 @@ static LaunchKit *_sharedInstance;
                 if ([lastUserDictionary isKindOfClass:[NSDictionary class]]) {
                     [self.analytics updateUserFromDictionary:lastUserDictionary reportUpdate:NO];
                 }
+            }
+            NSDictionary *bundlesManagerState = unarchivedDict[@"bundlesManagerState"];
+            if ([bundlesManagerState isKindOfClass:[NSDictionary class]]) {
+                [self.bundlesManager updateFromPreviousState:bundlesManagerState];
             }
         } else {
             // Old way, which stored only the session parameters directly
