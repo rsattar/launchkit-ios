@@ -37,6 +37,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
 @property (assign, nonatomic) BOOL downloadingRemoteBundles;
 @property (assign, nonatomic) BOOL remoteBundlesDownloaded;
+@property (strong, nonatomic) NSDate *lastManifestRetrievalTime;
 @property (strong, nonatomic) NSURLSession *remoteUIDownloadSession;
 
 @property (strong, nonatomic) NSMutableDictionary *pendingRemoteBundleLoadHandlers;
@@ -243,6 +244,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 {
     void (^finishWithError)(NSError *error) = ^(NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
+            self.lastManifestRetrievalTime = [NSDate date];
             self.remoteBundlesManifestRetrieved = (error == nil);
             if (self.debugMode) {
                 LKLog(@"LKBundlesManager: Finished retrieving remote bundle manifest.");

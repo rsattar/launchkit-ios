@@ -24,6 +24,7 @@ typedef void (^LKRemoteBundleLoadHandler)(NSBundle * bundle, NSError * error);
 @property (readonly, nonatomic) BOOL retrievingRemoteBundles;
 @property (readonly, nonatomic) BOOL remoteBundlesManifestRetrieved;
 @property (readonly, nonatomic) BOOL remoteBundlesDownloaded;
+@property (readonly, strong, nonatomic) NSDate *lastManifestRetrievalTime;
 
 //+ (instancetype) defaultManager;
 - (instancetype) initWithAPIClient:(LKAPIClient *)apiClient;
