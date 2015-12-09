@@ -311,6 +311,11 @@ static LaunchKit *_sharedInstance;
 
 - (void)trackProperties:(NSDictionary *)properties
 {
+    [self trackProperties:properties completionHandler:nil];
+}
+
+- (void)trackProperties:(NSDictionary *)properties completionHandler:(void (^)())completion
+{
     if (self.verboseLogging) {
         LKLog(@"Tracking: %@", properties);
     }
@@ -362,6 +367,9 @@ static LaunchKit *_sharedInstance;
         LKLog(@"Track Operation Finished");
         _weakSelf.trackingRequestInProgress = NO;
         [_weakSelf startNextTrackingRequestIfPossible];
+        if (completion) {
+            completion();
+        }
     };
     [self.trackingRequests addObject:track];
     [self startNextTrackingRequestIfPossible];
