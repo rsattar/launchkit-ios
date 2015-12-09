@@ -27,6 +27,7 @@ NSString *const LAUNCHKIT_TEST_API_TOKEN = @"73UhwH5CXba6MZSSa9oynByf3_NtQjQlACP
 - (nonnull instancetype)initWithToken:(NSString *)apiToken;
 - (void)archiveSession;
 - (void)retrieveSessionFromArchiveIfAvailable;
+- (void)trackProperties:(NSDictionary *)properties completionHandler:(void (^)())completion;
 
 @end
 
@@ -63,6 +64,25 @@ describe(@"LaunchKit", ^{
         [launchKit archiveSession];
         [launchKit retrieveSessionFromArchiveIfAvailable];
         expect(launchKit.sessionParameters).to.equal(params);
+    });
+
+    it(@"can handle multiple track calls, in sequence", ^{
+        __block NSString *firstSessionId = nil;
+        __block NSString *secondSessionId = nil;
+
+        waitUntil(^(DoneCallback done) {
+            launchKit.sessionParameters = @{};
+            [launchKit trackProperties:nil completionHandler:^{
+                // Shhould give us a new session Id
+                firstSessionId = launchKit.sessionParameters[@"session_id"];
+            }];
+            [launchKit trackProperties:nil completionHandler:^{
+                // Should give us the same session id
+                secondSessionId = launchKit.sessionParameters[@"session_id"];
+                done();
+            }];
+        });
+        expect(firstSessionId).to.equal(secondSessionId);
     });
 
 });
