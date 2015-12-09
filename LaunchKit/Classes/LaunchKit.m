@@ -12,6 +12,7 @@
 #import "LKAPIClient.h"
 #import "LKBundlesManager.h"
 #import "LKLog.h"
+#import "LKTrackOperation.h"
 #import "LKUIManager.h"
 
 #define DEBUG_DESTROY_BUNDLE_CACHE_ON_START 0
@@ -65,6 +66,11 @@ static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 @property (strong, nonatomic) LKAPIClient *apiClient;
 @property (strong, nonatomic) NSTimer *trackingTimer;
 @property (assign, nonatomic) NSTimeInterval trackingInterval;
+@property (assign, nonatomic) BOOL trackingRequestInProgress;
+// LaunchKit executes track requests sequentially, so queue them
+// manually. Can't use an NSOperationQueue here because completion
+// blocks are not guaranteed to fire before next operation starts.
+@property (strong, nonatomic) NSMutableArray *trackingRequests;
 
 @property (strong, nonatomic) NSDate *launchTime;
 
@@ -146,6 +152,7 @@ static LaunchKit *_sharedInstance;
         self.bundlesManager = [[LKBundlesManager alloc] initWithAPIClient:self.apiClient];
 
         self.trackingInterval = DEFAULT_TRACKING_INTERVAL;
+        self.trackingRequests = [NSMutableArray array];
 
         self.uiManager = [[LKUIManager alloc] initWithBundlesManager:self.bundlesManager];
         self.uiManager.delegate = self;
@@ -316,36 +323,62 @@ static LaunchKit *_sharedInstance;
     [propertiesToInclude addEntriesFromDictionary:trackedAnalytics];
 
     __weak LaunchKit *_weakSelf = self;
-    [self.apiClient trackProperties:propertiesToInclude withSuccessBlock:^(NSDictionary *responseDict) {
-        if (_weakSelf.verboseLogging) {
-            LKLog(@"Tracking response: %@", responseDict);
-        }
-        NSArray *todos = responseDict[@"do"];
-        if ([todos isKindOfClass:[NSArray class]]) {
-            for (NSDictionary *todo in todos) {
-                if (![todo isKindOfClass:[NSDictionary class]]) {
-                    continue;
-                }
-                NSString *command = todo[@"command"];
-                NSDictionary *args = todo[@"args"];
-                [_weakSelf handleCommand:command withArgs:args];
+
+    LKTrackOperation *track = [[LKTrackOperation alloc] initWithAPIClient:self.apiClient propertiesToTrack:propertiesToInclude];
+
+    __weak LKTrackOperation *_weakTrack = track;
+    track.completionBlock = ^{
+        if (_weakTrack.error) {
+            LKLog(@"Error tracking properties: %@", _weakTrack.error);
+            // "Update" our config with a nil, which will trigger
+            // it to fire a refresh handler, if this is the first launch
+            [_weakSelf.config updateParameters:nil];
+        } else {
+            NSDictionary *responseDict = _weakTrack.response;
+            if (_weakSelf.verboseLogging) {
+                LKLog(@"Tracking response: %@", responseDict);
             }
+            NSArray *todos = responseDict[@"do"];
+            if ([todos isKindOfClass:[NSArray class]]) {
+                for (NSDictionary *todo in todos) {
+                    if (![todo isKindOfClass:[NSDictionary class]]) {
+                        continue;
+                    }
+                    NSString *command = todo[@"command"];
+                    NSDictionary *args = todo[@"args"];
+                    [_weakSelf handleCommand:command withArgs:args];
+                }
+            }
+            NSDictionary *config = responseDict[@"config"];
+            if ([config isKindOfClass:[NSDictionary class]]) {
+                [_weakSelf.config updateParameters:config];
+            }
+            NSDictionary *user = responseDict[@"user"];
+            if ([user isKindOfClass:[NSDictionary class]]) {
+                [_weakSelf.analytics updateUserFromDictionary:user reportUpdate:YES];
+            }
+            [_weakSelf archiveSession];
         }
-        NSDictionary *config = responseDict[@"config"];
-        if ([config isKindOfClass:[NSDictionary class]]) {
-            [_weakSelf.config updateParameters:config];
-        }
-        NSDictionary *user = responseDict[@"user"];
-        if ([user isKindOfClass:[NSDictionary class]]) {
-            [_weakSelf.analytics updateUserFromDictionary:user reportUpdate:YES];
-        }
-        [self archiveSession];
-    } errorBlock:^(NSError *error) {
-        LKLog(@"Error tracking properties: %@", error);
-        // "Update" our config with a nil, which will trigger
-        // it to fire a refresh handler, if this is the first launch
-        [_weakSelf.config updateParameters:nil];
-    }];
+        LKLog(@"Track Operation Finished");
+        _weakSelf.trackingRequestInProgress = NO;
+        [_weakSelf startNextTrackingRequestIfPossible];
+    };
+    [self.trackingRequests addObject:track];
+    [self startNextTrackingRequestIfPossible];
+}
+
+- (void)startNextTrackingRequestIfPossible
+{
+    if (self.trackingRequestInProgress || self.trackingRequests.count == 0) {
+        return;
+    }
+
+    LKLog(@"Track Operation Started");
+    LKTrackOperation *track = self.trackingRequests.firstObject;
+    [[NSOperationQueue mainQueue] addOperation:track];
+    [self.trackingRequests removeObjectAtIndex:0];
+    self.trackingRequestInProgress = YES;
+
     if (self.trackingTimer.isValid) {
         // We have an existing tracking timer, but since we just tracked, restart it
         // NOTE: Even if we don't restart the tracking timer here, it would still
