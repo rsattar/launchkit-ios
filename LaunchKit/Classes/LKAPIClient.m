@@ -74,7 +74,9 @@ static NSCalendar *_globalGregorianCalendar;
 
         _urlSessionQueue = [[NSOperationQueue alloc] init];
         _urlSessionQueue.name = @"LaunchKit SDK API Queue";
-        _urlSessionQueue.qualityOfService = NSQualityOfServiceBackground;
+        if ([_urlSessionQueue respondsToSelector:@selector(setQualityOfService:)]) {
+            _urlSessionQueue.qualityOfService = NSQualityOfServiceBackground;
+        }
         _urlSessionQueue.maxConcurrentOperationCount = 1;
         _urlSession = [NSURLSession sessionWithConfiguration:_urlSessionConfiguration
                                                     delegate:nil
