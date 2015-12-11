@@ -41,6 +41,7 @@ typedef NS_ENUM(NSInteger, LKViewControllerFlowResult)
 @property (strong, nonatomic, nullable) IBInspectable NSString *presentationStyleName;
 
 @property (assign, nonatomic) IBInspectable CGFloat viewCornerRadius;
+@property (assign, nonatomic) IBInspectable BOOL hasMeasureableSize;
 
 // 'cardView' property can be set by a custom IB storyboard, but if it is not set,
 // then it will reference self.view (it is set during viewDidLoad)
