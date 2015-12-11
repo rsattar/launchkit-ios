@@ -128,6 +128,18 @@
         // "form sheet" view size is.
         CGSize formSheetDimensions = CGSizeMake(540, 620);
         CGSize preferredSize = maxRect.size;
+        if ([self.presentedViewController isKindOfClass:[LKViewController class]]) {
+            LKViewController *presentedLKVC = (LKViewController *)self.presentedViewController;
+            if (presentedLKVC.hasMeasureableSize) {
+                // Measure the size fitting within our maxRect, but allowing height to be measured as close to zero
+                // as possible (smallest height)
+                CGSize measuredSize = [self.presentedViewController.view systemLayoutSizeFittingSize:CGSizeMake(maxRect.size.width, 0)
+                                                                       withHorizontalFittingPriority:UILayoutPriorityRequired
+                                                                             verticalFittingPriority:UILayoutPriorityDefaultHigh];
+                preferredSize = CGSizeMake(MIN(maxRect.size.width, measuredSize.width),
+                                           MIN(maxRect.size.height, measuredSize.height));
+            }
+        }
         if (self.traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassRegular &&
             self.traitCollection.verticalSizeClass == UIUserInterfaceSizeClassRegular) {
             preferredSize = formSheetDimensions;
