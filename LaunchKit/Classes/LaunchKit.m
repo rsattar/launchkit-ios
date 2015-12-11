@@ -275,7 +275,9 @@ static LaunchKit *_sharedInstance;
 - (void)restartTrackingFireImmediately:(BOOL)fireFirstTimeImmediately
 {
     if (self.trackingTimer == nil || !self.trackingTimer.isValid) {
-        LKLog(@"Starting Tracking");
+        if (self.verboseLogging) {
+            LKLog(@"Starting Tracking");
+        }
     }
     [self stopTracking];
     if (fireFirstTimeImmediately) {
@@ -294,7 +296,9 @@ static LaunchKit *_sharedInstance;
 - (void)stopTracking
 {
     if (self.trackingTimer.isValid) {
-        LKLog(@"Stopping Tracking");
+        if (self.verboseLogging) {
+            LKLog(@"Stopping Tracking");
+        }
         [self.trackingTimer invalidate];
 
         if (self.debugMeasureUsage) {
@@ -364,7 +368,6 @@ static LaunchKit *_sharedInstance;
             }
             [_weakSelf archiveSession];
         }
-        LKLog(@"Track Operation Finished");
         _weakSelf.trackingRequestInProgress = NO;
         [_weakSelf startNextTrackingRequestIfPossible];
         if (completion) {
@@ -381,7 +384,6 @@ static LaunchKit *_sharedInstance;
         return;
     }
 
-    LKLog(@"Track Operation Started");
     LKTrackOperation *track = self.trackingRequests.firstObject;
     [[NSOperationQueue mainQueue] addOperation:track];
     [self.trackingRequests removeObjectAtIndex:0];
