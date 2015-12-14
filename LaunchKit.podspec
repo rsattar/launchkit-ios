@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "LaunchKit"
-  s.version          = "1.1.3"
+  s.version          = "1.1.4"
   s.summary          = "Useful tools you need to launch your app."
   s.description      = <<-DESC
                        We provide tools for launching your app like
