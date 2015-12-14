@@ -7,6 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		054014591C1F070E0022860A /* lk_crypt.h in Headers */ = {isa = PBXBuildFile; fileRef = 054014501C1F070E0022860A /* lk_crypt.h */; };
+		0540145A1C1F070E0022860A /* lk_ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 054014511C1F070E0022860A /* lk_ioapi.c */; };
+		0540145B1C1F070E0022860A /* lk_ioapi.h in Headers */ = {isa = PBXBuildFile; fileRef = 054014521C1F070E0022860A /* lk_ioapi.h */; };
+		0540145C1C1F070E0022860A /* lk_mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 054014531C1F070E0022860A /* lk_mztools.c */; };
+		0540145D1C1F070E0022860A /* lk_mztools.h in Headers */ = {isa = PBXBuildFile; fileRef = 054014541C1F070E0022860A /* lk_mztools.h */; };
+		0540145E1C1F070E0022860A /* lk_unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 054014551C1F070E0022860A /* lk_unzip.c */; };
+		0540145F1C1F070E0022860A /* lk_unzip.h in Headers */ = {isa = PBXBuildFile; fileRef = 054014561C1F070E0022860A /* lk_unzip.h */; };
+		054014601C1F070E0022860A /* lk_zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 054014571C1F070E0022860A /* lk_zip.c */; };
+		054014611C1F070E0022860A /* lk_zip.h in Headers */ = {isa = PBXBuildFile; fileRef = 054014581C1F070E0022860A /* lk_zip.h */; };
+		054014641C1F07230022860A /* LKTrackOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 054014621C1F07230022860A /* LKTrackOperation.h */; };
+		054014651C1F07230022860A /* LKTrackOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 054014631C1F07230022860A /* LKTrackOperation.m */; };
 		654CC8671C0FBF1F00131ABE /* LKAnalytics.h in Headers */ = {isa = PBXBuildFile; fileRef = 654CC8241C0FBF1F00131ABE /* LKAnalytics.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		654CC8681C0FBF1F00131ABE /* LKAnalytics.m in Sources */ = {isa = PBXBuildFile; fileRef = 654CC8251C0FBF1F00131ABE /* LKAnalytics.m */; };
 		654CC8691C0FBF1F00131ABE /* LKAppUser.h in Headers */ = {isa = PBXBuildFile; fileRef = 654CC8261C0FBF1F00131ABE /* LKAppUser.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -32,15 +43,6 @@
 		654CC87D1C0FBF1F00131ABE /* NSString+LKURLEncoded.m in Sources */ = {isa = PBXBuildFile; fileRef = 654CC83C1C0FBF1F00131ABE /* NSString+LKURLEncoded.m */; };
 		654CC87E1C0FBF1F00131ABE /* LK_SSZipArchive.h in Headers */ = {isa = PBXBuildFile; fileRef = 654CC83F1C0FBF1F00131ABE /* LK_SSZipArchive.h */; };
 		654CC87F1C0FBF1F00131ABE /* LK_SSZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = 654CC8401C0FBF1F00131ABE /* LK_SSZipArchive.m */; };
-		654CC8801C0FBF1F00131ABE /* crypt.h in Headers */ = {isa = PBXBuildFile; fileRef = 654CC8421C0FBF1F00131ABE /* crypt.h */; };
-		654CC8811C0FBF1F00131ABE /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 654CC8431C0FBF1F00131ABE /* ioapi.c */; };
-		654CC8821C0FBF1F00131ABE /* ioapi.h in Headers */ = {isa = PBXBuildFile; fileRef = 654CC8441C0FBF1F00131ABE /* ioapi.h */; };
-		654CC8831C0FBF1F00131ABE /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 654CC8451C0FBF1F00131ABE /* mztools.c */; };
-		654CC8841C0FBF1F00131ABE /* mztools.h in Headers */ = {isa = PBXBuildFile; fileRef = 654CC8461C0FBF1F00131ABE /* mztools.h */; };
-		654CC8851C0FBF1F00131ABE /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 654CC8471C0FBF1F00131ABE /* unzip.c */; };
-		654CC8861C0FBF1F00131ABE /* unzip.h in Headers */ = {isa = PBXBuildFile; fileRef = 654CC8481C0FBF1F00131ABE /* unzip.h */; };
-		654CC8871C0FBF1F00131ABE /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 654CC8491C0FBF1F00131ABE /* zip.c */; };
-		654CC8881C0FBF1F00131ABE /* zip.h in Headers */ = {isa = PBXBuildFile; fileRef = 654CC84A1C0FBF1F00131ABE /* zip.h */; };
 		654CC8891C0FBF1F00131ABE /* LKButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 654CC84D1C0FBF1F00131ABE /* LKButton.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		654CC88A1C0FBF1F00131ABE /* LKButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 654CC84E1C0FBF1F00131ABE /* LKButton.m */; };
 		654CC88B1C0FBF1F00131ABE /* LKFadeCustomSegue.h in Headers */ = {isa = PBXBuildFile; fileRef = 654CC84F1C0FBF1F00131ABE /* LKFadeCustomSegue.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -67,6 +69,17 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		054014501C1F070E0022860A /* lk_crypt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lk_crypt.h; sourceTree = "<group>"; };
+		054014511C1F070E0022860A /* lk_ioapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lk_ioapi.c; sourceTree = "<group>"; };
+		054014521C1F070E0022860A /* lk_ioapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lk_ioapi.h; sourceTree = "<group>"; };
+		054014531C1F070E0022860A /* lk_mztools.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lk_mztools.c; sourceTree = "<group>"; };
+		054014541C1F070E0022860A /* lk_mztools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lk_mztools.h; sourceTree = "<group>"; };
+		054014551C1F070E0022860A /* lk_unzip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lk_unzip.c; sourceTree = "<group>"; };
+		054014561C1F070E0022860A /* lk_unzip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lk_unzip.h; sourceTree = "<group>"; };
+		054014571C1F070E0022860A /* lk_zip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = lk_zip.c; sourceTree = "<group>"; };
+		054014581C1F070E0022860A /* lk_zip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lk_zip.h; sourceTree = "<group>"; };
+		054014621C1F07230022860A /* LKTrackOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKTrackOperation.h; sourceTree = "<group>"; };
+		054014631C1F07230022860A /* LKTrackOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKTrackOperation.m; sourceTree = "<group>"; };
 		654CC8241C0FBF1F00131ABE /* LKAnalytics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKAnalytics.h; sourceTree = "<group>"; };
 		654CC8251C0FBF1F00131ABE /* LKAnalytics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKAnalytics.m; sourceTree = "<group>"; };
 		654CC8261C0FBF1F00131ABE /* LKAppUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKAppUser.h; sourceTree = "<group>"; };
@@ -92,15 +105,6 @@
 		654CC83C1C0FBF1F00131ABE /* NSString+LKURLEncoded.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+LKURLEncoded.m"; sourceTree = "<group>"; };
 		654CC83F1C0FBF1F00131ABE /* LK_SSZipArchive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LK_SSZipArchive.h; sourceTree = "<group>"; };
 		654CC8401C0FBF1F00131ABE /* LK_SSZipArchive.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LK_SSZipArchive.m; sourceTree = "<group>"; };
-		654CC8421C0FBF1F00131ABE /* crypt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crypt.h; sourceTree = "<group>"; };
-		654CC8431C0FBF1F00131ABE /* ioapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ioapi.c; sourceTree = "<group>"; };
-		654CC8441C0FBF1F00131ABE /* ioapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ioapi.h; sourceTree = "<group>"; };
-		654CC8451C0FBF1F00131ABE /* mztools.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mztools.c; sourceTree = "<group>"; };
-		654CC8461C0FBF1F00131ABE /* mztools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mztools.h; sourceTree = "<group>"; };
-		654CC8471C0FBF1F00131ABE /* unzip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = unzip.c; sourceTree = "<group>"; };
-		654CC8481C0FBF1F00131ABE /* unzip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unzip.h; sourceTree = "<group>"; };
-		654CC8491C0FBF1F00131ABE /* zip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = zip.c; sourceTree = "<group>"; };
-		654CC84A1C0FBF1F00131ABE /* zip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zip.h; sourceTree = "<group>"; };
 		654CC84D1C0FBF1F00131ABE /* LKButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKButton.h; sourceTree = "<group>"; };
 		654CC84E1C0FBF1F00131ABE /* LKButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKButton.m; sourceTree = "<group>"; };
 		654CC84F1C0FBF1F00131ABE /* LKFadeCustomSegue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKFadeCustomSegue.h; sourceTree = "<group>"; };
@@ -192,15 +196,15 @@
 		654CC8411C0FBF1F00131ABE /* minizip */ = {
 			isa = PBXGroup;
 			children = (
-				654CC8421C0FBF1F00131ABE /* crypt.h */,
-				654CC8431C0FBF1F00131ABE /* ioapi.c */,
-				654CC8441C0FBF1F00131ABE /* ioapi.h */,
-				654CC8451C0FBF1F00131ABE /* mztools.c */,
-				654CC8461C0FBF1F00131ABE /* mztools.h */,
-				654CC8471C0FBF1F00131ABE /* unzip.c */,
-				654CC8481C0FBF1F00131ABE /* unzip.h */,
-				654CC8491C0FBF1F00131ABE /* zip.c */,
-				654CC84A1C0FBF1F00131ABE /* zip.h */,
+				054014501C1F070E0022860A /* lk_crypt.h */,
+				054014511C1F070E0022860A /* lk_ioapi.c */,
+				054014521C1F070E0022860A /* lk_ioapi.h */,
+				054014531C1F070E0022860A /* lk_mztools.c */,
+				054014541C1F070E0022860A /* lk_mztools.h */,
+				054014551C1F070E0022860A /* lk_unzip.c */,
+				054014561C1F070E0022860A /* lk_unzip.h */,
+				054014571C1F070E0022860A /* lk_zip.c */,
+				054014581C1F070E0022860A /* lk_zip.h */,
 			);
 			path = minizip;
 			sourceTree = "<group>";
@@ -301,6 +305,8 @@
 				654CC8381C0FBF1F00131ABE /* LKUtils.m */,
 				654CC8391C0FBF1F00131ABE /* NSDictionary+LKFormEncoded.h */,
 				654CC83A1C0FBF1F00131ABE /* NSDictionary+LKFormEncoded.m */,
+				054014621C1F07230022860A /* LKTrackOperation.h */,
+				054014631C1F07230022860A /* LKTrackOperation.m */,
 				654CC83B1C0FBF1F00131ABE /* NSString+LKURLEncoded.h */,
 				654CC83C1C0FBF1F00131ABE /* NSString+LKURLEncoded.m */,
 				654CC83D1C0FBF1F00131ABE /* ThirdParty */,
@@ -320,30 +326,31 @@
 				654CC88B1C0FBF1F00131ABE /* LKFadeCustomSegue.h in Headers */,
 				654CC8951C0FBF1F00131ABE /* LKSimpleStackView.h in Headers */,
 				654CC86B1C0FBF1F00131ABE /* LKBundleInfo.h in Headers */,
+				0540145B1C1F070E0022860A /* lk_ioapi.h in Headers */,
 				654CC87A1C0FBF1F00131ABE /* NSDictionary+LKFormEncoded.h in Headers */,
+				054014641C1F07230022860A /* LKTrackOperation.h in Headers */,
 				654CC8731C0FBF1F00131ABE /* LaunchKitShared.h in Headers */,
 				654CC87E1C0FBF1F00131ABE /* LK_SSZipArchive.h in Headers */,
+				0540145F1C1F070E0022860A /* lk_unzip.h in Headers */,
 				654CC8691C0FBF1F00131ABE /* LKAppUser.h in Headers */,
 				654CC8911C0FBF1F00131ABE /* LKPopCustomSegue.h in Headers */,
-				654CC8801C0FBF1F00131ABE /* crypt.h in Headers */,
-				654CC8881C0FBF1F00131ABE /* zip.h in Headers */,
 				654CC8891C0FBF1F00131ABE /* LKButton.h in Headers */,
 				654CC8781C0FBF1F00131ABE /* LKUtils.h in Headers */,
 				654CC8971C0FBF1F00131ABE /* LKViewController.h in Headers */,
 				654CC89E1C0FBF1F00131ABE /* LKCardPresentationController.h in Headers */,
-				654CC8841C0FBF1F00131ABE /* mztools.h in Headers */,
+				0540145D1C1F070E0022860A /* lk_mztools.h in Headers */,
 				654CC89C1C0FBF1F00131ABE /* LKUIManager.h in Headers */,
 				654CC8931C0FBF1F00131ABE /* LKPushCustomSegue.h in Headers */,
 				654CC8761C0FBF1F00131ABE /* LKLog.h in Headers */,
+				054014591C1F070E0022860A /* lk_crypt.h in Headers */,
 				654CC8741C0FBF1F00131ABE /* LKAPIClient.h in Headers */,
-				654CC8861C0FBF1F00131ABE /* unzip.h in Headers */,
-				654CC8821C0FBF1F00131ABE /* ioapi.h in Headers */,
 				654CC88F1C0FBF1F00131ABE /* LKNavigationController.h in Headers */,
 				654CC86F1C0FBF1F00131ABE /* LKConfig.h in Headers */,
 				654CC88D1C0FBF1F00131ABE /* LKImageView.h in Headers */,
 				654CC87C1C0FBF1F00131ABE /* NSString+LKURLEncoded.h in Headers */,
 				654CC89A1C0FBF1F00131ABE /* UIView+LKAdditions.h in Headers */,
 				654CC8671C0FBF1F00131ABE /* LKAnalytics.h in Headers */,
+				054014611C1F070E0022860A /* lk_zip.h in Headers */,
 				654CC8711C0FBF1F00131ABE /* LaunchKit.h in Headers */,
 				654CC86D1C0FBF1F00131ABE /* LKBundlesManager.h in Headers */,
 			);
@@ -417,21 +424,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				654CC87B1C0FBF1F00131ABE /* NSDictionary+LKFormEncoded.m in Sources */,
-				654CC8811C0FBF1F00131ABE /* ioapi.c in Sources */,
 				654CC87F1C0FBF1F00131ABE /* LK_SSZipArchive.m in Sources */,
+				054014651C1F07230022860A /* LKTrackOperation.m in Sources */,
+				0540145E1C1F070E0022860A /* lk_unzip.c in Sources */,
 				654CC86E1C0FBF1F00131ABE /* LKBundlesManager.m in Sources */,
 				654CC89B1C0FBF1F00131ABE /* UIView+LKAdditions.m in Sources */,
-				654CC8831C0FBF1F00131ABE /* mztools.c in Sources */,
 				654CC8941C0FBF1F00131ABE /* LKPushCustomSegue.m in Sources */,
 				654CC8961C0FBF1F00131ABE /* LKSimpleStackView.m in Sources */,
 				654CC89D1C0FBF1F00131ABE /* LKUIManager.m in Sources */,
 				654CC8721C0FBF1F00131ABE /* LaunchKit.m in Sources */,
-				654CC8851C0FBF1F00131ABE /* unzip.c in Sources */,
 				654CC8681C0FBF1F00131ABE /* LKAnalytics.m in Sources */,
 				654CC88A1C0FBF1F00131ABE /* LKButton.m in Sources */,
 				654CC8981C0FBF1F00131ABE /* LKViewController.m in Sources */,
 				654CC8771C0FBF1F00131ABE /* LKLog.m in Sources */,
-				654CC8871C0FBF1F00131ABE /* zip.c in Sources */,
 				654CC8921C0FBF1F00131ABE /* LKPopCustomSegue.m in Sources */,
 				654CC89F1C0FBF1F00131ABE /* LKCardPresentationController.m in Sources */,
 				654CC8701C0FBF1F00131ABE /* LKConfig.m in Sources */,
@@ -440,9 +445,12 @@
 				654CC88C1C0FBF1F00131ABE /* LKFadeCustomSegue.m in Sources */,
 				654CC86C1C0FBF1F00131ABE /* LKBundleInfo.m in Sources */,
 				654CC8791C0FBF1F00131ABE /* LKUtils.m in Sources */,
+				054014601C1F070E0022860A /* lk_zip.c in Sources */,
+				0540145C1C1F070E0022860A /* lk_mztools.c in Sources */,
 				654CC86A1C0FBF1F00131ABE /* LKAppUser.m in Sources */,
 				654CC8901C0FBF1F00131ABE /* LKNavigationController.m in Sources */,
 				654CC87D1C0FBF1F00131ABE /* NSString+LKURLEncoded.m in Sources */,
+				0540145A1C1F070E0022860A /* lk_ioapi.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
