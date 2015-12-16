@@ -374,20 +374,23 @@ static LaunchKit *_sharedInstance;
             completion();
         }
     };
-    [self.trackingRequests addObject:track];
+    @synchronized(self.trackingRequests) {
+        [self.trackingRequests addObject:track];
+    }
     [self startNextTrackingRequestIfPossible];
 }
 
-- (void)startNextTrackingRequestIfPossible
-{
-    if (self.trackingRequestInProgress || self.trackingRequests.count == 0) {
-        return;
-    }
+- (void)startNextTrackingRequestIfPossible {
+    @synchronized(self.trackingRequests) {
+        if (self.trackingRequestInProgress || self.trackingRequests.count == 0) {å
+            return;
+        }
 
-    LKTrackOperation *track = self.trackingRequests.firstObject;
-    [[NSOperationQueue mainQueue] addOperation:track];
-    [self.trackingRequests removeObjectAtIndex:0];
-    self.trackingRequestInProgress = YES;
+        LKTrackOperation *track = self.trackingRequests.firstObject;
+        [[NSOperationQueue mainQueue] addOperation:track];
+        [self.trackingRequests removeObjectAtIndex:0];
+        self.trackingRequestInProgress = YES;
+    }
 
     if (self.trackingTimer.isValid) {
         // We have an existing tracking timer, but since we just tracked, restart it
