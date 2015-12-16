@@ -382,7 +382,7 @@ static LaunchKit *_sharedInstance;
 
 - (void)startNextTrackingRequestIfPossible {
     @synchronized(self.trackingRequests) {
-        if (self.trackingRequestInProgress || self.trackingRequests.count == 0) {å
+        if (self.trackingRequestInProgress || self.trackingRequests.count == 0) {
             return;
         }
 
