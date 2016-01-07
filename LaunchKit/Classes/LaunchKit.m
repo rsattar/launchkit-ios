@@ -366,6 +366,7 @@ static LaunchKit *_sharedInstance;
             if ([user isKindOfClass:[NSDictionary class]]) {
                 [_weakSelf.analytics updateUserFromDictionary:user reportUpdate:YES];
             }
+            [_weakSelf updateServerBundlesUpdatedTimeFromConfig];
             [_weakSelf archiveSession];
         }
         _weakSelf.trackingRequestInProgress = NO;
@@ -447,6 +448,16 @@ static LaunchKit *_sharedInstance;
 
     if (self.verboseLogging) {
         LKLog(@"Tracking timer interval changed to %.1f via remote command", self.trackingInterval);
+    }
+}
+
+- (void) updateServerBundlesUpdatedTimeFromConfig
+{
+    NSTimeInterval interval = [self.config doubleForKey:@"io.launchkit.bundlesUpdatedTime" defaultValue:0.0];
+    if (interval > 0.0) {
+        // Interval would be 0.0 if timeString was nil, or timeString was not a valid double
+        NSDate *timestamp = [NSDate dateWithTimeIntervalSince1970:interval];
+        [self.bundlesManager updateServerBundlesUpdatedTimeWithTime:timestamp];
     }
 }
 

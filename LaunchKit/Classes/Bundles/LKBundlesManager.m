@@ -77,7 +77,12 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
     NSDate *lastManifestRetrievalTime = state[@"lastManifestRetrievalTime"];
     if ([lastManifestRetrievalTime isKindOfClass:[NSDate class]]) {
-        self.lastManifestRetrievalTime = lastManifestRetrievalTime;
+        _lastManifestRetrievalTime = lastManifestRetrievalTime;
+    }
+
+    NSDate *serverBundlesUpdatedTime = state[@"serverBundlesUpdatedTime"];
+    if ([serverBundlesUpdatedTime isKindOfClass:[NSDate class]]) {
+        _serverBundlesUpdatedTime = serverBundlesUpdatedTime;
     }
 }
 
@@ -87,7 +92,23 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     if (self.lastManifestRetrievalTime) {
         state[@"lastManifestRetrievalTime"] = self.lastManifestRetrievalTime;
     }
+    if (self.serverBundlesUpdatedTime) {
+        state[@"serverBundlesUpdatedTime"] = self.serverBundlesUpdatedTime;
+    }
     return state;
+}
+
+
+- (void) updateServerBundlesUpdatedTimeWithTime:(NSDate *)bundlesUpdatedTime
+{
+    if (_serverBundlesUpdatedTime == bundlesUpdatedTime &&
+        [_serverBundlesUpdatedTime isEqualToDate:bundlesUpdatedTime]) {
+        return;
+    }
+
+    _serverBundlesUpdatedTime = bundlesUpdatedTime;
+
+
 }
 
 - (BOOL)retrievingRemoteBundles
