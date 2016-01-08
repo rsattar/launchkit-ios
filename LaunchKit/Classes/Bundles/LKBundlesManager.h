@@ -21,8 +21,9 @@ typedef void (^LKRemoteBundleLoadHandler)(NSBundle * bundle, NSError * error);
 @property (assign, nonatomic) BOOL debugMode;
 @property (assign, nonatomic) BOOL verboseLogging;
 
+@property (readonly, nonatomic) BOOL hasNewestRemoteBundles;
 @property (readonly, nonatomic) BOOL retrievingRemoteBundles;
-@property (readonly, nonatomic) BOOL remoteBundlesManifestRetrieved;
+@property (readonly, nonatomic) BOOL latestRemoteBundlesManifestRetrieved;
 @property (readonly, nonatomic) BOOL remoteBundlesDownloaded;
 
 @property (readonly, strong, nonatomic) NSDate *serverBundlesUpdatedTime;

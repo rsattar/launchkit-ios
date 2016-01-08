@@ -14,6 +14,7 @@
 
 static BOOL const LOAD_PREPACKAGED_BUNDLES = YES;
 static BOOL const LOAD_CACHED_BUNDLES = YES;
+static BOOL const CACHE_SERVER_BUNDLE_UPDATE_TIME = YES;
 
 static LKBundlesManager *_sharedInstance;
 
@@ -33,10 +34,11 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
 @property (strong, nonatomic) LKAPIClient *apiClient;
 @property (assign, nonatomic) BOOL retrievingRemoteBundlesManifest;
-@property (assign, nonatomic) BOOL remoteBundlesManifestRetrieved;
+@property (assign, nonatomic) BOOL latestRemoteBundlesManifestRetrieved;
 
 @property (assign, nonatomic) BOOL downloadingRemoteBundles;
 @property (assign, nonatomic) BOOL remoteBundlesDownloaded;
+@property (strong, nonatomic) NSDate *serverBundlesUpdatedTime;
 @property (strong, nonatomic) NSDate *lastManifestRetrievalTime;
 @property (strong, nonatomic) NSURLSession *remoteUIDownloadSession;
 
@@ -62,7 +64,8 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
         self.apiClient = apiClient;
         self.remoteBundleMap = [NSMutableDictionary dictionaryWithCapacity:2];
         self.localBundleMap = [NSMutableDictionary dictionaryWithCapacity:2];
-        self.remoteBundlesManifestRetrieved = NO;
+        self.latestRemoteBundlesManifestRetrieved = NO;
+        self.serverBundlesUpdatedTime = [NSDate distantPast];
         self.remoteBundlesDownloaded = NO;
         self.pendingRemoteBundleLoadHandlers = [NSMutableDictionary dictionaryWithCapacity:1];
     }
@@ -80,9 +83,11 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
         _lastManifestRetrievalTime = lastManifestRetrievalTime;
     }
 
-    NSDate *serverBundlesUpdatedTime = state[@"serverBundlesUpdatedTime"];
-    if ([serverBundlesUpdatedTime isKindOfClass:[NSDate class]]) {
-        _serverBundlesUpdatedTime = serverBundlesUpdatedTime;
+    if (CACHE_SERVER_BUNDLE_UPDATE_TIME) {
+        NSDate *serverBundlesUpdatedTime = state[@"serverBundlesUpdatedTime"];
+        if ([serverBundlesUpdatedTime isKindOfClass:[NSDate class]]) {
+            _serverBundlesUpdatedTime = serverBundlesUpdatedTime;
+        }
     }
 }
 
@@ -92,7 +97,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     if (self.lastManifestRetrievalTime) {
         state[@"lastManifestRetrievalTime"] = self.lastManifestRetrievalTime;
     }
-    if (self.serverBundlesUpdatedTime) {
+    if (CACHE_SERVER_BUNDLE_UPDATE_TIME && self.serverBundlesUpdatedTime) {
         state[@"serverBundlesUpdatedTime"] = self.serverBundlesUpdatedTime;
     }
     return state;
@@ -101,19 +106,37 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
 - (void) updateServerBundlesUpdatedTimeWithTime:(NSDate *)bundlesUpdatedTime
 {
-    if (_serverBundlesUpdatedTime == bundlesUpdatedTime &&
-        [_serverBundlesUpdatedTime isEqualToDate:bundlesUpdatedTime]) {
+    if ([_serverBundlesUpdatedTime isEqualToDate:bundlesUpdatedTime]) {
+        // We have the same 'last' server time as our current, so
+        // mark that we have the latest, and there's nothing else to do
+        self.latestRemoteBundlesManifestRetrieved = YES;
+
         return;
     }
 
     _serverBundlesUpdatedTime = bundlesUpdatedTime;
 
+    // We don't have the latest bundle manifest, so go and fetch it (and
+    // consequently download any new bundles)
+    self.latestRemoteBundlesManifestRetrieved = NO;
+    [self retrieveAndCacheAvailableRemoteBundlesWithCompletion:^(NSError *error) {
+        if (error) {
+            LKLogWarning(@"Received error downloading and caching remote bundles: %@", error);
+        } else {
+            LKLog(@"Remote bundles downloaded and cached.");
+        }
+    }];
 
 }
 
 - (BOOL)retrievingRemoteBundles
 {
     return self.retrievingRemoteBundlesManifest || self.downloadingRemoteBundles;
+}
+
+- (BOOL)hasNewestRemoteBundles
+{
+    return self.latestRemoteBundlesManifestRetrieved && self.remoteBundlesDownloaded;
 }
 
 + (NSURL *)bundlesCacheDirectoryURLCreateIfNeeded:(BOOL)createIfNeeded
@@ -287,7 +310,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     void (^finishWithError)(NSError *error) = ^(NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
             self.lastManifestRetrievalTime = [NSDate date];
-            self.remoteBundlesManifestRetrieved = (error == nil);
+            self.latestRemoteBundlesManifestRetrieved = (error == nil);
             if (self.debugMode) {
                 LKLog(@"LKBundlesManager: Finished retrieving remote bundle manifest.");
             }
@@ -353,7 +376,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
 - (void)loadBundleWithId:(NSString *)bundleId completion:(LKRemoteBundleLoadHandler)completion
 {
-    if (self.remoteBundlesManifestRetrieved) {
+    if (self.latestRemoteBundlesManifestRetrieved) {
         // We have the remote manifest at least, so we can check if our UI even exists
         LKBundleInfo *locallyAvailableBundleInfo = [self localBundleInfoWithName:bundleId];
         if (!locallyAvailableBundleInfo) {
@@ -365,7 +388,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     }
 
     // If we are downloading remote bundles, always wait until those are done
-    if (self.retrievingRemoteBundles) {
+    if (!self.hasNewestRemoteBundles && self.retrievingRemoteBundles) {
         if (completion) {
             // We should wait until the remote bundle manifest is returned and then attempt this again
             NSMutableArray *handlers = self.pendingRemoteBundleLoadHandlers[bundleId];

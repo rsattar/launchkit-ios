@@ -183,13 +183,6 @@ static LaunchKit *_sharedInstance;
 #endif
 
         [self.bundlesManager rebuildLocalBundlesMap];
-        [self.bundlesManager retrieveAndCacheAvailableRemoteBundlesWithCompletion:^(NSError *error) {
-            if (error) {
-                LKLogWarning(@"Received error downloading and caching remote bundles: %@", error);
-            } else {
-                LKLog(@"Remote bundles downloaded and cached.");
-            }
-        }];
     }
     return self;
 }
