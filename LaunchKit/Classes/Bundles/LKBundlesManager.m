@@ -14,7 +14,7 @@
 
 static BOOL const LOAD_PREPACKAGED_BUNDLES = YES;
 static BOOL const LOAD_CACHED_BUNDLES = YES;
-static BOOL const CACHE_SERVER_BUNDLE_UPDATE_TIME = YES;
+static BOOL const STORE_SERVER_BUNDLE_UPDATE_TIME = YES;
 
 static LKBundlesManager *_sharedInstance;
 
@@ -38,7 +38,10 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
 @property (assign, nonatomic) BOOL downloadingRemoteBundles;
 @property (assign, nonatomic) BOOL remoteBundlesDownloaded;
-@property (strong, nonatomic) NSDate *serverBundlesUpdatedTime;
+
+// This is stored on our [application support]/launchkit/bundles folder
+@property (strong, nonatomic) NSDate *localBundlesFolderUpdatedTime;
+
 @property (strong, nonatomic) NSDate *lastManifestRetrievalTime;
 @property (strong, nonatomic) NSURLSession *remoteUIDownloadSession;
 
@@ -64,8 +67,8 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
         self.apiClient = apiClient;
         self.remoteBundleMap = [NSMutableDictionary dictionaryWithCapacity:2];
         self.localBundleMap = [NSMutableDictionary dictionaryWithCapacity:2];
+        self.localBundlesFolderUpdatedTime = [NSDate distantPast];
         self.latestRemoteBundlesManifestRetrieved = NO;
-        self.serverBundlesUpdatedTime = [NSDate distantPast];
         self.remoteBundlesDownloaded = NO;
         self.pendingRemoteBundleLoadHandlers = [NSMutableDictionary dictionaryWithCapacity:1];
     }
@@ -82,13 +85,6 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     if ([lastManifestRetrievalTime isKindOfClass:[NSDate class]]) {
         _lastManifestRetrievalTime = lastManifestRetrievalTime;
     }
-
-    if (CACHE_SERVER_BUNDLE_UPDATE_TIME) {
-        NSDate *serverBundlesUpdatedTime = state[@"serverBundlesUpdatedTime"];
-        if ([serverBundlesUpdatedTime isKindOfClass:[NSDate class]]) {
-            _serverBundlesUpdatedTime = serverBundlesUpdatedTime;
-        }
-    }
 }
 
 - (NSDictionary *)stateDictionary
@@ -97,36 +93,50 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     if (self.lastManifestRetrievalTime) {
         state[@"lastManifestRetrievalTime"] = self.lastManifestRetrievalTime;
     }
-    if (CACHE_SERVER_BUNDLE_UPDATE_TIME && self.serverBundlesUpdatedTime) {
-        state[@"serverBundlesUpdatedTime"] = self.serverBundlesUpdatedTime;
-    }
     return state;
 }
 
 
 - (void) updateServerBundlesUpdatedTimeWithTime:(NSDate *)bundlesUpdatedTime
 {
-    if ([_serverBundlesUpdatedTime isEqualToDate:bundlesUpdatedTime]) {
-        // We have the same 'last' server time as our current, so
+    if ([self.localBundlesFolderUpdatedTime isEqualToDate:bundlesUpdatedTime]) {
+
+        // We have the same 'local' server time as our current, so
         // mark that we have the latest, and there's nothing else to do
         self.latestRemoteBundlesManifestRetrieved = YES;
 
         return;
     }
 
-    _serverBundlesUpdatedTime = bundlesUpdatedTime;
+    // We may already be in the process of retrieving remote bundles, so check for that.
+    // Rare Edge Case Note™: It may be fetching an _older_ timestamped manifest+bundle
+    // when it receives a new timestamp. In that case, the new timestamped data won't be
+    // downloaded until the _next_ time that updateServerBundlesUpdatedTimeWithTime: is
+    // called. It essentially "self-corrects", eventually (Assuming LK is still making
+    // track calls).
+    if (!self.retrievingRemoteBundles) {
 
-    // We don't have the latest bundle manifest, so go and fetch it (and
-    // consequently download any new bundles)
-    self.latestRemoteBundlesManifestRetrieved = NO;
-    [self retrieveAndCacheAvailableRemoteBundlesWithCompletion:^(NSError *error) {
-        if (error) {
-            LKLogWarning(@"Received error downloading and caching remote bundles: %@", error);
-        } else {
-            LKLog(@"Remote bundles downloaded and cached.");
+        if (self.debugMode) {
+            if (self.verboseLogging) {
+                if ([self.localBundlesFolderUpdatedTime isEqualToDate:[NSDate distantPast]]) {
+                    LKLog(@"RETRIEVING Manifest+Bundles because: Local bundle time is not available, assuming no bundles");
+                } else {
+                    LKLog(@"RETRIEVING Manifest+Bundles because: Local bundle time (%@) != server time (%@)");
+                }
+            }
         }
-    }];
 
+        // We don't have the latest bundle manifest, so go and fetch it (and
+        // consequently download any new bundles)
+        self.latestRemoteBundlesManifestRetrieved = NO;
+        [self retrieveAndCacheAvailableRemoteBundlesWithAssociatedServerTimestamp:bundlesUpdatedTime completion:^(NSError *error) {
+            if (error) {
+                LKLogWarning(@"Received error downloading and caching remote bundles: %@", error);
+            } else {
+                LKLog(@"Remote bundles downloaded and cached.");
+            }
+        }];
+    }
 }
 
 - (BOOL)retrievingRemoteBundles
@@ -137,6 +147,42 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 - (BOOL)hasNewestRemoteBundles
 {
     return self.latestRemoteBundlesManifestRetrieved && self.remoteBundlesDownloaded;
+}
+
++ (nullable NSDate *)updateTimeInLocalBundlesFolder
+{
+    if (!STORE_SERVER_BUNDLE_UPDATE_TIME) {
+        return nil;
+    }
+    NSURL *bundlesURL = [LKBundlesManager bundlesCacheDirectoryURLCreateIfNeeded:YES];
+    NSURL *bundlesCanaryFileURL = [bundlesURL URLByAppendingPathComponent:@"LKWuzHere.txt"];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:bundlesCanaryFileURL.path]) {
+        // File doesn't exist; maybe it was deleted by iOS, or we never finished downloading bundles?
+        return nil;
+    }
+
+    NSData *updateTimeStringData = [NSData dataWithContentsOfURL:bundlesCanaryFileURL];
+    NSString *updateTimeString = [[NSString alloc] initWithData:updateTimeStringData encoding:NSUTF8StringEncoding];
+    NSTimeInterval timeInterval = [updateTimeString doubleValue];
+    if (timeInterval == 0.0) {
+        // Not a valid time string
+        return nil;
+    }
+
+    NSDate *updateTime = [NSDate dateWithTimeIntervalSince1970:timeInterval];
+    return updateTime;
+}
+
++ (void)setUpdateTimeInLocalBundlesFolder:(NSDate *)updateTime
+{
+    if (!updateTime || !STORE_SERVER_BUNDLE_UPDATE_TIME) {
+        return;
+    }
+    NSURL *bundlesURL = [LKBundlesManager bundlesCacheDirectoryURLCreateIfNeeded:YES];
+    NSURL *bundlesCanaryFileURL = [bundlesURL URLByAppendingPathComponent:@"LKWuzHere.txt"];
+    NSString *updateTimeString = [NSString stringWithFormat:@"%f", updateTime.timeIntervalSince1970];
+    NSData *updateTimeStringData = [updateTimeString dataUsingEncoding:NSUTF8StringEncoding];
+    [updateTimeStringData writeToURL:bundlesCanaryFileURL atomically:NO];
 }
 
 + (NSURL *)bundlesCacheDirectoryURLCreateIfNeeded:(BOOL)createIfNeeded
@@ -300,6 +346,16 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
             self.localBundleMap[info.name] = info;
         }
     }
+
+    // Load the "update time" we stored in a canary file. This will help us determine whether or not
+    // our local bundles is definitely out of date with server, and if it's missing, it could imply
+    // that iOS/tvOS/watchOS has "cleaned" our folders without us knowing.
+    NSDate *localUpdateTime = [LKBundlesManager updateTimeInLocalBundlesFolder];
+    if (localUpdateTime) {
+        self.localBundlesFolderUpdatedTime = localUpdateTime;
+    } else {
+        self.localBundlesFolderUpdatedTime = [NSDate distantPast];
+    }
 }
 
 #pragma mark - Remote Bundles Map
@@ -355,7 +411,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     }];
 }
 
-- (void)retrieveAndCacheAvailableRemoteBundlesWithCompletion:(void (^)(NSError *error))completion
+- (void)retrieveAndCacheAvailableRemoteBundlesWithAssociatedServerTimestamp:(NSDate *)serverTimestamp completion:(void (^)(NSError *error))completion
 {
     [self retrieveRemoteBundlesManifestWithCompletion:^(NSError *error) {
         if (error != nil) {
@@ -363,7 +419,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
                 completion(error);
             }
         } else {
-            [self downloadRemoteBundlesForceRetrieve:NO completion:^(NSError *error) {
+            [self downloadRemoteBundlesForceRetrieve:NO associatedServerTimestamp:serverTimestamp completion:^(NSError *error) {
 
                 if (completion) {
                     completion(error);
@@ -465,7 +521,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
 #pragma mark -
 
-- (void) downloadRemoteBundlesForceRetrieve:(BOOL)forceRetrieve completion:(void (^)(NSError *error))completion
+- (void) downloadRemoteBundlesForceRetrieve:(BOOL)forceRetrieve associatedServerTimestamp:(NSDate *)serverTimestamp completion:(void (^)(NSError *error))completion
 {
     NSMutableArray *infosNeedingDownload = [NSMutableArray arrayWithCapacity:self.remoteBundleMap.count];
     // Make a list of infos that need to be downloaded
@@ -485,6 +541,11 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
         dispatch_async(dispatch_get_main_queue(), ^{
             _weakSelf.remoteBundlesDownloaded = (error == nil);
             _weakSelf.downloadingRemoteBundles = NO;
+            // Mark our local folder with the 'serverBundlesUpdated' timestamp on the server
+            if (STORE_SERVER_BUNDLE_UPDATE_TIME) {
+                [LKBundlesManager setUpdateTimeInLocalBundlesFolder:serverTimestamp];
+                _weakSelf.localBundlesFolderUpdatedTime = serverTimestamp;
+            }
             if (self.debugMode && infosNeedingDownload.count > 0) {
                 LKLog(@"LKBundlesManager: Finished downloading remote bundles.");
             }

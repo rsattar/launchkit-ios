@@ -26,14 +26,12 @@ typedef void (^LKRemoteBundleLoadHandler)(NSBundle * bundle, NSError * error);
 @property (readonly, nonatomic) BOOL latestRemoteBundlesManifestRetrieved;
 @property (readonly, nonatomic) BOOL remoteBundlesDownloaded;
 
-@property (readonly, strong, nonatomic) NSDate *serverBundlesUpdatedTime;
 @property (readonly, strong, nonatomic) NSDate *lastManifestRetrievalTime;
 
 //+ (instancetype) defaultManager;
 - (instancetype) initWithAPIClient:(LKAPIClient *)apiClient;
 
 - (void) rebuildLocalBundlesMap;
-- (void) retrieveAndCacheAvailableRemoteBundlesWithCompletion:(void (^)(NSError *error))completion;
 - (void) loadBundleWithId:(NSString *)bundleId completion:(LKRemoteBundleLoadHandler)completion;
 - (LKBundleInfo *)localBundleInfoWithName:(NSString *)name;
 - (LKBundleInfo *)remoteBundleInfoWithName:(NSString *)name;
