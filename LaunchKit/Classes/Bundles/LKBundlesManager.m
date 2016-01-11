@@ -105,6 +105,13 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
         // mark that we have the latest, and there's nothing else to do
         self.latestRemoteBundlesManifestRetrieved = YES;
 
+        // We may have tried to load some bundles earlier, but were waiting to
+        // verify that our localBundlesFolderUpdatedTime is *still* the same as
+        // on the server, so flush any pending loads.
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self notifyAnyPendingBundleLoadHandlers];
+        });
+
         return;
     }
 
@@ -432,6 +439,8 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
 - (void)loadBundleWithId:(NSString *)bundleId completion:(LKRemoteBundleLoadHandler)completion
 {
+    // Early check: we might have the manifest already, so check if this bundleId doesnt
+    // exist in the manifest (and therefore not worth waiting for downloads anyway)
     if (self.latestRemoteBundlesManifestRetrieved) {
         // We have the remote manifest at least, so we can check if our UI even exists
         LKBundleInfo *locallyAvailableBundleInfo = [self localBundleInfoWithName:bundleId];
@@ -443,9 +452,11 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
         }
     }
 
-    // If we are downloading remote bundles, always wait until those are done
+
+    // If we are not current, always wait until we are current
     if (!self.hasNewestRemoteBundles || self.retrievingRemoteBundles) {
         if (completion) {
+
             // We should wait until the remote bundle manifest is returned and then attempt this again
             NSMutableArray *handlers = self.pendingRemoteBundleLoadHandlers[bundleId];
             if (handlers == nil) {
