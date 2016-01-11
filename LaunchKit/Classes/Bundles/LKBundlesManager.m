@@ -444,7 +444,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     }
 
     // If we are downloading remote bundles, always wait until those are done
-    if (!self.hasNewestRemoteBundles && self.retrievingRemoteBundles) {
+    if (!self.hasNewestRemoteBundles || self.retrievingRemoteBundles) {
         if (completion) {
             // We should wait until the remote bundle manifest is returned and then attempt this again
             NSMutableArray *handlers = self.pendingRemoteBundleLoadHandlers[bundleId];
