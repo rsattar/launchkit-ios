@@ -454,6 +454,13 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
 
     // If we are not current, always wait until we are current
+    // This can be:
+    // 1. We are just starting up, and even though we may have a local update time,
+    // we haven't received a track call yet to update us with the "true" update time on the server
+    // 2. We may actively be downloading the bundles when this request comes in
+    //
+    // In both situations we have to wait for the process to finish, before notifying the
+    // completion block.
     if (!self.hasNewestRemoteBundles || self.retrievingRemoteBundles) {
         if (completion) {
 
