@@ -394,6 +394,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
         if (!_weakSelf.remoteBundleMap) {
             _weakSelf.remoteBundleMap = [NSMutableDictionary dictionaryWithCapacity:bundleInfos.count];
         }
+        [_weakSelf.remoteBundleMap removeAllObjects];
         for (LKBundleInfo *bundleInfo in bundleInfos) {
             // Check our local bundle map, and
             // if we have the same version,
@@ -426,6 +427,9 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
                 completion(error);
             }
         } else {
+            // Remove any bundles that we have locally that are no longer in our new manifest
+            [self deleteLocalBundlesNotAvailableInRemoteBundles];
+            // Download any bundles in our new manifest that we don't have
             [self downloadRemoteBundlesForceRetrieve:NO associatedServerTimestamp:serverTimestamp completion:^(NSError *error) {
 
                 if (completion) {
@@ -537,7 +541,94 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
                                   userInfo:@{@"message" : message}];
 }
 
-#pragma mark -
+#pragma mark - Bundle Deleting
+
+- (void)deleteLocalBundlesNotAvailableInRemoteBundles
+{
+    NSSet *remoteBundleNames = [NSSet setWithArray:self.remoteBundleMap.allKeys];
+    NSSet *localBundleNames = [NSSet setWithArray:self.localBundleMap.allKeys];
+    NSMutableSet *localBundleNamesNotInRemote = [NSMutableSet setWithCapacity:localBundleNames.count];
+    for (NSString *localName in localBundleNames) {
+        if ([remoteBundleNames member:localName] == nil) {
+            [localBundleNamesNotInRemote addObject:localName];
+        }
+    }
+
+    for (NSString *bundleName in localBundleNamesNotInRemote) {
+        [self deleteVersionsOfBundleWithName:bundleName exceptVersion:nil];
+        // Since we don't need a record of this item in local bundle map,
+        // delete it from memory
+        [self.localBundleMap removeObjectForKey:bundleName];
+    }
+}
+
+- (BOOL)deleteVersionsOfBundleWithName:(NSString *)name exceptVersion:(NSString *)versionToKeep
+{
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSURL *bundleVersionsDir = [[LKBundlesManager bundlesCacheDirectoryURLCreateIfNeeded:NO] URLByAppendingPathComponent:name];
+
+    BOOL (^deleteBundleFolder)(void) = ^BOOL {
+        NSError *folderDeleteError = nil;
+        [fileManager removeItemAtURL:bundleVersionsDir error:&folderDeleteError];
+        if (folderDeleteError == nil) {
+            LKLog(@"Deleted local folder for bundle '%@'", name);
+        }
+        return (folderDeleteError == nil);
+    };
+
+    // Shortcut, just delete the folder, if we're not keeping any versions
+    if (versionToKeep.length == 0) {
+        // Can delete the whole directory instead!
+        return deleteBundleFolder();
+    }
+
+    // Go and delete versions one by one
+    NSError *errorEnumeratingFiles = nil;
+    NSArray *versionFolderUrls = [fileManager contentsOfDirectoryAtURL:bundleVersionsDir includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsHiddenFiles error:&errorEnumeratingFiles];
+    if (errorEnumeratingFiles != nil) {
+        return NO;
+    }
+
+    NSUInteger numDeleted = 0;
+    for (NSURL *versionFolderUrl in versionFolderUrls) {
+        if ([versionFolderUrl.lastPathComponent isEqualToString:versionToKeep]) {
+            continue;
+        }
+        NSError *versionFolderDeleteError = nil;
+        [fileManager removeItemAtURL:versionFolderUrl error:&versionFolderDeleteError];
+        if (versionFolderDeleteError != nil) {
+            LKLogWarning(@"Unable to delete version: %@ of bundle '%@': %@",
+                         versionFolderUrl.lastPathComponent,
+                         name,
+                         versionFolderDeleteError);
+        } else {
+            numDeleted++;
+        }
+    }
+    if (numDeleted == versionFolderUrls.count) {
+        // We deleted everything
+        return deleteBundleFolder();
+    } else {
+        LKLog(@"Deleted %lu old versions of bundle '%@'", numDeleted, name);
+        // NOTE: This will return YES on a partial delete, meaning at least 1
+        // version was deleted.
+        return (numDeleted > 0);
+    }
+}
+
+
+- (void)deleteLocalBundleInfo:(LKBundleInfo *)bundleInfo
+{
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+
+    // localCacheUrl == .bundle file, so go back up one level to reveal version
+    NSURL *versionFolderUrl = [bundleInfo.url URLByDeletingLastPathComponent];
+    NSError *deleteVersionError = nil;
+    [fileManager removeItemAtURL:versionFolderUrl error:&deleteVersionError];
+}
+
+
+#pragma mark - Bundle Downloading
 
 - (void) downloadRemoteBundlesForceRetrieve:(BOOL)forceRetrieve associatedServerTimestamp:(NSDate *)serverTimestamp completion:(void (^)(NSError *error))completion
 {
@@ -603,48 +694,6 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
         }
         onDownloadsFinished(nil);
     }
-}
-
-
-- (void)deleteVersionsOfBundleWithName:(NSString *)name exceptVersion:(NSString *)versionToKeep
-{
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSURL *bundleVersionsDir = [[LKBundlesManager bundlesCacheDirectoryURLCreateIfNeeded:NO] URLByAppendingPathComponent:name];
-
-    NSError *errorEnumeratingFiles = nil;
-    NSArray *versionFolderUrls = [fileManager contentsOfDirectoryAtURL:bundleVersionsDir includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsHiddenFiles error:&errorEnumeratingFiles];
-    if (errorEnumeratingFiles != nil) {
-        return;
-    }
-
-    NSUInteger numDeleted = 0;
-    for (NSURL *versionFolderUrl in versionFolderUrls) {
-        if ([versionFolderUrl.lastPathComponent isEqualToString:versionToKeep]) {
-            continue;
-        }
-        NSError *versionFolderDeleteError = nil;
-        [fileManager removeItemAtURL:versionFolderUrl error:&versionFolderDeleteError];
-        if (versionFolderDeleteError != nil) {
-            LKLogWarning(@"Unable to delete version: %@ of bundle '%@': %@",
-                         versionFolderUrl.lastPathComponent,
-                         name,
-                         versionFolderDeleteError);
-        } else {
-            numDeleted++;
-        }
-    }
-    LKLog(@"Deleted %lu old versions of bundle '%@'", numDeleted, name);
-}
-
-
-- (void)deleteLocalBundleInfo:(LKBundleInfo *)bundleInfo
-{
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-
-    // localCacheUrl == .bundle file, so go back up one level to reveal version
-    NSURL *versionFolderUrl = [bundleInfo.url URLByDeletingLastPathComponent];
-    NSError *deleteVersionError = nil;
-    [fileManager removeItemAtURL:versionFolderUrl error:&deleteVersionError];
 }
 
 
