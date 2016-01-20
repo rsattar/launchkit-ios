@@ -259,26 +259,33 @@
 }
 
 
-- (NSString *)currentAppVersion
+- (NSString *)currentAppVersionAndBuild
 {
+    NSDictionary *bundleDict = [[NSBundle mainBundle] infoDictionary];
     // Example: 1.5.2
-    NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-    if (!version) {
+    NSString *version = bundleDict[@"CFBundleShortVersionString"];
+    if (!version || ![version isKindOfClass:[NSString class]]) {
         version = @"(unknown)";
     }
-    return version;
+    // Example: 10
+    NSString *build = bundleDict[@"CFBundleVersion"];
+    if (!build || ![build isKindOfClass:[NSString class]]) {
+        build = @"(unknown)";
+    }
+    // Example: 1.5.2-10
+    return [NSString stringWithFormat:@"%@-%@", version, build];
 }
 
 
 - (void)markPresentationOfRemoteUI:(NSString *)remoteUIId
 {
     NSSet *presentedInVersions = self.appVersionsForPresentedBundleId[remoteUIId];
-    NSString *currentVersion = [self currentAppVersion];
-    if (![presentedInVersions member:currentVersion]) {
+    NSString *currentVersionAndBuild = [self currentAppVersionAndBuild];
+    if (![presentedInVersions member:currentVersionAndBuild]) {
         if (presentedInVersions == nil) {
-            presentedInVersions = [NSSet setWithObject:currentVersion];
+            presentedInVersions = [NSSet setWithObject:currentVersionAndBuild];
         } else {
-            presentedInVersions = [presentedInVersions setByAddingObject:currentVersion];
+            presentedInVersions = [presentedInVersions setByAddingObject:currentVersionAndBuild];
         }
         self.appVersionsForPresentedBundleId[remoteUIId] = presentedInVersions;
         [self archiveAppVersionsForPresentedBundleId];
@@ -289,8 +296,8 @@
 - (BOOL)remoteUIPresentedForThisAppVersion:(NSString *)remoteUIId
 {
     NSSet *presentedInVersions = self.appVersionsForPresentedBundleId[remoteUIId];
-    NSString *currentVersion = [self currentAppVersion];
-    BOOL hasPresentedInThisVersion = [presentedInVersions member:currentVersion] != nil;
+    NSString *currentVersionAndBuild = [self currentAppVersionAndBuild];
+    BOOL hasPresentedInThisVersion = [presentedInVersions member:currentVersionAndBuild] != nil;
     return hasPresentedInThisVersion;
 }
 
