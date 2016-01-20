@@ -10,7 +10,7 @@
 #import <LaunchKit/LKAPIClient.h>
 #import <LaunchKit/LKAnalytics.h>
 
-NSString *const LAUNCHKIT_TEST_API_TOKEN = @"73UhwH5CXba6MZSSa9oynByf3_NtQjQlACPpenAhuGbf";
+NSString *const LAUNCHKIT_TEST_API_TOKEN = @"-0zvS4K8dMZRFrfUJdexflRpoRCuU4wmppfNfcoHkugo";
 
 @interface LaunchKit (TestingAdditions)
 
@@ -24,6 +24,9 @@ NSString *const LAUNCHKIT_TEST_API_TOKEN = @"73UhwH5CXba6MZSSa9oynByf3_NtQjQlACP
 @property (strong, nonatomic) LKAnalytics *analytics;
 // Config
 @property (readwrite, strong, nonatomic, nonnull) LKConfig *config;
+// Bundles
+@property (strong, nonatomic) LKBundlesManager *bundlesManager;
+
 - (nonnull instancetype)initWithToken:(NSString *)apiToken;
 - (void)archiveSession;
 - (void)retrieveSessionFromArchiveIfAvailable;
@@ -35,6 +38,26 @@ NSString *const LAUNCHKIT_TEST_API_TOKEN = @"73UhwH5CXba6MZSSa9oynByf3_NtQjQlACP
 
 @property (readwrite, strong, nonatomic, nonnull) NSDictionary *parameters;
 - (NSDictionary *)dictionaryWithoutLaunchKitKeys:(nonnull NSDictionary *)dictionary;
+
+@end
+
+@interface LKAPIClient (TestingAdditions)
+
+@property (strong, nonatomic) NSString *cachedBundleIdentifier; // E.g.: com.yourcompany.appname
+@property (strong, nonatomic) NSString *cachedBundleVersion;    // E.g.: 1.2
+@property (strong, nonatomic) NSString *cachedBuildNumber;      // E.g.: 14
+@property (strong, nonatomic) NSString *cachedOSVersion;        // E.g.: iOS 8.1.3
+@property (strong, nonatomic) NSString *cachedHardwareModel;    // E.g.: iPhone 7,1
+@property (strong, nonatomic) NSString *cachedLocaleIdentifier; // E.g.: en_US, system's current language + region
+@property (strong, nonatomic) NSString *cachedAppLocalization;  // E.g.: en, the localization the app is running as
+
+@end
+
+@interface LKBundlesManager (TestingAdditions)
+
+- (LKBundleInfo *)localBundleInfoWithName:(NSString *)name;
+- (LKBundleInfo *)remoteBundleInfoWithName:(NSString *)name;
+- (void)retrieveAndCacheAvailableRemoteBundlesWithAssociatedServerTimestamp:(NSDate *)serverTimestamp completion:(void (^)(NSError *error))completion;
 
 @end
 
@@ -73,7 +96,7 @@ describe(@"LaunchKit", ^{
         waitUntil(^(DoneCallback done) {
             launchKit.sessionParameters = @{};
             [launchKit trackProperties:nil completionHandler:^{
-                // Shhould give us a new session Id
+                // Should give us a new session Id
                 firstSessionId = launchKit.sessionParameters[@"session_id"];
             }];
             [launchKit trackProperties:nil completionHandler:^{
@@ -159,6 +182,51 @@ describe(@"LKConfig", ^{
         NSDictionary *stripped = [config dictionaryWithoutLaunchKitKeys:parameters];
         expect(stripped.count).to.equal(0);
     });
+});
+
+
+describe(@"LKBundlesManager", ^{
+
+
+    __block LaunchKit *launchKit = nil;
+    beforeAll(^{
+        [LKBundlesManager deleteBundlesCacheDirectory];
+
+        launchKit = [[LaunchKit alloc] initWithToken:LAUNCHKIT_TEST_API_TOKEN];
+        launchKit.apiClient.cachedBundleIdentifier = @"com.getcluster.LaunchKitSample.LKBundlesTest";
+    });
+
+    afterAll(^{
+        launchKit = nil;
+    });
+
+    it(@"does not have local release notes bundle", ^{
+        LKBundleInfo *info = [launchKit.bundlesManager localBundleInfoWithName:@"WhatsNew"];
+        expect(info).to.beNil();
+    });
+
+    it(@"can find the release notes bundle for 1.0", ^{
+        launchKit.apiClient.cachedBundleVersion = @"1.0";
+        waitUntil(^(DoneCallback done) {
+            [launchKit.bundlesManager retrieveAndCacheAvailableRemoteBundlesWithAssociatedServerTimestamp:nil completion:^(NSError *error) {
+                done();
+            }];
+        });
+        LKBundleInfo *info = [launchKit.bundlesManager localBundleInfoWithName:@"WhatsNew"];
+        expect(info).to.beInstanceOf([LKBundleInfo class]);
+    });
+
+    it(@"can delete expired bundles", ^{
+        launchKit.apiClient.cachedBundleVersion = @"2.0";
+        waitUntil(^(DoneCallback done) {
+            [launchKit.bundlesManager retrieveAndCacheAvailableRemoteBundlesWithAssociatedServerTimestamp:nil completion:^(NSError *error) {
+                done();
+            }];
+        });
+        LKBundleInfo *info = [launchKit.bundlesManager localBundleInfoWithName:@"WhatsNew"];
+        expect(info).to.beNil();
+    });
+
 });
 
 /*
