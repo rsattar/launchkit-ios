@@ -38,7 +38,10 @@ You can install the LaunchKit SDK manually by [cloning the repo](https://github.
 ```
 LaunchKit/Classes
 ```
-...to your project. You will also have to add `zlib` as a dependency on your app target.
+...to your project. Additionally, you will also have to:
+
+1. Add `zlib` as a dependency on your app target.
+2. Set `LAUNCHKIT_MANUAL_IMPORT=1` in your target's Build Settings, for all configurations (Debug and Release, by default). [See Screenshot](http://cl.ly/2a41171u0q1q)
  
 
 ### Step 2
