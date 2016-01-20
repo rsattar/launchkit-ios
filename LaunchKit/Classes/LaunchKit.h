@@ -8,10 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
-#import "LaunchKitShared.h"
-#import "LKAppUser.h"
-#import "LKConfig.h"
-#import "LKUIManager.h"
+#import <LaunchKit/LaunchKitShared.h>
+#import <LaunchKit/LKAppUser.h>
+#import <LaunchKit/LKConfig.h>
+#import <LaunchKit/LKUIManager.h>
 
 //! Project version number for LaunchKit.
 FOUNDATION_EXPORT double LaunchKitVersionNumber;
