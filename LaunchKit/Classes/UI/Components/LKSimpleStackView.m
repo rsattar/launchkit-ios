@@ -456,8 +456,9 @@
 
     NSMutableArray *constraints = [NSMutableArray arrayWithCapacity:self.arrangedSubviews.count*2];
 
-    NSString *alignmentFormat = [NSString stringWithFormat:@"%@:|-(marginLeading)-[current]-(marginTrailing)-|", self.offAxisString];
-    NSDictionary *alignmentMetrics = @{@"marginLeading" : @(offAxisMarginLeading), @"marginTrailing" : @(offAxisMarginTrailing)};
+    // Either we'll fill in the off-axis direction, or center
+    NSString *alignmentFillFormat = [NSString stringWithFormat:@"%@:|-(marginLeading)-[current]-(marginTrailing)-|", self.offAxisString];
+    NSDictionary *alignmentFillMetrics = @{@"marginLeading" : @(offAxisMarginLeading), @"marginTrailing" : @(offAxisMarginTrailing)};
 
     NSLayoutAttribute centerAttribute = (self.axis == UILayoutConstraintAxisVertical) ? NSLayoutAttributeCenterX : NSLayoutAttributeCenterY;
 
@@ -477,9 +478,9 @@
             } else {
                 // Fill
                 [constraints addObjectsFromArray:
-                 [NSLayoutConstraint constraintsWithVisualFormat:alignmentFormat
+                 [NSLayoutConstraint constraintsWithVisualFormat:alignmentFillFormat
                                                          options:alignmentOptions
-                                                         metrics:alignmentMetrics
+                                                         metrics:alignmentFillMetrics
                                                            views:NSDictionaryOfVariableBindings(current)]];
             }
         }
