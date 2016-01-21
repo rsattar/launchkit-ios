@@ -16,6 +16,8 @@
 @property (strong, nonatomic) NSLayoutConstraint *firstAxisConstraint;
 // List of all the axis-aligned constraints between arranged subviews
 @property (strong, nonatomic) NSMutableArray *spacingConstraints;
+// List of all the off-axis constraints making our view larger than subviews
+@property (strong, nonatomic) NSMutableArray *offAxisSizeConstraints;
 // Constraints on all arranged subviews aligning along axis
 @property (strong, nonatomic) NSMutableArray *alignmentConstraints;
 // Constraints being applied along axis to make some subviews bigger than others
@@ -288,6 +290,9 @@
     if (self.spacingConstraints.count > 0) {
         [constraintsToRemove addObjectsFromArray:self.spacingConstraints];
     }
+    if (self.offAxisSizeConstraints.count > 0) {
+        [constraintsToRemove addObjectsFromArray:self.offAxisSizeConstraints];
+    }
     if (self.alignmentConstraints.count > 0) {
         [constraintsToRemove addObjectsFromArray:self.alignmentConstraints];
     }
@@ -297,6 +302,7 @@
     [self removeConstraints:constraintsToRemove];
 
     self.spacingConstraints = [NSMutableArray arrayWithCapacity:self.stackedSubviews.count];
+    self.offAxisSizeConstraints = [NSMutableArray arrayWithCapacity:self.stackedSubviews.count];
     self.alignmentConstraints = [NSMutableArray arrayWithCapacity:self.stackedSubviews.count];
     self.distributionConstraints = [NSMutableArray arrayWithCapacity:self.stackedSubviews.count];
     self.firstAxisConstraint = nil;
@@ -351,12 +357,41 @@
                                                     metrics:@{@"axisMarginLeading" : @(axisMarginLeading)}
                                                       views:NSDictionaryOfVariableBindings(current)][0];
         }
+        // Add constraints here that make the stack view >= size of all the subviews
+        // e.g. like ">= subview.height", if axis is horizontal
+        if (current != nil) {
+            // Add a low priority constraint to make our view larger than our subview, in the off-axis
+            NSLayoutConstraint *constraint = nil;
+            NSLayoutAttribute attribute = NSLayoutAttributeWidth;
+            CGFloat totalMargins = 0.0;
+            if (self.axis == UILayoutConstraintAxisVertical) {
+                attribute = NSLayoutAttributeWidth;
+                if (self.layoutMarginsRelativeArrangement) {
+                    totalMargins += (self.lkMargins.left + self.lkMargins.right);
+                }
+            } else {
+                attribute = NSLayoutAttributeHeight;
+                if (self.layoutMarginsRelativeArrangement) {
+                    totalMargins += (self.lkMargins.top + self.lkMargins.bottom);
+                }
+            }
+            constraint = [NSLayoutConstraint constraintWithItem:self
+                                                      attribute:attribute
+                                                      relatedBy:NSLayoutRelationGreaterThanOrEqual
+                                                         toItem:current
+                                                      attribute:attribute
+                                                     multiplier:1.0
+                                                       constant:totalMargins];
+            constraint.priority = UILayoutPriorityDefaultLow;
+            [self.offAxisSizeConstraints addObject:constraint];
+        }
     }];
 
     [self.alignmentConstraints addObjectsFromArray:[self buildAlignmentConstraintsForArrangedSubviews]];
     [self.distributionConstraints addObjectsFromArray:[self buildDistributionConstraintsForArrangedSubviews]];
 
     NSMutableArray *constraintsToAdd = [NSMutableArray arrayWithArray:self.spacingConstraints];
+    [constraintsToAdd addObjectsFromArray:self.offAxisSizeConstraints];
     [constraintsToAdd addObjectsFromArray:self.alignmentConstraints];
     [constraintsToAdd addObjectsFromArray:self.distributionConstraints];
     if (self.firstAxisConstraint) {
