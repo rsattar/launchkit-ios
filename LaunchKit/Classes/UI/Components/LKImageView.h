@@ -11,5 +11,6 @@
 @interface LKImageView : UIImageView
 
 @property (assign, nonatomic) IBInspectable BOOL lk_templateAlways;
+@property (assign, nonatomic) IBInspectable BOOL lk_heightConstrainedToAspectWidth;
 
 @end
