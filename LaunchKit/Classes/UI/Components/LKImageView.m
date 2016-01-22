@@ -83,7 +83,7 @@
                                                                             attribute:NSLayoutAttributeWidth
                                                                            multiplier:aspectRatioToSet
                                                                              constant:0.0];
-            self.aspectRatioHeightConstraint.priority = UILayoutPriorityDefaultLow;
+            self.aspectRatioHeightConstraint.priority = UILayoutPriorityDefaultHigh;
             [self addConstraint:self.aspectRatioHeightConstraint];
         }
 
