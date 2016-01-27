@@ -104,14 +104,21 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
         // We have the same 'local' server time as our current, so
         // mark that we have the latest, and there's nothing else to do
         self.latestRemoteBundlesManifestRetrieved = YES;
-
-        // We may have tried to load some bundles earlier, but were waiting to
-        // verify that our localBundlesFolderUpdatedTime is *still* the same as
-        // on the server, so flush any pending loads.
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self notifyAnyPendingBundleLoadHandlers];
-        });
-
+        // Check against any remoteBundleMap we may have whether or not we need to download anything
+        NSMutableArray *infosNeedingDownload = [self remoteBundleInfosNeedingDownloadForceRetrieve:NO];
+        self.remoteBundlesDownloaded = (infosNeedingDownload.count == 0);
+        if (self.remoteBundlesDownloaded) {
+            // We may have tried to load some bundles earlier, but were waiting to
+            // verify that our localBundlesFolderUpdatedTime is *still* the same as
+            // on the server, so flush any pending loads.
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self notifyAnyPendingBundleLoadHandlers];
+            });
+        } else if (!self.downloadingRemoteBundles) {
+            // This should only happen if somehow our local bundles cache was *partially* purged.
+            // We have an updated manifest, but some of our local bundles aren't downloaded, so go and get them
+            [self downloadRemoteBundlesForceRetrieve:NO associatedServerTimestamp:self.localBundlesFolderUpdatedTime completion:nil];
+        }
         return;
     }
 
@@ -630,9 +637,9 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
 #pragma mark - Bundle Downloading
 
-- (void) downloadRemoteBundlesForceRetrieve:(BOOL)forceRetrieve associatedServerTimestamp:(NSDate *)serverTimestamp completion:(void (^)(NSError *error))completion
+- (NSMutableArray<LKBundleInfo *> *) remoteBundleInfosNeedingDownloadForceRetrieve:(BOOL)forceRetrieve
 {
-    NSMutableArray *infosNeedingDownload = [NSMutableArray arrayWithCapacity:self.remoteBundleMap.count];
+    NSMutableArray<LKBundleInfo *> *infosNeedingDownload = [NSMutableArray arrayWithCapacity:self.remoteBundleMap.count];
     // Make a list of infos that need to be downloaded
     for (NSString *name in self.remoteBundleMap) {
         LKBundleInfo *remoteInfo = self.remoteBundleMap[name];
@@ -642,6 +649,16 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
             [infosNeedingDownload addObject:remoteInfo];
         }
     }
+    return infosNeedingDownload;
+}
+
+- (void) downloadRemoteBundlesForceRetrieve:(BOOL)forceRetrieve associatedServerTimestamp:(NSDate *)serverTimestamp completion:(void (^)(NSError *error))completion
+{
+    if (self.downloadingRemoteBundles) {
+        // TODO(Riz): fire completion handler?
+        return;
+    }
+    NSMutableArray<LKBundleInfo *> *infosNeedingDownload = [self remoteBundleInfosNeedingDownloadForceRetrieve:forceRetrieve];
 
     __block NSInteger numItemsToDownload = infosNeedingDownload.count;
     __weak LKBundlesManager *_weakSelf = self;
