@@ -313,6 +313,12 @@ static LaunchKit *_sharedInstance;
 
 - (void)trackProperties:(NSDictionary *)properties completionHandler:(void (^)())completion
 {
+    if (self.apiToken.length == 0) {
+        if (self.debugMode) {
+            LKLogWarning(@"Not tracking, because API Token is empty");
+        }
+        return;
+    }
     if (self.verboseLogging) {
         LKLog(@"Tracking: %@", properties);
     }
