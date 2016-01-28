@@ -61,10 +61,9 @@
     NSString *launchScreenName = [NSBundle mainBundle].infoDictionary[@"UILaunchStoryboardName"];
     if (launchScreenName.length > 0) {
         // Try storyboard first
-        UIViewController *launchViewController = nil;
         @try {
             UIStoryboard *storyboard = [UIStoryboard storyboardWithName:launchScreenName bundle:bundle];
-            launchViewController = [storyboard instantiateInitialViewController];
+            self.launchViewController = [storyboard instantiateInitialViewController];
         }
         @catch (NSException *exception) {
             // Storyboard could not load, so move on
@@ -95,7 +94,6 @@
         }
 
         if (self.launchViewController != nil && self.launchScreenView == nil) {
-            self.launchViewController = launchViewController;
             self.launchScreenView = self.launchViewController.view;
         }
 
