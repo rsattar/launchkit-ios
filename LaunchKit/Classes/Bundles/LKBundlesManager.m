@@ -99,8 +99,14 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
 - (void) updateServerBundlesUpdatedTimeWithTime:(NSDate *)bundlesUpdatedTime
 {
-    if ([self.localBundlesFolderUpdatedTime isEqualToDate:bundlesUpdatedTime]) {
-
+    NSTimeInterval localTimestamp = self.localBundlesFolderUpdatedTime.timeIntervalSince1970;
+    NSTimeInterval serverTimestamp = bundlesUpdatedTime.timeIntervalSince1970;
+    if (localTimestamp == serverTimestamp) {
+        if (self.debugMode) {
+            if (self.verboseLogging) {
+                LKLog(@"Manifest is up-to-date, and remoteBundlesDownloaded = %d", self.remoteBundlesDownloaded);
+            }
+        }
         // We have the same 'local' server time as our current, so
         // mark that we have the latest, and there's nothing else to do
         self.latestRemoteBundlesManifestRetrieved = YES;
