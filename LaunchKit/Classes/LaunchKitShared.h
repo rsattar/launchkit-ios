@@ -13,7 +13,7 @@
 #import "LKConfig.h"
 #import "LKViewController.h"
 
-#define LAUNCHKIT_VERSION @"1.2.0"
+#define LAUNCHKIT_VERSION @"1.2.1"
 
 #pragma mark - LKConfig Convenience Functions
 
