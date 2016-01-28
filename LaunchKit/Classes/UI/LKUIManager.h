@@ -15,6 +15,7 @@
 typedef void (^LKReleaseNotesCompletionHandler)(BOOL didPresent);
 typedef void (^LKRemoteUILoadHandler)(LKViewController *viewController, NSError *error);
 typedef void (^LKRemoteUIDismissalHandler)(LKViewControllerFlowResult flowResult);
+typedef void (^LKOnboardingUICompletionHandler)(LKViewControllerFlowResult flowResult);
 
 @class LKUIManager;
 @protocol LKUIManagerDelegate <NSObject>
@@ -37,5 +38,9 @@ typedef void (^LKRemoteUIDismissalHandler)(LKViewControllerFlowResult flowResult
                              animated:(BOOL)animated
                      dismissalHandler:(LKRemoteUIDismissalHandler)dismissalHandler;
 - (BOOL)remoteUIPresentedForThisAppVersion:(NSString *)remoteUIId;
+
+#pragma mark - Onboarding UI
+- (void)presentOnboardingUIOnWindow:(UIWindow *)window
+                  completionHandler:(LKOnboardingUICompletionHandler)completionHandler;
 
 @end

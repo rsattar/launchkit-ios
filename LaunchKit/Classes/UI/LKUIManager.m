@@ -11,6 +11,7 @@
 #import "LaunchKitShared.h"
 #import "LKCardPresentationController.h"
 #import "LKLog.h"
+#import "LKOnboardingViewController.h"
 
 @interface LKUIManager () <LKViewControllerFlowDelegate, UIViewControllerTransitioningDelegate>
 
@@ -21,6 +22,10 @@
 @property (copy, nonatomic) LKRemoteUIDismissalHandler remoteUIControllerDismissalHandler;
 
 @property (strong, nonatomic) NSMutableDictionary *appVersionsForPresentedBundleId;
+
+// Onboarding UI
+@property (strong, nonatomic, nullable) UIViewController *postOnboardingRootViewController;
+@property (strong, nonatomic, nullable) UIWindow *onboardingWindow;
 
 @end
 
@@ -169,6 +174,91 @@
             if (handler != nil) {
                 handler(flowResult);
             }
+        }];
+    }
+}
+
+
+- (void)presentOnboardingUIOnWindow:(UIWindow *)window
+                  completionHandler:(LKOnboardingUICompletionHandler)completionHandler;
+{
+    if (window == nil) {
+        window = [UIApplication sharedApplication].keyWindow;
+    }
+    if (window == nil) {
+        LKLogError(@"Cannot display onboarding UI. Window is not available");
+        return;
+    }
+    self.onboardingWindow = window;
+    LKOnboardingViewController *onboarding = [[LKOnboardingViewController alloc] init];
+    self.postOnboardingRootViewController = window.rootViewController;
+
+    // Present it without animation, just swap out root view controller
+    self.onboardingWindow.rootViewController = onboarding;
+
+    __weak LKUIManager *weakSelf = self;
+    onboarding.dismissalHandler = ^(LKViewControllerFlowResult flowResult) {
+
+        [weakSelf transitionToRootViewController:weakSelf.postOnboardingRootViewController inWindow:weakSelf.onboardingWindow animation:LKRootViewControllerAnimationModalPresentation completion:^{
+
+            // Onboarding is done! First call
+            if (completionHandler) {
+                completionHandler(flowResult);
+            }
+
+            // Cleanup
+            weakSelf.onboardingWindow = nil;
+            weakSelf.postOnboardingRootViewController = nil;
+
+        }];
+        //weakSelf.onboardingWindow.rootViewController = weakSelf.postOnboardingRootViewController;
+
+    };
+}
+
+typedef NS_ENUM(NSInteger, LKRootViewControllerAnimation) {
+    LKRootViewControllerAnimationNone,
+    LKRootViewControllerAnimationModalDismiss,
+    LKRootViewControllerAnimationModalPresentation,
+};
+
+- (void)transitionToRootViewController:(UIViewController *)toViewController
+                              inWindow:(UIWindow *)window
+                             animation:(LKRootViewControllerAnimation)animation
+                            completion:(void (^)())completion
+{
+    void (^doneTransitioning)() = ^{
+        if (completion) {
+            completion();
+        }
+    };
+
+    if (animation == LKRootViewControllerAnimationNone) {
+        window.rootViewController = toViewController;
+        doneTransitioning();
+    } else if (animation == LKRootViewControllerAnimationModalDismiss) {
+        NSTimeInterval duration = 0.35;
+        [UIView transitionWithView:window duration:duration options:UIViewAnimationOptionAllowAnimatedContent animations:^{
+            [window insertSubview:toViewController.view belowSubview:window.rootViewController.view];
+            CGRect endFrame = window.rootViewController.view.frame;
+            endFrame.origin.y += CGRectGetHeight(endFrame);
+            window.rootViewController.view.frame = endFrame;
+        } completion:^(BOOL finished) {
+            window.rootViewController = toViewController;
+            doneTransitioning();
+        }];
+    } else if (animation== LKRootViewControllerAnimationModalPresentation) {
+
+        NSTimeInterval duration = 0.35;
+        CGRect startFrame = window.bounds;
+        startFrame.origin.y += CGRectGetHeight(startFrame);
+        toViewController.view.frame = startFrame;
+        [UIView transitionWithView:window duration:duration options:UIViewAnimationOptionAllowAnimatedContent animations:^{
+            [window insertSubview:toViewController.view aboveSubview:window.rootViewController.view];
+            toViewController.view.frame = window.bounds;
+        } completion:^(BOOL finished) {
+            window.rootViewController = toViewController;
+            doneTransitioning();
         }];
     }
 }

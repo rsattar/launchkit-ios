@@ -549,6 +549,19 @@ static LaunchKit *_sharedInstance;
     }
 }
 
+
+#pragma mark - Onboarding UI
+
+- (void)presentOnboardingUIOnWindow:(UIWindow *)window
+                  completionHandler:(LKOnboardingUICompletionHandler)completionHandler;
+{
+    [self.uiManager presentOnboardingUIOnWindow:window
+                              completionHandler:completionHandler];
+}
+
+
+#pragma mark -
+
 - (void)showUIWithName:(NSString *)uiName fromViewController:(UIViewController *)presentingViewController completion:(void (^)(LKViewControllerFlowResult flowResult, NSError *error))completion
 {
     [[LaunchKit sharedInstance] loadRemoteUIWithId:uiName completion:^(LKViewController *viewController, NSError *error) {

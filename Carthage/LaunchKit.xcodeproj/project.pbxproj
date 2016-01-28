@@ -18,6 +18,8 @@
 		054014611C1F070E0022860A /* lk_zip.h in Headers */ = {isa = PBXBuildFile; fileRef = 054014581C1F070E0022860A /* lk_zip.h */; };
 		054014641C1F07230022860A /* LKTrackOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 054014621C1F07230022860A /* LKTrackOperation.h */; };
 		054014651C1F07230022860A /* LKTrackOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 054014631C1F07230022860A /* LKTrackOperation.m */; };
+		653A823F1C59898C004BCDA0 /* LKOnboardingViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 653A823D1C59898C004BCDA0 /* LKOnboardingViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		653A82401C59898C004BCDA0 /* LKOnboardingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 653A823E1C59898C004BCDA0 /* LKOnboardingViewController.m */; };
 		654CC8671C0FBF1F00131ABE /* LKAnalytics.h in Headers */ = {isa = PBXBuildFile; fileRef = 654CC8241C0FBF1F00131ABE /* LKAnalytics.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		654CC8681C0FBF1F00131ABE /* LKAnalytics.m in Sources */ = {isa = PBXBuildFile; fileRef = 654CC8251C0FBF1F00131ABE /* LKAnalytics.m */; };
 		654CC8691C0FBF1F00131ABE /* LKAppUser.h in Headers */ = {isa = PBXBuildFile; fileRef = 654CC8261C0FBF1F00131ABE /* LKAppUser.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -80,6 +82,8 @@
 		054014581C1F070E0022860A /* lk_zip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lk_zip.h; sourceTree = "<group>"; };
 		054014621C1F07230022860A /* LKTrackOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKTrackOperation.h; sourceTree = "<group>"; };
 		054014631C1F07230022860A /* LKTrackOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKTrackOperation.m; sourceTree = "<group>"; };
+		653A823D1C59898C004BCDA0 /* LKOnboardingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKOnboardingViewController.h; sourceTree = "<group>"; };
+		653A823E1C59898C004BCDA0 /* LKOnboardingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKOnboardingViewController.m; sourceTree = "<group>"; };
 		654CC8241C0FBF1F00131ABE /* LKAnalytics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKAnalytics.h; sourceTree = "<group>"; };
 		654CC8251C0FBF1F00131ABE /* LKAnalytics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKAnalytics.m; sourceTree = "<group>"; };
 		654CC8261C0FBF1F00131ABE /* LKAppUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKAppUser.h; sourceTree = "<group>"; };
@@ -144,6 +148,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		653A823C1C59898C004BCDA0 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				653A823D1C59898C004BCDA0 /* LKOnboardingViewController.h */,
+				653A823E1C59898C004BCDA0 /* LKOnboardingViewController.m */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
 		654CC8231C0FBF1F00131ABE /* Analytics */ = {
 			isa = PBXGroup;
 			children = (
@@ -212,9 +225,10 @@
 		654CC84B1C0FBF1F00131ABE /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				654CC84C1C0FBF1F00131ABE /* Components */,
 				654CC8621C0FBF1F00131ABE /* LKUIManager.h */,
 				654CC8631C0FBF1F00131ABE /* LKUIManager.m */,
+				654CC84C1C0FBF1F00131ABE /* Components */,
+				653A823C1C59898C004BCDA0 /* Onboarding */,
 				654CC8641C0FBF1F00131ABE /* Presentation */,
 			);
 			path = UI;
@@ -352,6 +366,7 @@
 				654CC8671C0FBF1F00131ABE /* LKAnalytics.h in Headers */,
 				054014611C1F070E0022860A /* lk_zip.h in Headers */,
 				654CC8711C0FBF1F00131ABE /* LaunchKit.h in Headers */,
+				653A823F1C59898C004BCDA0 /* LKOnboardingViewController.h in Headers */,
 				654CC86D1C0FBF1F00131ABE /* LKBundlesManager.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -430,6 +445,7 @@
 				654CC86E1C0FBF1F00131ABE /* LKBundlesManager.m in Sources */,
 				654CC89B1C0FBF1F00131ABE /* UIView+LKAdditions.m in Sources */,
 				654CC8941C0FBF1F00131ABE /* LKPushCustomSegue.m in Sources */,
+				653A82401C59898C004BCDA0 /* LKOnboardingViewController.m in Sources */,
 				654CC8961C0FBF1F00131ABE /* LKSimpleStackView.m in Sources */,
 				654CC89D1C0FBF1F00131ABE /* LKUIManager.m in Sources */,
 				654CC8721C0FBF1F00131ABE /* LaunchKit.m in Sources */,

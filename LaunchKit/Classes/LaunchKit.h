@@ -140,6 +140,11 @@ FOUNDATION_EXPORT const unsigned char LaunchKitVersionString[];
                                        completion:(nullable LKReleaseNotesCompletionHandler)completion;
 
 
+#pragma mark - Onboarding UI
+- (void)presentOnboardingUIOnWindow:(nonnull UIWindow *)window
+                  completionHandler:(nullable LKOnboardingUICompletionHandler)completionHandler;
+
+
 #pragma mark - Remote UI
 /*!
  @method
