@@ -216,6 +216,41 @@ describe(@"LKBundlesManager", ^{
         expect(info).to.beInstanceOf([LKBundleInfo class]);
     });
 
+    it(@"up-to-date manifest can return a bundle immediately, if available", ^{
+        // Ensure that we save our remote bundles with an actual timestamp that's testable
+        NSDate *now = [NSDate date];
+        waitUntil(^(DoneCallback done) {
+            [launchKit.bundlesManager retrieveAndCacheAvailableRemoteBundlesWithAssociatedServerTimestamp:now completion:^(NSError *error) {
+                done();
+            }];
+        });
+        // Now create a new LK instance, with a new bundles manager instance
+        LaunchKit *newLKInstance = [[LaunchKit alloc] initWithToken:LAUNCHKIT_TEST_API_TOKEN];
+        newLKInstance.apiClient.cachedBundleIdentifier = @"com.getcluster.LaunchKitSample.LKBundlesTest";
+        newLKInstance.apiClient.cachedBundleVersion = @"1.0";
+
+        // Simulate how the bundlesManager might be told it is up-to-date
+        //NSLog(@"Marking bundles manager as 'up-to-date'");
+        [newLKInstance.bundlesManager updateServerBundlesUpdatedTimeWithTime:now];
+
+        waitUntil(^(DoneCallback done) {
+            //NSLog(@"Waiting 2.0 secs...");
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                done();
+            });
+        });
+        __block BOOL loadedBundle = NO;
+        waitUntilTimeout(2.0, ^(DoneCallback done) {
+            //NSLog(@"loading 'WhatsNew' bundle in uptodate bundles manager...");
+            [newLKInstance.bundlesManager loadBundleWithId:@"WhatsNew" completion:^(NSBundle *bundle, NSError *error) {
+                //NSLog(@"'WhatsNew' bundle did load in the bundles manager!");
+                loadedBundle = (bundle != nil);
+                done();
+            }];
+        });
+        expect(loadedBundle).to.beTruthy();
+    });
+
     it(@"can delete expired bundles", ^{
         launchKit.apiClient.cachedBundleVersion = @"2.0";
         waitUntil(^(DoneCallback done) {
