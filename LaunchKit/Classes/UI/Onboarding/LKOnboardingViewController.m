@@ -10,7 +10,7 @@
 
 #import "LKLog.h"
 
-@interface LKOnboardingViewController ()
+@interface LKOnboardingViewController () <LKViewControllerFlowDelegate>
 
 #if !TARGET_OS_TV
 @property (assign, nonatomic) BOOL shouldLockOrientation;
@@ -137,6 +137,7 @@
 #endif
 }
 
+#pragma mark - Navigation
 /*
 #pragma mark - Navigation
 
@@ -146,6 +147,8 @@
     // Pass the selected object to the new view controller.
 }
 */
+
+#pragma mark - Actual onboarding UI
 
 - (void) setActualOnboardingUI:(LKViewController *)actualOnboardingUI
 {
@@ -158,8 +161,17 @@
     }
     // TODO: (Optional) On iPads, show onboarding UI in a form sheet size
     [self addChildViewController:self.remoteOnboardingViewController];
+    self.remoteOnboardingViewController.flowDelegate = self;
     UIView *remoteView = self.remoteOnboardingViewController.view;
     [self.view addSubview:remoteView];
+}
+
+
+- (void)launchKitController:(nonnull LKViewController *)controller
+        didFinishWithResult:(LKViewControllerFlowResult)result
+                   userInfo:(nullable NSDictionary *)userInfo
+{
+    [self finishFlowWithResult:result userInfo:userInfo];
 }
 
 

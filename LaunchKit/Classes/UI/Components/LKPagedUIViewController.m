@@ -51,6 +51,7 @@
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark - Navigation
 /*
 #pragma mark - Navigation
 
@@ -61,6 +62,7 @@
 }
 */
 
+#pragma mark - Page Controls
 - (void) updatePageControls
 {
     UILayoutConstraintAxis axis = self.pagesStackView.axis;
