@@ -51,6 +51,49 @@
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark - Paging measurements
+
+- (CGFloat) currentScrollOffset
+{
+    UILayoutConstraintAxis axis = self.pagesStackView.axis;
+    CGPoint contentOffset = self.scrollView.contentOffset;
+    CGFloat offset;
+    if (axis == UILayoutConstraintAxisHorizontal) {
+        offset = contentOffset.x;
+    } else {
+        offset = contentOffset.y;
+    }
+    return offset;
+}
+
+- (CGFloat) totalContentSize
+{
+    UILayoutConstraintAxis axis = self.pagesStackView.axis;
+    CGSize contentSize = self.scrollView.contentSize;
+    CGFloat total;
+    if (axis == UILayoutConstraintAxisHorizontal) {
+        total = contentSize.width;
+    } else {
+        total = contentSize.height;
+    }
+    return total;
+}
+
+- (CGFloat) singlePageSize
+{
+    CGFloat total = [self totalContentSize];
+    CGFloat pageSize = total / [self numberOfPages];
+    return pageSize;
+}
+
+- (NSInteger) currentPage
+{
+    CGFloat offset = [self currentScrollOffset];
+    CGFloat pageSize = [self singlePageSize];
+    CGFloat page = floor((double)offset/(double)pageSize);
+    return (NSInteger)page;
+}
+
 #pragma mark - Navigation
 /*
 #pragma mark - Navigation
@@ -61,27 +104,36 @@
     // Pass the selected object to the new view controller.
 }
 */
+- (IBAction)moveToNextOnboardingPage:(UIStoryboardSegue *)segue
+{
+    if ([self currentPage] == [self numberOfPages] - 1) {
+        [self finishFlowWithResult:LKViewControllerFlowResultCompleted userInfo:nil];
+    } else {
+        [self scrollToNextPageAnimated:YES];
+    }
+}
+
+- (void) scrollToNextPageAnimated:(BOOL)animated
+{
+    CGFloat offsetInAxis = [self currentScrollOffset];
+    offsetInAxis += [self singlePageSize];
+
+    UILayoutConstraintAxis axis = self.pagesStackView.axis;
+    CGPoint contentOffset = self.scrollView.contentOffset;
+    if (axis == UILayoutConstraintAxisHorizontal) {
+        contentOffset.x = offsetInAxis;
+    } else {
+        contentOffset.y = offsetInAxis;
+    }
+    [self.scrollView setContentOffset:contentOffset animated:animated];
+}
 
 #pragma mark - Page Controls
 - (void) updatePageControls
 {
-    UILayoutConstraintAxis axis = self.pagesStackView.axis;
-    CGPoint contentOffset = self.scrollView.contentOffset;
-    CGSize contentSize = self.scrollView.contentSize;
-    CGFloat offset;
-    CGFloat total;
-    if (axis == UILayoutConstraintAxisHorizontal) {
-        offset = contentOffset.x;
-        total = contentSize.width;
-    } else {
-        offset = contentOffset.y;
-        total = contentSize.height;
-    }
-    CGFloat pageSize = total / [self numberOfPages];
-    CGFloat page = floor((double)offset/(double)pageSize);
 
     for (UIPageControl *pageControl in self.pageControls) {
-        pageControl.currentPage = page;
+        pageControl.currentPage = [self currentPage];
     }
 }
 
