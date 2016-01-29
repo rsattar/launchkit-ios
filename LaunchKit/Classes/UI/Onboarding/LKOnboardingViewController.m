@@ -128,12 +128,13 @@
 {
     [super viewDidAppear:animated];
 
+#if DEBUG
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        if (self.dismissalHandler) {
-            self.dismissalHandler(LKViewControllerFlowResultCompleted);
+        if (!self.remoteOnboardingViewController) {
+            [self finishOnboardingWithResult:LKViewControllerFlowResultCompleted];
         }
-        self.dismissalHandler = nil;
     });
+#endif
 }
 
 /*
