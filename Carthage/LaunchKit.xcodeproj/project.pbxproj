@@ -68,6 +68,12 @@
 		654CC89E1C0FBF1F00131ABE /* LKCardPresentationController.h in Headers */ = {isa = PBXBuildFile; fileRef = 654CC8651C0FBF1F00131ABE /* LKCardPresentationController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		654CC89F1C0FBF1F00131ABE /* LKCardPresentationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 654CC8661C0FBF1F00131ABE /* LKCardPresentationController.m */; };
 		654CC8A11C0FBF9000131ABE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 654CC8A01C0FBF9000131ABE /* libz.tbd */; };
+		65FC8FCE1C5C0EA500C203F6 /* LKGradientView.h in Headers */ = {isa = PBXBuildFile; fileRef = 65FC8FC81C5C0EA500C203F6 /* LKGradientView.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		65FC8FCF1C5C0EA500C203F6 /* LKGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = 65FC8FC91C5C0EA500C203F6 /* LKGradientView.m */; };
+		65FC8FD01C5C0EA500C203F6 /* LKPageControl.h in Headers */ = {isa = PBXBuildFile; fileRef = 65FC8FCA1C5C0EA500C203F6 /* LKPageControl.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		65FC8FD11C5C0EA500C203F6 /* LKPageControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 65FC8FCB1C5C0EA500C203F6 /* LKPageControl.m */; };
+		65FC8FD21C5C0EA500C203F6 /* LKPagedUIViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 65FC8FCC1C5C0EA500C203F6 /* LKPagedUIViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		65FC8FD31C5C0EA500C203F6 /* LKPagedUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 65FC8FCD1C5C0EA500C203F6 /* LKPagedUIViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -134,6 +140,12 @@
 		654CC8A01C0FBF9000131ABE /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		6593C8A91BE405DB006E5AD2 /* LaunchKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LaunchKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6593C8AE1BE405DB006E5AD2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		65FC8FC81C5C0EA500C203F6 /* LKGradientView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKGradientView.h; sourceTree = "<group>"; };
+		65FC8FC91C5C0EA500C203F6 /* LKGradientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKGradientView.m; sourceTree = "<group>"; };
+		65FC8FCA1C5C0EA500C203F6 /* LKPageControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKPageControl.h; sourceTree = "<group>"; };
+		65FC8FCB1C5C0EA500C203F6 /* LKPageControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKPageControl.m; sourceTree = "<group>"; };
+		65FC8FCC1C5C0EA500C203F6 /* LKPagedUIViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKPagedUIViewController.h; sourceTree = "<group>"; };
+		65FC8FCD1C5C0EA500C203F6 /* LKPagedUIViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKPagedUIViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -241,10 +253,16 @@
 				654CC84E1C0FBF1F00131ABE /* LKButton.m */,
 				654CC84F1C0FBF1F00131ABE /* LKFadeCustomSegue.h */,
 				654CC8501C0FBF1F00131ABE /* LKFadeCustomSegue.m */,
+				65FC8FC81C5C0EA500C203F6 /* LKGradientView.h */,
+				65FC8FC91C5C0EA500C203F6 /* LKGradientView.m */,
 				654CC8511C0FBF1F00131ABE /* LKImageView.h */,
 				654CC8521C0FBF1F00131ABE /* LKImageView.m */,
 				654CC8531C0FBF1F00131ABE /* LKNavigationController.h */,
 				654CC8541C0FBF1F00131ABE /* LKNavigationController.m */,
+				65FC8FCA1C5C0EA500C203F6 /* LKPageControl.h */,
+				65FC8FCB1C5C0EA500C203F6 /* LKPageControl.m */,
+				65FC8FCC1C5C0EA500C203F6 /* LKPagedUIViewController.h */,
+				65FC8FCD1C5C0EA500C203F6 /* LKPagedUIViewController.m */,
 				654CC8551C0FBF1F00131ABE /* LKPopCustomSegue.h */,
 				654CC8561C0FBF1F00131ABE /* LKPopCustomSegue.m */,
 				654CC8571C0FBF1F00131ABE /* LKPushCustomSegue.h */,
@@ -343,8 +361,10 @@
 				0540145B1C1F070E0022860A /* lk_ioapi.h in Headers */,
 				654CC87A1C0FBF1F00131ABE /* NSDictionary+LKFormEncoded.h in Headers */,
 				054014641C1F07230022860A /* LKTrackOperation.h in Headers */,
+				65FC8FCE1C5C0EA500C203F6 /* LKGradientView.h in Headers */,
 				654CC8731C0FBF1F00131ABE /* LaunchKitShared.h in Headers */,
 				654CC87E1C0FBF1F00131ABE /* LK_SSZipArchive.h in Headers */,
+				65FC8FD01C5C0EA500C203F6 /* LKPageControl.h in Headers */,
 				0540145F1C1F070E0022860A /* lk_unzip.h in Headers */,
 				654CC8691C0FBF1F00131ABE /* LKAppUser.h in Headers */,
 				654CC8911C0FBF1F00131ABE /* LKPopCustomSegue.h in Headers */,
@@ -365,6 +385,7 @@
 				654CC89A1C0FBF1F00131ABE /* UIView+LKAdditions.h in Headers */,
 				654CC8671C0FBF1F00131ABE /* LKAnalytics.h in Headers */,
 				054014611C1F070E0022860A /* lk_zip.h in Headers */,
+				65FC8FD21C5C0EA500C203F6 /* LKPagedUIViewController.h in Headers */,
 				654CC8711C0FBF1F00131ABE /* LaunchKit.h in Headers */,
 				653A823F1C59898C004BCDA0 /* LKOnboardingViewController.h in Headers */,
 				654CC86D1C0FBF1F00131ABE /* LKBundlesManager.h in Headers */,
@@ -447,6 +468,7 @@
 				654CC8941C0FBF1F00131ABE /* LKPushCustomSegue.m in Sources */,
 				653A82401C59898C004BCDA0 /* LKOnboardingViewController.m in Sources */,
 				654CC8961C0FBF1F00131ABE /* LKSimpleStackView.m in Sources */,
+				65FC8FD31C5C0EA500C203F6 /* LKPagedUIViewController.m in Sources */,
 				654CC89D1C0FBF1F00131ABE /* LKUIManager.m in Sources */,
 				654CC8721C0FBF1F00131ABE /* LaunchKit.m in Sources */,
 				654CC8681C0FBF1F00131ABE /* LKAnalytics.m in Sources */,
@@ -463,8 +485,10 @@
 				654CC8791C0FBF1F00131ABE /* LKUtils.m in Sources */,
 				054014601C1F070E0022860A /* lk_zip.c in Sources */,
 				0540145C1C1F070E0022860A /* lk_mztools.c in Sources */,
+				65FC8FD11C5C0EA500C203F6 /* LKPageControl.m in Sources */,
 				654CC86A1C0FBF1F00131ABE /* LKAppUser.m in Sources */,
 				654CC8901C0FBF1F00131ABE /* LKNavigationController.m in Sources */,
+				65FC8FCF1C5C0EA500C203F6 /* LKGradientView.m in Sources */,
 				654CC87D1C0FBF1F00131ABE /* NSString+LKURLEncoded.m in Sources */,
 				0540145A1C1F070E0022860A /* lk_ioapi.c in Sources */,
 			);
