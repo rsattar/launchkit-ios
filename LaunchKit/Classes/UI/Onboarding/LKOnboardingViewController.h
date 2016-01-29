@@ -14,6 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (copy, nonatomic, nullable) LKRemoteUIDismissalHandler dismissalHandler;
 
+- (void) setActualOnboardingUI:(UIViewController *)actualOnboardingUI;
+- (void) finishOnboardingWithResult:(LKViewControllerFlowResult)result;
+
 @end
 
 NS_ASSUME_NONNULL_END

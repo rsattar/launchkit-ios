@@ -20,6 +20,8 @@
 @property (strong, nonatomic, nullable) UIView *launchScreenView;
 @property (strong, nonatomic, nullable) UIViewController *launchViewController;
 
+@property (strong, nonatomic, nullable) LKViewController *remoteOnboardingViewController;
+
 @end
 
 @implementation LKOnboardingViewController
@@ -113,6 +115,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    // Fire this, in case we supplied the onboarding view controller already
+    [self setActualOnboardingUI:self.remoteOnboardingViewController];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -141,5 +145,35 @@
     // Pass the selected object to the new view controller.
 }
 */
+
+- (void) setActualOnboardingUI:(LKViewController *)actualOnboardingUI
+{
+    if (self.remoteOnboardingViewController == actualOnboardingUI) {
+        return;
+    }
+    self.remoteOnboardingViewController = actualOnboardingUI;
+    if (!self.viewIfLoaded) {
+        return;
+    }
+    // TODO: (Optional) On iPads, show onboarding UI in a form sheet size
+    [self addChildViewController:self.remoteOnboardingViewController];
+    UIView *remoteView = self.remoteOnboardingViewController.view;
+    [self.view addSubview:remoteView];
+}
+
+
+- (void) finishFlowWithResult:(LKViewControllerFlowResult)result userInfo:(NSDictionary *)userInfo
+{
+    if (self.dismissalHandler) {
+        self.dismissalHandler(result);
+    }
+    self.dismissalHandler = nil;
+}
+
+
+- (void) finishOnboardingWithResult:(LKViewControllerFlowResult)result
+{
+    [self finishFlowWithResult:result userInfo:nil];
+}
 
 @end

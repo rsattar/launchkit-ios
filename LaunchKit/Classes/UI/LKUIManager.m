@@ -211,9 +211,16 @@
             weakSelf.postOnboardingRootViewController = nil;
 
         }];
-        //weakSelf.onboardingWindow.rootViewController = weakSelf.postOnboardingRootViewController;
 
     };
+    [self loadRemoteUIWithId:@"Onboarding" completion:^(LKViewController *viewController, NSError *error) {
+        if (viewController == nil) {
+            LKLogWarning(@"Unable to load remote onboarding UI, cancelling");
+            [onboarding finishOnboardingWithResult:LKViewControllerFlowResultFailed];
+            return;
+        }
+        [onboarding setActualOnboardingUI:viewController];
+    }];
 }
 
 typedef NS_ENUM(NSInteger, LKRootViewControllerAnimation) {
