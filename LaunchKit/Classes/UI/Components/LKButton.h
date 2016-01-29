@@ -13,6 +13,7 @@
 // This class adds some useful methods and functionality that are needed to help define UI just from a storyboard
 @interface LKButton : UIButton
 
+@property (strong, nonatomic, nullable) IBInspectable UIColor *highlightedBackgroundColor;
 @property (strong, nonatomic, nullable) IBInspectable NSString *openURL;
 
 @end

@@ -8,6 +8,12 @@
 
 #import "LKButton.h"
 
+@interface LKButton ()
+
+@property (strong, nonatomic, nullable) UIColor *defaultBackgroundColor;
+
+@end
+
 @implementation LKButton
 
 /*
@@ -20,7 +26,10 @@
 
 - (void) commonInit
 {
+    self.defaultBackgroundColor = self.backgroundColor;
     [self addTarget:self action:@selector(touchedUpInside:) forControlEvents:UIControlEventTouchUpInside];
+    [self addTarget:self action:@selector(touchedDown:) forControlEvents:UIControlEventTouchDown];
+    [self addTarget:self action:@selector(touchedUpOutside:) forControlEvents:UIControlEventTouchUpOutside];
 }
 
 - (instancetype) init
@@ -61,6 +70,32 @@
             [[UIApplication sharedApplication] openURL:url];
         }
     }
+    [self setSuperBackgroundColor:self.defaultBackgroundColor];
+}
+
+- (void) touchedDown:(id)sender
+{
+    if (self.highlightedBackgroundColor != nil) {
+        [self setSuperBackgroundColor:self.highlightedBackgroundColor];
+    }
+}
+
+- (void) touchedUpOutside:(id)sender
+{
+    [self setSuperBackgroundColor:self.defaultBackgroundColor];
+}
+
+- (void) setSuperBackgroundColor:(UIColor *)backgroundColor
+{
+    super.backgroundColor = backgroundColor;
+}
+
+// Overridden so events like from IB and user-set values record the
+// default background color separately
+- (void) setBackgroundColor:(UIColor *)backgroundColor
+{
+    super.backgroundColor = backgroundColor;
+    self.defaultBackgroundColor = backgroundColor;
 }
 
 
