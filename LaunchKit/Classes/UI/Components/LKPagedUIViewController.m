@@ -29,6 +29,16 @@
     // Do any additional setup after loading the view.
 }
 
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    BOOL isPad = [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad;
+    if (isPad) {
+        return UIInterfaceOrientationMaskAll;
+    } else {
+        return UIInterfaceOrientationMaskPortrait;
+    }
+}
+
 - (NSUInteger)numberOfPages
 {
     NSUInteger numberOfPages = 0;
