@@ -16,6 +16,10 @@
 @property (weak, nonatomic) IBOutlet LKSimpleStackView *pagesStackView;
 @property (weak, nonatomic) IBOutlet UIButton *skipButton;
 @property (strong, nonatomic) IBOutletCollection(UIPageControl) NSArray *pageControls;
+
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0
+@property (assign, nonatomic) NSInteger iOS7_pageBeforeRotation;
+#endif
 @end
 
 @implementation LKPagedUIViewController
@@ -53,9 +57,58 @@
     [self updatePageControls];
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+// iOS 7 code, works in iOS 8. However if this is built with
+// a deployment target of iOS 9 and up, this code will not be
+// called
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+{
+    [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
+    self.iOS7_pageBeforeRotation = [self currentPage];
+}
+
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+{
+    [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
+    CGFloat sizePerPage = [self singlePageSize];
+    CGFloat offsetAmount = sizePerPage * self.iOS7_pageBeforeRotation;
+    CGPoint contentOffset = self.scrollView.contentOffset;
+    UILayoutConstraintAxis axis = self.pagesStackView.axis;
+    if (axis == UILayoutConstraintAxisHorizontal) {
+        contentOffset.x = offsetAmount;
+    } else {
+        contentOffset.y = offsetAmount;
+    }
+    [UIView animateWithDuration:duration animations:^{
+        [self.scrollView setContentOffset:contentOffset animated:YES];
+    }];
+}
+#endif
+
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
+{
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    // Our iOS 9+ the interface orientation work will be be called, so we must handle the rotation of the UI here
+    NSOperatingSystemVersion iOS9 = {9,0,0};
+    if ([[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:iOS9]) {
+
+        NSInteger currentPage = [self currentPage];
+        [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
+            // Page size will be accurate for current orientation here
+            CGFloat sizePerPage = [self singlePageSize];
+            CGFloat offsetAmount = sizePerPage * currentPage;
+            CGPoint contentOffset = self.scrollView.contentOffset;
+            UILayoutConstraintAxis axis = self.pagesStackView.axis;
+            if (axis == UILayoutConstraintAxisHorizontal) {
+                contentOffset.x = offsetAmount;
+            } else {
+                contentOffset.y = offsetAmount;
+            }
+            [self.scrollView setContentOffset:contentOffset animated:YES];
+        } completion:^(id<UIViewControllerTransitionCoordinatorContext>  _Nonnull context) {
+            
+        }];
+    }
 }
 
 #pragma mark - Paging measurements
