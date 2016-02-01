@@ -14,6 +14,7 @@
 
 static BOOL const LOAD_PREPACKAGED_BUNDLES = YES;
 static BOOL const LOAD_CACHED_BUNDLES = YES;
+static BOOL const LOAD_SERVER_BUNDLE_UPDATE_TIME = YES;
 static BOOL const STORE_SERVER_BUNDLE_UPDATE_TIME = YES;
 
 static LKBundlesManager *_sharedInstance;
@@ -371,7 +372,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     // our local bundles is definitely out of date with server, and if it's missing, it could imply
     // that iOS/tvOS/watchOS has "cleaned" our folders without us knowing.
     NSDate *localUpdateTime = [LKBundlesManager updateTimeInLocalBundlesFolder];
-    if (localUpdateTime) {
+    if (LOAD_SERVER_BUNDLE_UPDATE_TIME && localUpdateTime) {
         self.localBundlesFolderUpdatedTime = localUpdateTime;
     } else {
         self.localBundlesFolderUpdatedTime = [NSDate distantPast];
