@@ -42,6 +42,8 @@
     NSUInteger numberOfPages = [self numberOfPages];
     for (UIPageControl *pageControl in self.pageControls) {
         pageControl.numberOfPages = numberOfPages;
+        // Also hide/unhide if there's only 1 page
+        pageControl.hidden = (numberOfPages <= 1);
     }
     [self updatePageControls];
 }
