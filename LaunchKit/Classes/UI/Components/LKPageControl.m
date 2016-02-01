@@ -24,4 +24,13 @@
     [self setNeedsDisplay];
 }
 
+- (CGSize) intrinsicContentSize
+{
+    CGSize normalSize = [super intrinsicContentSize];
+    if (_vertical) {
+        return CGSizeMake(normalSize.height, normalSize.width);
+    }
+    return normalSize;
+}
+
 @end
