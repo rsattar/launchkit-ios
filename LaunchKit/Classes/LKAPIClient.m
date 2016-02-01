@@ -19,6 +19,7 @@ NSString* const LKAPIFailedAuthenticationChallenge = @"LKAPIFailedAuthentication
 static NSString* const API_ERROR_DOMAIN = @"LaunchKitAPI";
 
 #define LK_DEBUG_LOG_REQUESTS 0
+#define LK_DEBUG_RETRIEVE_LATEST_HOSTED_BUNDLES 0
 
 static NSCalendar *_globalGregorianCalendar;
 
@@ -129,7 +130,7 @@ static NSCalendar *_globalGregorianCalendar;
 
 
 - (void) retrieveBundlesManifestWithSuccessBlock:(void (^)(NSArray *bundleInfos))successBlock
-                                             errorBlock:(void(^)(NSError *error))errorBlock
+                                      errorBlock:(void(^)(NSError *error))errorBlock
 {
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
     params[@"token"] = self.apiToken;
@@ -147,7 +148,13 @@ static NSCalendar *_globalGregorianCalendar;
 #else
     params[@"debug_build"] = @(NO);
 #endif
-    [self objectFromPath:@"v1/bundles" method:@"GET" params:params successBlock:^(NSDictionary *responseDict) {
+    NSString *path = @"v1/bundles";
+#if DEBUG
+#ifdef LK_DEBUG_RETRIEVE_LATEST_HOSTED_BUNDLES
+    path = @"v1/bundles/debug";
+#endif
+#endif
+    [self objectFromPath:path method:@"GET" params:params successBlock:^(NSDictionary *responseDict) {
         // TODO: (Riz) Actually make ObjC models for the data, rather than returning raw dictionary
         NSArray *rawBundleInfos = responseDict[@"bundles"];
         NSMutableArray *bundleInfos = [NSMutableArray arrayWithCapacity:rawBundleInfos.count];
