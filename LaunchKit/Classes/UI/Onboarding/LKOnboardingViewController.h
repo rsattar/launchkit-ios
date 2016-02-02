@@ -6,7 +6,10 @@
 //
 //
 
-#import <LaunchKit/LaunchKit.h>
+#import <UIKit/UIKit.h>
+
+#import "LKViewController.h"
+#import "LKUIManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

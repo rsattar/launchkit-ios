@@ -6,7 +6,9 @@
 //
 //
 
-#import <LaunchKit/LaunchKit.h>
+#import <UIKit/UIKit.h>
+
+#import "LKViewController.h"
 
 @interface LKPagedUIViewController : LKViewController <UIScrollViewDelegate>
 
