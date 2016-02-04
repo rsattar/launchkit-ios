@@ -181,6 +181,11 @@
     // Pass the selected object to the new view controller.
 }
 */
+- (IBAction)onStaticContinueButtonTriggered:(UIButton *)sender
+{
+    [self moveToNextOnboardingPage:nil];
+}
+
 - (IBAction)moveToNextOnboardingPage:(UIStoryboardSegue *)segue
 {
     if ([self currentPage] == [self numberOfPages] - 1) {
