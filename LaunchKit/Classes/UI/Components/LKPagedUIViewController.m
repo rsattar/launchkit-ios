@@ -16,6 +16,8 @@
 @property (weak, nonatomic) IBOutlet LKSimpleStackView *pagesStackView;
 @property (weak, nonatomic) IBOutlet UIButton *skipButton;
 @property (strong, nonatomic) IBOutletCollection(UIPageControl) NSArray *pageControls;
+@property (weak, nonatomic) IBOutlet LKSimpleStackView *bottomStackView;
+@property (weak, nonatomic) IBOutlet UIButton *staticContinueButton;
 
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0
 @property (assign, nonatomic) NSInteger iOS7_pageBeforeRotation;
@@ -26,7 +28,12 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
+    // If the static button isn't being used, make
+    // the bottom stackview pass-through touches
+    if (self.staticContinueButton &&
+        (self.staticContinueButton.hidden || self.staticContinueButton.alpha == 0.0)) {
+        self.bottomStackView.userInteractionEnabled = NO;
+    }
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations
