@@ -19,6 +19,8 @@
 @property (weak, nonatomic) IBOutlet LKSimpleStackView *bottomStackView;
 @property (weak, nonatomic) IBOutlet UIButton *staticContinueButton;
 
+@property (strong, nonatomic) NSArray *staticButtonTitles;
+
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0
 @property (assign, nonatomic) NSInteger iOS7_pageBeforeRotation;
 #endif
@@ -34,6 +36,7 @@
         (self.staticContinueButton.hidden || self.staticContinueButton.alpha == 0.0)) {
         self.bottomStackView.userInteractionEnabled = NO;
     }
+    [self buildStaticButtonTitlesFromString];
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations
@@ -44,6 +47,61 @@
     } else {
         return UIInterfaceOrientationMaskPortrait;
     }
+}
+
+#pragma mark - Static Button Titles
+
+- (void) buildStaticButtonTitlesFromString
+{
+    if (self.staticButtonTitlesString.length == 0) {
+        self.staticButtonTitles = nil;
+        return;
+    }
+    // Trim away outer @@'s in case person wrote them in
+    NSMutableCharacterSet *trimmable = [NSMutableCharacterSet whitespaceAndNewlineCharacterSet];
+    [trimmable addCharactersInString:@"@ "];
+    self.staticButtonTitlesString = [self.staticButtonTitlesString stringByTrimmingCharactersInSet:trimmable];
+    // Check for length again
+    if (self.staticButtonTitlesString.length == 0) {
+        return;
+    }
+    // There may intentionally be *less* titles than number of pages,
+    // so fill-in from the front, if needed
+    NSMutableArray<NSString *> *buttonTitles = [[self.staticButtonTitlesString componentsSeparatedByString:@"@@"] mutableCopy];
+    NSUInteger numPages = [self numberOfPages];
+    if (buttonTitles.count < numPages) {
+        NSString *firstTitle = buttonTitles.firstObject;
+        while (buttonTitles.count < numPages) {
+            [buttonTitles insertObject:firstTitle atIndex:0];
+        }
+    } else if (buttonTitles.count > numPages) {
+        // Remove titles from the front to match the size
+        // The assumption here is that the *last* title is
+        // generally the one we'll want for the last button
+        // so adjust the remainder titles to allow that to happen
+        NSUInteger difference = buttonTitles.count - numPages;
+        [buttonTitles removeObjectsInRange:NSMakeRange(0, difference)];
+    }
+    self.staticButtonTitles = buttonTitles;
+}
+
+- (void) updateStaticButtonTitleForCurrentPage
+{
+    if (self.staticButtonTitles.count == 0) {
+        return;
+    }
+
+    NSInteger index = [self currentPage];
+    NSString *title = self.staticButtonTitles[index];
+    [self.staticContinueButton setTitle:title forState:UIControlStateNormal];
+}
+
+#pragma mark - Counting / Measuring Pages
+
+- (void) updateUIForCurrentPage
+{
+    [self updatePageControls];
+    [self updateStaticButtonTitleForCurrentPage];
 }
 
 - (NSUInteger)numberOfPages
@@ -71,7 +129,7 @@
             pageControl.hidden = YES;
         }
     }
-    [self updatePageControls];
+    [self updateUIForCurrentPage];
 }
 
 // iOS 7 code, works in iOS 8. However if this is built with
@@ -167,6 +225,10 @@
 {
     CGFloat offset = [self currentScrollOffset];
     CGFloat pageSize = [self singlePageSize];
+    if (pageSize == 0) {
+        // We may not be layed out yet
+        return 0;
+    }
     CGFloat page = floor((double)offset/(double)pageSize);
     return (NSInteger)page;
 }
@@ -221,19 +283,19 @@
 
 - (void) scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
-    [self updatePageControls];
+    [self updateUIForCurrentPage];
 }
 
 - (void) scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
 {
     if (!decelerate) {
-        [self updatePageControls];
+        [self updateUIForCurrentPage];
     }
 }
 
 - (void) scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
 {
-    [self updatePageControls];
+    [self updateUIForCurrentPage];
 }
 
 @end

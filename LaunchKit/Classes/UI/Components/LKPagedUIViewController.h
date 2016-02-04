@@ -12,4 +12,7 @@
 
 @interface LKPagedUIViewController : LKViewController <UIScrollViewDelegate>
 
+// A single string, with static titles separated by '@@'
+@property (strong, nonatomic) IBInspectable NSString *staticButtonTitlesString;
+
 @end
