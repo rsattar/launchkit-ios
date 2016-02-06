@@ -31,6 +31,7 @@ typedef NS_ENUM(NSInteger, LKViewControllerFlowResult)
 @interface LKViewController : UIViewController
 
 @property (weak, nonatomic, nullable) id <LKViewControllerFlowDelegate> flowDelegate;
+@property (readonly, nonatomic) LKViewControllerFlowResult finishedFlowResult;
 
 @property (strong, nonatomic, nullable) LKBundleInfo *bundleInfo;
 

@@ -142,6 +142,12 @@
             viewController = viewController.parentViewController;
         }
     }
+    [self markFinishedFlowResult:result];
+}
+
+- (void) markFinishedFlowResult:(LKViewControllerFlowResult)result
+{
+    _finishedFlowResult = result;
 }
 
 #pragma mark - Form Submission

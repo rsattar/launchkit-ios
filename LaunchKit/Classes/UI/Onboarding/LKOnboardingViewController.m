@@ -10,6 +10,12 @@
 
 #import "LKLog.h"
 
+@interface LKViewController (LKHelperAdditions)
+
+- (void) markFinishedFlowResult:(LKViewControllerFlowResult)result;
+
+@end
+
 @interface LKOnboardingViewController () <LKViewControllerFlowDelegate>
 
 #if !TARGET_OS_TV
@@ -152,6 +158,9 @@
 
 - (void) setActualOnboardingUI:(LKViewController *)actualOnboardingUI
 {
+    if (self.finishedFlowResult != LKViewControllerFlowResultNotSet || actualOnboardingUI == nil) {
+        return;
+    }
     if (self.remoteOnboardingViewController == actualOnboardingUI) {
         return;
     }
@@ -181,6 +190,7 @@
         self.dismissalHandler(result);
     }
     self.dismissalHandler = nil;
+    [self markFinishedFlowResult:result];
 }
 
 
