@@ -420,9 +420,9 @@
 #pragma mark - Page Controls
 - (void) updatePageControls
 {
-
+    NSInteger page = [self currentPage];
     for (UIPageControl *pageControl in self.pageControls) {
-        pageControl.currentPage = [self currentPage];
+        pageControl.currentPage = page;
     }
 }
 
