@@ -14,5 +14,7 @@
 
 // A single string, with static titles separated by '@@'
 @property (strong, nonatomic) IBInspectable NSString *staticButtonTitlesString;
+// A single string, with bundled image names separated by '@@'
+@property (strong, nonatomic) IBInspectable NSString *fixedBackgroundImageNamesString;
 
 @end
