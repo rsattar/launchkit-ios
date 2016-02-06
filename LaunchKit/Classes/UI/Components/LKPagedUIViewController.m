@@ -116,8 +116,14 @@
 - (void) updateFixedBackgroundImageForCurrentScroll
 {
     CGFloat pageSize = [self singlePageSize];
+    NSUInteger numPages = [self numberOfPages];
     NSInteger currentPage = [self currentPage];
-    if ((currentPage + 1) >= [self numberOfPages]) {
+    CGFloat offset = [self currentScrollOffset];
+    if (offset < 0.0) {
+        // Trying to rubber-band negative, skip
+        return;
+    }
+    if ((currentPage + 1) >= numPages) {
         // Nothing to animate *to*, this is the last image
         return;
     }
@@ -369,7 +375,7 @@
         return 0;
     }
     CGFloat page = floor((double)offset/(double)pageSize);
-    return (NSInteger)page;
+    return MAX(0,(NSInteger)page);
 }
 
 #pragma mark - Navigation
