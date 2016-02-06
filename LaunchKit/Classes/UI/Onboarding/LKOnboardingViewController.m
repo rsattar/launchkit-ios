@@ -135,9 +135,11 @@
     [super viewDidAppear:animated];
 
 #if DEBUG
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    NSTimeInterval cancelWaitTime = 5.0;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(cancelWaitTime * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         if (!self.remoteOnboardingViewController) {
-            [self finishOnboardingWithResult:LKViewControllerFlowResultCompleted];
+            LKLogError(@"DEBUGGING ONLY: Actual onboarding UI failed to load from remote after %.1f seconds, failing...", cancelWaitTime);
+            [self finishOnboardingWithResult:LKViewControllerFlowResultFailed];
         }
     });
 #endif
