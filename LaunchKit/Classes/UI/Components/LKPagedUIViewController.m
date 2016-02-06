@@ -192,9 +192,13 @@
 - (nullable UIImage *) imageInBundleWithName:(NSString *)imageName
 {
     NSBundle *bundle = [NSBundle mainBundle];
+    if (self.bundleInfo != nil) { //  && [self.bundleInfo.url.scheme isEqualToString:@"file"]
+        NSURL *url = self.bundleInfo.url;
+        bundle = [NSBundle bundleWithURL:url];
+    }
     UIImage *image = nil;
     if ([self respondsToSelector:@selector(traitCollection)]) {
-        image = [UIImage imageNamed:imageName];// inBundle:bundle compatibleWithTraitCollection:nil];
+        image = [UIImage imageNamed:imageName inBundle:bundle compatibleWithTraitCollection:nil];
     } else {
         // iOS 7 and below :(
         // Try and find the named image manually in the bundle
