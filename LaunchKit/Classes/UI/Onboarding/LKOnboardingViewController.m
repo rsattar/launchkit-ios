@@ -175,6 +175,7 @@
     self.remoteOnboardingViewController.flowDelegate = self;
     UIView *remoteView = self.remoteOnboardingViewController.view;
     [self.view addSubview:remoteView];
+    [self setNeedsStatusBarAppearanceUpdate];
 }
 
 
@@ -199,6 +200,18 @@
 - (void) finishOnboardingWithResult:(LKViewControllerFlowResult)result
 {
     [self finishFlowWithResult:result userInfo:nil];
+}
+
+#pragma mark - Status Bar Management
+
+- (UIViewController *)childViewControllerForStatusBarHidden
+{
+    return self.remoteOnboardingViewController;
+}
+
+- (UIViewController *)childViewControllerForStatusBarStyle
+{
+    return self.remoteOnboardingViewController;
 }
 
 @end
