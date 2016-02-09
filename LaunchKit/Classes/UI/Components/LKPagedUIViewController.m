@@ -26,6 +26,11 @@
 @property (strong, nonatomic) NSArray *fixedBackgroundImageNames;
 @property (strong, nonatomic) NSMutableDictionary *fixedImageCache;
 
+@property (weak, nonatomic) IBOutlet UIImageView *scrollingBackgroundImage;
+@property (strong, nonatomic) IBOutletCollection(NSLayoutConstraint) NSArray *scrollingBackgroundImageConstraints;
+// Once our view loads, we will set this constraint to be the either top or left constraint
+@property (strong, nonatomic) NSLayoutConstraint *scrollImageOffsetConstraint;
+
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0
 @property (assign, nonatomic) NSInteger iOS7_pageBeforeRotation;
 #endif
@@ -43,6 +48,7 @@
     }
     [self buildStaticButtonTitlesFromString];
     [self buildFixedBackgroundImageNamesFromString];
+    [self prepareScrollingBackgroundImageConstraints];
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations
@@ -238,6 +244,81 @@
     }
 
     return image;
+}
+
+#pragma mark - Scrolling Background Image
+
+- (void) prepareScrollingBackgroundImageConstraints
+{
+    if (self.scrollingBackgroundImage.image == nil) {
+        return;
+    }
+
+    [self.view removeConstraints:self.scrollingBackgroundImageConstraints];
+    self.scrollingBackgroundImageConstraints = nil;
+
+    NSMutableArray *newConstraints = [NSMutableArray arrayWithCapacity:4];
+    UILayoutConstraintAxis axis = self.pagesStackView.axis;
+    // Top and Left Constraint
+    NSLayoutConstraint *topConstraint = [self createConstraintForAttribute:NSLayoutAttributeTop];
+    NSLayoutConstraint *leftConstraint = [self createConstraintForAttribute:NSLayoutAttributeLeading];
+    if (axis == UILayoutConstraintAxisVertical) {
+        self.scrollImageOffsetConstraint = topConstraint;
+    } else {
+        self.scrollImageOffsetConstraint = leftConstraint;
+    }
+    [newConstraints addObject:topConstraint];
+    [newConstraints addObject:leftConstraint];
+
+    // Bottom or Right constraint
+    NSLayoutConstraint *thirdConstraint = nil;
+    if (axis == UILayoutConstraintAxisVertical) {
+        thirdConstraint = [self createConstraintForAttribute:NSLayoutAttributeRight];
+    } else {
+        thirdConstraint = [self createConstraintForAttribute:NSLayoutAttributeBottom];
+    }
+    [newConstraints addObject:thirdConstraint];
+
+    self.scrollingBackgroundImageConstraints = newConstraints;
+
+    [self.view addConstraints:newConstraints];
+}
+
+- (NSLayoutConstraint *)createConstraintForAttribute:(NSLayoutAttribute)attribute
+{
+    NSLayoutConstraint *constraint = [NSLayoutConstraint constraintWithItem:self.scrollingBackgroundImage attribute:attribute relatedBy:NSLayoutRelationEqual toItem:self.view attribute:attribute multiplier:1.0 constant:0.0];
+
+    return constraint;
+}
+
+- (void) updateScrollingBackgroundImageOffset
+{
+    if (self.scrollingBackgroundImage.image == nil) {
+        return;
+    }
+    UILayoutConstraintAxis axis = self.pagesStackView.axis;
+    CGFloat imageViewSize = 0.0;
+    if (axis == UILayoutConstraintAxisHorizontal) {
+        imageViewSize = CGRectGetWidth(self.scrollingBackgroundImage.bounds);
+    } else {
+        imageViewSize = CGRectGetHeight(self.scrollingBackgroundImage.bounds);
+    }
+    CGFloat totalPageSize = [self totalContentSize];
+    CGFloat singlePageSize = [self singlePageSize];
+    // Add some total overscroll buffer, let's say 25% of page size
+    CGFloat overscrollBuffer = singlePageSize/4.0;
+    if (singlePageSize == 0.0 || singlePageSize == totalPageSize) {
+        return;
+    }
+    CGFloat scrollOffset = [self currentScrollOffset];
+    CGFloat pageScrollPercentage = scrollOffset / (totalPageSize - singlePageSize);
+
+    // Mark what the max and min scroll values will be, then set the offset
+    CGFloat maxImageScroll = (imageViewSize - singlePageSize) - overscrollBuffer;
+    CGFloat singleSideOverscroll = (overscrollBuffer / 2.0);
+    CGFloat scrollingImageOffset = MIN(maxImageScroll + singleSideOverscroll, MAX(-singleSideOverscroll, maxImageScroll * pageScrollPercentage));
+    self.scrollImageOffsetConstraint.constant = -singleSideOverscroll - scrollingImageOffset;
+    [self.view setNeedsLayout];
 }
 
 #pragma mark - Counting / Measuring Pages
@@ -446,6 +527,7 @@
 - (void) scrollViewDidScroll:(UIScrollView *)scrollView
 {
     [self updateFixedBackgroundImageForCurrentScroll];
+    [self updateScrollingBackgroundImageOffset];
 }
 
 @end
