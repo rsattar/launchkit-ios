@@ -328,6 +328,7 @@
     [self updatePageControls];
     [self updateStaticButtonTitleForCurrentPage];
     [self updateFixedBackgroundImageForCurrentPageAnimated:NO];
+    [self updateScrollingBackgroundImageOffset];
 }
 
 - (NSUInteger)numberOfPages
