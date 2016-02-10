@@ -686,13 +686,14 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     }
     NSMutableArray<LKBundleInfo *> *infosNeedingDownload = [self remoteBundleInfosNeedingDownloadForceRetrieve:forceRetrieve];
 
+    __block unsigned long long totalDownloadSize = 0;
     __block NSInteger numItemsToDownload = infosNeedingDownload.count;
     __weak LKBundlesManager *_weakSelf = self;
 
 #if DEBUG
     NSDate *startDate = [NSDate date];
 #endif
-    void (^onDownloadsFinished)(NSError *error) = ^(NSError *error) {
+    void (^onDownloadsFinished)(unsigned long long downloadSize, NSError *error) = ^(unsigned long long downloadSize, NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
             _weakSelf.remoteBundlesDownloaded = (error == nil);
             _weakSelf.downloadingRemoteBundles = NO;
@@ -707,7 +708,8 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 #if DEBUG
             if (self.debugMode && self.verboseLogging) {
                 NSTimeInterval timeTaken = -[startDate timeIntervalSinceNow];
-                LKLog(@"LKBundlesManager: Took %.2f seconds to download remote bundles", timeTaken);
+                unsigned long long kilobytes = downloadSize / (unsigned long long) 1024;
+                LKLog(@"LKBundlesManager: Took %.2f seconds to download %lluKB remote bundles", timeTaken, kilobytes);
             }
 #endif
             [self notifyAnyPendingBundleLoadHandlers];
@@ -733,10 +735,11 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
                 }
                 LKLog(@"LKBundlesManager: Downloading %@ version %@ (%@)...", info.name, info.version, newOrUpdating);
             }
-            [_weakSelf downloadBundleFromInfo:info deleteOtherVersions:YES completion:^(LKBundleInfo *savedInfo, NSError *error) {
+            [_weakSelf downloadBundleFromInfo:info deleteOtherVersions:YES completion:^(LKBundleInfo *savedInfo, unsigned long long downloadSize, NSError *error) {
                 numItemsToDownload--;
+                totalDownloadSize += downloadSize;
                 if (numItemsToDownload == 0) {
-                    onDownloadsFinished(error);
+                    onDownloadsFinished(totalDownloadSize, error);
                 }
             }];
         }
@@ -744,17 +747,17 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
         if (self.debugMode) {
             LKLog(@"LKBundlesManager: No need to download any remote bundles.");
         }
-        onDownloadsFinished(nil);
+        onDownloadsFinished(0, nil);
     }
 }
 
 
-- (void) downloadBundleFromInfo:(LKBundleInfo *)info deleteOtherVersions:(BOOL)deleteOtherVersions completion:(void(^)(LKBundleInfo *savedInfo, NSError *error))completion
+- (void) downloadBundleFromInfo:(LKBundleInfo *)info deleteOtherVersions:(BOOL)deleteOtherVersions completion:(void(^)(LKBundleInfo *savedInfo, unsigned long long downloadSize, NSError *error))completion
 {
     NSURL *remoteUICacheDirUrl = [LKBundlesManager bundlesCacheDirectoryURLCreateIfNeeded:YES];
     NSURL *localCacheParentUrl = [[remoteUICacheDirUrl URLByAppendingPathComponent:info.name] URLByAppendingPathComponent:info.version];
     __weak LKBundlesManager *_weakSelf = self;
-    [self saveDataFromRemoteUrl:info.url toDirectoryUrl:localCacheParentUrl completion:^(NSURL *savedFileUrl, NSError *error) {
+    [self saveDataFromRemoteUrl:info.url toDirectoryUrl:localCacheParentUrl completion:^(NSURL *savedFileUrl, unsigned long long downloadSize, NSError *error) {
         if (completion) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 LKBundleInfo *savedInfo = nil;
@@ -770,14 +773,14 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
                                                     exceptVersion:savedInfo.version];
                     }
                 }
-                completion(savedInfo, error);
+                completion(savedInfo, downloadSize, error);
             });
         }
     }];
 }
 
 
-- (void)saveDataFromRemoteUrl:(NSURL *)remoteUrl toDirectoryUrl:(NSURL *)directoryUrl completion:(void (^)(NSURL *savedFileUrl, NSError *error))completion
+- (void)saveDataFromRemoteUrl:(NSURL *)remoteUrl toDirectoryUrl:(NSURL *)directoryUrl completion:(void (^)(NSURL *savedFileUrl, unsigned long long downloadSize, NSError *error))completion
 {
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSURLRequest *request = [NSURLRequest requestWithURL:remoteUrl];
@@ -790,7 +793,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
         NSURL *savedUrl = nil;
         if (error) {
             if (completion) {
-                completion(nil, error);
+                completion(nil, 0, error);
             }
         } else {
             if ([fileManager fileExistsAtPath:directoryUrl.path]) {
@@ -799,12 +802,18 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
                 if (deleteExistingFileError != nil) {
                     LKLogError(@"Couldn't delete existing item at %@ in order to download a new copy. Error: %@", deleteExistingFileError);
                     if (completion) {
-                        completion(nil, deleteExistingFileError);
+                        completion(nil, 0, deleteExistingFileError);
                     }
                     return;
                 }
             }
 
+            NSError *fileSizeError = nil;
+            NSDictionary *fileAttributes = [fileManager attributesOfItemAtPath:location.path error:&fileSizeError];
+            unsigned long long downloadSize = 0;
+            if (fileAttributes != nil && fileSizeError == nil) {
+                downloadSize = [fileAttributes[NSFileSize] unsignedLongLongValue];
+            }
 
             // Unzip if the saved file is zipped
             if ([remoteUrl.lastPathComponent.pathExtension isEqualToString:@"zip"]) {
@@ -816,7 +825,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
                 if (!unzipped || unzipError != nil) {
                     if (completion) {
-                        completion(nil, unzipError);
+                        completion(nil, downloadSize, unzipError);
                     }
                     return;
                 }
@@ -838,7 +847,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
                 savedUrl = directoryUrl;
             }
             if (completion) {
-                completion(savedUrl, nil);
+                completion(savedUrl, downloadSize, nil);
             }
         }
     }];
