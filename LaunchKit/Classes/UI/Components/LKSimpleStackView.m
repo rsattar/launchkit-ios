@@ -407,7 +407,7 @@
 
 - (NSArray *)buildDistributionConstraintsForArrangedSubviews
 {
-    NSMutableArray *constraints = [NSMutableArray arrayWithCapacity:self.arrangedSubviews.count*2];
+    NSMutableArray *constraints = [NSMutableArray arrayWithCapacity:self.stackedSubviews.count*2];
 
     NSLayoutAttribute axisDimensionAttribute = (self.axis == UILayoutConstraintAxisVertical) ? NSLayoutAttributeHeight : NSLayoutAttributeWidth;
 
@@ -489,7 +489,7 @@
         }
     }
 
-    NSMutableArray *constraints = [NSMutableArray arrayWithCapacity:self.arrangedSubviews.count*2];
+    NSMutableArray *constraints = [NSMutableArray arrayWithCapacity:self.stackedSubviews.count*2];
 
     // Either we'll fill in the off-axis direction, or center
     NSString *alignmentFillFormat = [NSString stringWithFormat:@"%@:|-(marginLeading)-[current]-(marginTrailing)-|", self.offAxisString];
@@ -529,8 +529,8 @@
 
 - (void) debug_printLayout {
     //var arrangedConstraints: [NSLayoutConstraint] = []
-    for (UIView *arrangedSubview in self.arrangedSubviews) {
-        NSInteger index = [self.arrangedSubviews indexOfObject:arrangedSubview];
+    for (UIView *arrangedSubview in self.stackedSubviews) {
+        NSInteger index = [self.stackedSubviews indexOfObject:arrangedSubview];
         NSLog(@"Arranged subview: %ld %@", (long)(index+1), arrangedSubview);
         NSLog(@"---------------------------------");
         NSArray *constraints = arrangedSubview.constraints;
