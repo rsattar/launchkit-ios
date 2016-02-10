@@ -273,7 +273,7 @@
     // Bottom or Right constraint
     NSLayoutConstraint *thirdConstraint = nil;
     if (axis == UILayoutConstraintAxisVertical) {
-        thirdConstraint = [self createConstraintForAttribute:NSLayoutAttributeRight];
+        thirdConstraint = [self createConstraintForAttribute:NSLayoutAttributeTrailing];
     } else {
         thirdConstraint = [self createConstraintForAttribute:NSLayoutAttributeBottom];
     }
@@ -305,8 +305,9 @@
     }
     CGFloat totalPageSize = [self totalContentSize];
     CGFloat singlePageSize = [self singlePageSize];
-    // Add some total overscroll buffer, let's say 25% of page size
-    CGFloat overscrollBuffer = singlePageSize/4.0;
+    // Add some total overscroll buffer, let's say 5% of image size
+    CGFloat overscrollBuffer = MIN(64.0, imageViewSize*0.05);
+    CGFloat singleSideOverscroll = (overscrollBuffer / 2.0);
     if (singlePageSize == 0.0 || singlePageSize == totalPageSize) {
         return;
     }
@@ -314,10 +315,15 @@
     CGFloat pageScrollPercentage = scrollOffset / (totalPageSize - singlePageSize);
 
     // Mark what the max and min scroll values will be, then set the offset
-    CGFloat maxImageScroll = (imageViewSize - singlePageSize) - overscrollBuffer;
-    CGFloat singleSideOverscroll = (overscrollBuffer / 2.0);
-    CGFloat scrollingImageOffset = MIN(maxImageScroll + singleSideOverscroll, MAX(-singleSideOverscroll, maxImageScroll * pageScrollPercentage));
-    self.scrollImageOffsetConstraint.constant = -singleSideOverscroll - scrollingImageOffset;
+    CGFloat maxImageScrollRange = (imageViewSize-singlePageSize-overscrollBuffer);
+    CGFloat offset = (maxImageScrollRange * pageScrollPercentage);
+    // Ensure we have clamp offset when underscrolling
+    offset = MAX(offset, -singleSideOverscroll);
+    // Ensure we have clamp offset when overscrolling
+    offset = MIN(maxImageScrollRange+singleSideOverscroll, offset);
+    // Add the necessary starting offset
+    offset += singleSideOverscroll;
+    self.scrollImageOffsetConstraint.constant = -offset;
     [self.view setNeedsLayout];
 }
 
