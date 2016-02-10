@@ -134,15 +134,14 @@
 {
     [super viewDidAppear:animated];
 
-#if DEBUG
-    NSTimeInterval cancelWaitTime = 5.0;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(cancelWaitTime * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        if (!self.remoteOnboardingViewController) {
-            LKLogError(@"DEBUGGING ONLY: Actual onboarding UI failed to load from remote after %.1f seconds, failing...", cancelWaitTime);
-            [self finishOnboardingWithResult:LKViewControllerFlowResultFailed];
-        }
-    });
-#endif
+    if (self.maxWaitTimeInterval > 0) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(self.maxWaitTimeInterval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            if (!self.remoteOnboardingViewController) {
+                LKLogError(@"Actual onboarding UI failed to load from remote after %.1f seconds, failing...", self.maxWaitTimeInterval);
+                [self finishOnboardingWithResult:LKViewControllerFlowResultFailed];
+            }
+        });
+    }
 }
 
 #pragma mark - Navigation

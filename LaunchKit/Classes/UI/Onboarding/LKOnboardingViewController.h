@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface LKOnboardingViewController : LKViewController
 
+@property (assign, nonatomic) NSTimeInterval maxWaitTimeInterval;
 @property (copy, nonatomic, nullable) LKRemoteUIDismissalHandler dismissalHandler;
 
 - (void) setActualOnboardingUI:(UIViewController *)actualOnboardingUI;
