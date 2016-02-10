@@ -384,13 +384,22 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
 - (void) retrieveRemoteBundlesManifestWithCompletion:(void (^)(NSError *error))completion
 {
+#if DEBUG
+    NSDate *startDate = [NSDate date];
+#endif
     void (^finishWithError)(NSError *error) = ^(NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
             self.lastManifestRetrievalTime = [NSDate date];
             self.latestRemoteBundlesManifestRetrieved = (error == nil);
+#if DEBUG
             if (self.debugMode) {
                 LKLog(@"LKBundlesManager: Finished retrieving remote bundle manifest.");
+                if (self.verboseLogging) {
+                    NSTimeInterval timeTaken = -[startDate timeIntervalSinceNow];
+                    LKLog(@"LKBundlesManager: Took %.2f seconds to retrieve bundles manifest", timeTaken);
+                }
             }
+#endif
             self.retrievingRemoteBundlesManifest = NO;
             if (completion) {
                 completion(error);
@@ -435,20 +444,30 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
 - (void)retrieveAndCacheAvailableRemoteBundlesWithAssociatedServerTimestamp:(NSDate *)serverTimestamp completion:(void (^)(NSError *error))completion
 {
+#if DEBUG
+    NSDate *startDate = [NSDate date];
+#endif
+    void (^finish)(NSError *) = ^(NSError *error) {
+#if DEBUG
+        if (self.debugMode && self.verboseLogging) {
+            NSTimeInterval timeTaken = -[startDate timeIntervalSinceNow];
+            LKLog(@"LKBundlesManager: Took %.2f seconds to retrieve and cache remote bundles", timeTaken);
+        }
+#endif
+        if (completion) {
+            completion(error);
+        }
+    };
+
     [self retrieveRemoteBundlesManifestWithCompletion:^(NSError *error) {
         if (error != nil) {
-            if (completion) {
-                completion(error);
-            }
+            finish(error);
         } else {
             // Remove any bundles that we have locally that are no longer in our new manifest
             [self deleteLocalBundlesNotAvailableInRemoteBundles];
             // Download any bundles in our new manifest that we don't have
             [self downloadRemoteBundlesForceRetrieve:NO associatedServerTimestamp:serverTimestamp completion:^(NSError *error) {
-
-                if (completion) {
-                    completion(error);
-                }
+                finish(error);
             }];
         }
     }];
@@ -670,6 +689,9 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     __block NSInteger numItemsToDownload = infosNeedingDownload.count;
     __weak LKBundlesManager *_weakSelf = self;
 
+#if DEBUG
+    NSDate *startDate = [NSDate date];
+#endif
     void (^onDownloadsFinished)(NSError *error) = ^(NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
             _weakSelf.remoteBundlesDownloaded = (error == nil);
@@ -682,6 +704,12 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
             if (self.debugMode && infosNeedingDownload.count > 0) {
                 LKLog(@"LKBundlesManager: Finished downloading remote bundles.");
             }
+#if DEBUG
+            if (self.debugMode && self.verboseLogging) {
+                NSTimeInterval timeTaken = -[startDate timeIntervalSinceNow];
+                LKLog(@"LKBundlesManager: Took %.2f seconds to download remote bundles", timeTaken);
+            }
+#endif
             [self notifyAnyPendingBundleLoadHandlers];
             if (completion) {
                 completion(error);
