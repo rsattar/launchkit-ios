@@ -18,7 +18,7 @@ _Warning! This part of the process needs to be completed by someone with access 
 
 ### Step 1
 
-#### Option 1: Cocoapods
+#### Option 1: CocoaPods
 LaunchKit is available through [CocoaPods](http://cocoapods.org/). To install it, simply add the following line to your `Podfile`:
 
 ```
