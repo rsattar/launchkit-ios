@@ -166,7 +166,7 @@
         return;
     }
     self.remoteOnboardingViewController = actualOnboardingUI;
-    if (!self.viewIfLoaded) {
+    if (![self isViewLoaded]) {
         return;
     }
     // TODO: (Optional) On iPads, show onboarding UI in a form sheet size
