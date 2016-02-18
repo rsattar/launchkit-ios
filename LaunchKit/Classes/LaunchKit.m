@@ -196,13 +196,14 @@ static LaunchKit *_sharedInstance;
 {
     _debugMode = debugMode;
     self.analytics.debugMode = debugMode;
-    LKLOG_ENABLED = _debugMode;
+    LKLOG_ENABLED = _debugMode || _verboseLogging;
     self.bundlesManager.debugMode = debugMode;
 }
 
 - (void)setVerboseLogging:(BOOL)verboseLogging
 {
     _verboseLogging = verboseLogging;
+    LKLOG_ENABLED = _debugMode || _verboseLogging;
     self.apiClient.verboseLogging = verboseLogging;
     self.analytics.verboseLogging = verboseLogging;
     self.bundlesManager.verboseLogging = verboseLogging;
