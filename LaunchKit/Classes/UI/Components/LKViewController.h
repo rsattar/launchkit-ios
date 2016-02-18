@@ -18,6 +18,8 @@ typedef NS_ENUM(NSInteger, LKViewControllerFlowResult)
     LKViewControllerFlowResultFailed,
 };
 
+extern  NSString * _Nonnull NSStringFromViewControllerFlowResult(LKViewControllerFlowResult result);
+
 @class LKViewController;
 @protocol LKViewControllerFlowDelegate <NSObject>
 

@@ -321,3 +321,20 @@
 
 
 @end
+
+NSString * NSStringFromViewControllerFlowResult(LKViewControllerFlowResult result)
+{
+    switch (result) {
+        case LKViewControllerFlowResultNotSet:
+            return @"not-set";
+        case LKViewControllerFlowResultCompleted:
+            return @"completed";
+        case LKViewControllerFlowResultCancelled:
+            return @"cancelled";
+        case LKViewControllerFlowResultFailed:
+            return @"failed";
+        default:
+            NSLog(@"Couldn't understand flow result %ld; returning 'unknown'", result);
+            return @"unknown";
+    }
+}
