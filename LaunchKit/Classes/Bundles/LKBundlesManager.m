@@ -142,7 +142,9 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
                 if ([self.localBundlesFolderUpdatedTime isEqualToDate:[NSDate distantPast]]) {
                     LKLog(@"RETRIEVING Manifest+Bundles because: Local bundle time is not available, assuming no bundles");
                 } else {
-                    LKLog(@"RETRIEVING Manifest+Bundles because: Local bundle time (%@) != server time (%@)");
+                    LKLog(@"RETRIEVING Manifest+Bundles because: Local bundle time (%@) != server time (%@)",
+                          self.localBundlesFolderUpdatedTime,
+                          bundlesUpdatedTime);
                 }
             }
         }
