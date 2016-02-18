@@ -69,20 +69,24 @@
     NSString *launchScreenName = [NSBundle mainBundle].infoDictionary[@"UILaunchStoryboardName"];
     if (launchScreenName.length > 0) {
         // Try storyboard first
-        @try {
-            UIStoryboard *storyboard = [UIStoryboard storyboardWithName:launchScreenName bundle:bundle];
-            self.launchViewController = [storyboard instantiateInitialViewController];
-        }
-        @catch (NSException *exception) {
-            // Storyboard could not load, so move on
-            LKLogWarning(@"%@.storyboard not found", launchScreenName);
-        }
-        @finally {
-            //
+        NSString *storyboardPath = [bundle pathForResource:launchScreenName ofType:@"storyboardc"];
+        if (storyboardPath.length > 0) {
+            @try {
+                UIStoryboard *storyboard = [UIStoryboard storyboardWithName:launchScreenName bundle:bundle];
+                self.launchViewController = [storyboard instantiateInitialViewController];
+            }
+            @catch (NSException *exception) {
+                // Storyboard could not load, so move on
+                LKLogWarning(@"%@.storyboard not found", launchScreenName);
+            }
+            @finally {
+                //
+            }
         }
 
         // Try xib next
-        if (!self.launchViewController) {
+        NSString *nibPath = [bundle pathForResource:launchScreenName ofType:@"nib"];
+        if (!self.launchViewController && nibPath.length > 0) {
             @try {
                 UINib *nib = [UINib nibWithNibName:launchScreenName bundle:bundle];
                 UIViewController *nibVC = [[UIViewController alloc] init];
