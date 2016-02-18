@@ -560,8 +560,32 @@ static LaunchKit *_sharedInstance;
 - (void)presentOnboardingUIOnWindow:(UIWindow *)window
                   completionHandler:(LKOnboardingUICompletionHandler)completionHandler;
 {
+    __weak LaunchKit *weakSelf = self;
     [self.uiManager presentOnboardingUIOnWindow:window
-                              completionHandler:completionHandler];
+                              completionHandler:^(LKViewControllerFlowResult flowResult,
+                                                  LKBundleInfo *bundleInfo,
+                                                  NSDate *onboardingStartTime,
+                                                  NSDate *onboardingEndTime,
+                                                  NSTimeInterval preOnboardingDuration) {
+
+                                  if (bundleInfo != nil) {
+                                      NSMutableDictionary *params = [NSMutableDictionary dictionary];
+                                      params[@"command"] = @"ui-shown";
+                                      params[@"ui_name"] = bundleInfo.name;
+                                      params[@"ui_version"] = bundleInfo.version;
+                                      params[@"flow_result"] = NSStringFromViewControllerFlowResult(flowResult);
+                                      params[@"start_time"] = @(onboardingStartTime.timeIntervalSince1970);
+                                      params[@"end_time"] = @(onboardingEndTime.timeIntervalSince1970);
+                                      params[@"load_duration"] = @(preOnboardingDuration);
+                                      [weakSelf trackProperties:params];
+                                  }
+
+                                  if (completionHandler) {
+                                      completionHandler(flowResult);
+                                  }
+                              }];
+
+
 }
 
 

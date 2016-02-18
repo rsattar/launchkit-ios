@@ -15,6 +15,13 @@
 typedef void (^LKReleaseNotesCompletionHandler)(BOOL didPresent);
 typedef void (^LKRemoteUILoadHandler)(LKViewController *viewController, NSError *error);
 typedef void (^LKRemoteUIDismissalHandler)(LKViewControllerFlowResult flowResult);
+// Used internally, returning additional usage stats
+typedef void (^LKOnboardingUIDismissHandler)(LKViewControllerFlowResult flowResult,
+                                             LKBundleInfo *bundleInfo,
+                                             NSDate *onboardingStartTime,
+                                             NSDate *onboardingEndTime,
+                                             NSTimeInterval preOnboardingDuration);
+// Used externally, to report overall flow result
 typedef void (^LKOnboardingUICompletionHandler)(LKViewControllerFlowResult flowResult);
 
 @class LKUIManager;
@@ -41,6 +48,6 @@ typedef void (^LKOnboardingUICompletionHandler)(LKViewControllerFlowResult flowR
 
 #pragma mark - Onboarding UI
 - (void)presentOnboardingUIOnWindow:(UIWindow *)window
-                  completionHandler:(LKOnboardingUICompletionHandler)completionHandler;
+                  completionHandler:(LKOnboardingUIDismissHandler)completionHandler;
 
 @end

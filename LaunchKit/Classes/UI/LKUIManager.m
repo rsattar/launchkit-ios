@@ -179,8 +179,11 @@
 }
 
 
+#pragma mark - Onboarding UI
+
+
 - (void)presentOnboardingUIOnWindow:(UIWindow *)window
-                  completionHandler:(LKOnboardingUICompletionHandler)completionHandler;
+                  completionHandler:(LKOnboardingUIDismissHandler)completionHandler;
 {
     if (window == nil) {
         window = [UIApplication sharedApplication].keyWindow;
@@ -197,13 +200,13 @@
     self.onboardingWindow.rootViewController = onboarding;
 
     __weak LKUIManager *weakSelf = self;
-    onboarding.dismissalHandler = ^(LKViewControllerFlowResult flowResult) {
+    onboarding.dismissalHandler = ^(LKViewControllerFlowResult flowResult, LKBundleInfo *bundleInfo, NSDate *onboardingStartTime, NSDate *onboardingEndTime, NSTimeInterval preOnboardingDuration) {
 
         [weakSelf transitionToRootViewController:weakSelf.postOnboardingRootViewController inWindow:weakSelf.onboardingWindow animation:LKRootViewControllerAnimationModalPresentation completion:^{
 
             // Onboarding is done! First call
             if (completionHandler) {
-                completionHandler(flowResult);
+                completionHandler(flowResult, bundleInfo, onboardingStartTime, onboardingEndTime, preOnboardingDuration);
             }
 
             // Cleanup

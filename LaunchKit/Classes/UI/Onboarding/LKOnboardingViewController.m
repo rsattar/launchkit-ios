@@ -28,6 +28,11 @@
 
 @property (strong, nonatomic, nullable) LKViewController *remoteOnboardingViewController;
 
+// Measuring Time
+@property (strong, nonatomic, nullable) NSDate *viewAppearanceTime;
+@property (assign, nonatomic) NSTimeInterval preOnboardingDuration;
+@property (strong, nonatomic, nullable) NSDate *actualOnboardingStartTime;
+
 @end
 
 @implementation LKOnboardingViewController
@@ -140,6 +145,8 @@
 {
     [super viewDidAppear:animated];
 
+    self.viewAppearanceTime = [NSDate date];
+
     if (self.maxWaitTimeInterval > 0) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(self.maxWaitTimeInterval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             if (!self.remoteOnboardingViewController) {
@@ -172,6 +179,10 @@
         return;
     }
     self.remoteOnboardingViewController = actualOnboardingUI;
+    self.actualOnboardingStartTime = [NSDate date];
+    if (self.viewAppearanceTime != nil) {
+        self.preOnboardingDuration = [[NSDate date] timeIntervalSinceDate:self.viewAppearanceTime];
+    }
     if (![self isViewLoaded]) {
         return;
     }
@@ -194,8 +205,9 @@
 
 - (void) finishFlowWithResult:(LKViewControllerFlowResult)result userInfo:(NSDictionary *)userInfo
 {
+    NSDate *endTime = [NSDate date];
     if (self.dismissalHandler) {
-        self.dismissalHandler(result);
+        self.dismissalHandler(result, self.bundleInfo, self.actualOnboardingStartTime, endTime, self.preOnboardingDuration);
     }
     self.dismissalHandler = nil;
     [self markFinishedFlowResult:result];
