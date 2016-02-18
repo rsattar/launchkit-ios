@@ -429,7 +429,7 @@ static LaunchKit *_sharedInstance;
         self.sessionParameters = updatedSessionParams;
     } else if ([command isEqualToString:@"log"]) {
         // Log sent from remote server.
-        LKLog(@"%@ - %@", [args[@"level"] uppercaseString], args[@"message"]);
+        NSLog(@"[LaunchKit] %@ - %@", [args[@"level"] uppercaseString], args[@"message"]);
     }
 }
 
