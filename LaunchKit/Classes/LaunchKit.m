@@ -478,7 +478,11 @@ static LaunchKit *_sharedInstance;
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification
 {
-    [self restartTrackingFireImmediately:YES];
+    // Sometimes (especially on app startup), we might already have
+    // manually requested a track call (i.e. for -setUserIdentifier:email:name)
+    // So if we're already tracking something then, don't need to fire immediately
+    BOOL shouldTrackImmediately = !self.trackingRequestInProgress;
+    [self restartTrackingFireImmediately:shouldTrackImmediately];
 }
 
 - (void)applicationDidEnterBackground:(NSNotification *)notification
