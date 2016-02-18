@@ -82,23 +82,25 @@
         }
 
         // Try xib next
-        @try {
-            UINib *nib = [UINib nibWithNibName:launchScreenName bundle:bundle];
-            UIViewController *nibVC = [[UIViewController alloc] init];
-            NSArray *topLevelObjects = [nib instantiateWithOwner:nibVC options:nil];
+        if (!self.launchViewController) {
+            @try {
+                UINib *nib = [UINib nibWithNibName:launchScreenName bundle:bundle];
+                UIViewController *nibVC = [[UIViewController alloc] init];
+                NSArray *topLevelObjects = [nib instantiateWithOwner:nibVC options:nil];
 
-            if ([topLevelObjects.firstObject isKindOfClass:[UIView class]]) {
-                self.launchScreenView = (UIView *)topLevelObjects.firstObject;
-            } else if ([topLevelObjects.firstObject isKindOfClass:[UIViewController class]]) {
-                self.launchViewController = (UIViewController *)topLevelObjects.firstObject;
+                if ([topLevelObjects.firstObject isKindOfClass:[UIView class]]) {
+                    self.launchScreenView = (UIView *)topLevelObjects.firstObject;
+                } else if ([topLevelObjects.firstObject isKindOfClass:[UIViewController class]]) {
+                    self.launchViewController = (UIViewController *)topLevelObjects.firstObject;
+                }
             }
-        }
-        @catch (NSException *exception) {
-            // Nib could not be loaded
-            LKLogWarning(@"%@.nib not found", launchScreenName);
-        }
-        @finally {
-            //
+            @catch (NSException *exception) {
+                // Nib could not be loaded
+                LKLogWarning(@"%@.nib not found", launchScreenName);
+            }
+            @finally {
+                //
+            }
         }
 
         if (self.launchViewController != nil && self.launchScreenView == nil) {
