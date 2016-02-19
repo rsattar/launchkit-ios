@@ -206,6 +206,9 @@
 
 - (nullable UIImage *) imageInBundleWithName:(NSString *)imageName
 {
+    if (imageName.length == 0) {
+        return nil;
+    }
     NSBundle *bundle = [NSBundle mainBundle];
     if (self.bundleInfo != nil) { //  && [self.bundleInfo.url.scheme isEqualToString:@"file"]
         NSURL *url = self.bundleInfo.url;
