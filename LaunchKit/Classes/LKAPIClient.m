@@ -150,7 +150,7 @@ static NSCalendar *_globalGregorianCalendar;
 #endif
     NSString *path = @"v1/bundles";
 #if DEBUG
-#ifdef LK_DEBUG_RETRIEVE_LATEST_HOSTED_BUNDLES
+#if LK_DEBUG_RETRIEVE_LATEST_HOSTED_BUNDLES
     path = @"v1/bundles/debug";
 #endif
 #endif
