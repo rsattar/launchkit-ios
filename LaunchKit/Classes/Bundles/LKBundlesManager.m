@@ -481,9 +481,12 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     // Early check: we might have the manifest already, so check if this bundleId doesnt
     // exist in the manifest (and therefore not worth waiting for downloads anyway)
     if (self.latestRemoteBundlesManifestRetrieved) {
-        // We have the remote manifest at least, so we can check if our UI even exists
-        LKBundleInfo *locallyAvailableBundleInfo = [self localBundleInfoWithName:bundleId];
-        if (!locallyAvailableBundleInfo) {
+        // Shortcut: We have the remote manifest at least,
+        // so we can at least check if the bundle should exist
+        // If it's not part of the manifest, then no sense waiting
+        // for downloads to finish (it's not going to be there)
+        LKBundleInfo *remotelyAvailableBundleInfo = [self remoteBundleInfoWithName:bundleId];
+        if (!remotelyAvailableBundleInfo) {
             if (completion) {
                 completion(nil, [self bundleInfoNotFoundErrorForId:bundleId]);
             }
