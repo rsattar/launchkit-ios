@@ -12,9 +12,9 @@
 
 @interface LKPagedUIViewController : LKViewController <UIScrollViewDelegate>
 
-// A single string, with static titles separated by '@@'
+// A single string, with static titles represented as JSON
 @property (strong, nonatomic) IBInspectable NSString *staticButtonTitlesString;
-// A single string, with bundled image names separated by '@@'
+// A single string, with bundled image names represented as JSON
 @property (strong, nonatomic) IBInspectable NSString *fixedBackgroundImageNamesString;
 
 @end

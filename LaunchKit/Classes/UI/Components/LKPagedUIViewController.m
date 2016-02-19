@@ -46,8 +46,8 @@
         (self.staticContinueButton.hidden || self.staticContinueButton.alpha == 0.0)) {
         self.bottomStackView.userInteractionEnabled = NO;
     }
-    [self buildStaticButtonTitlesFromString];
-    [self buildFixedBackgroundImageNamesFromString];
+    [self buildStaticButtonTitlesFromJSONString];
+    [self buildFixedBackgroundImageNamesFromJSONString];
     [self prepareScrollingBackgroundImageConstraints];
 }
 
@@ -61,22 +61,25 @@
     }
 }
 
-- (nullable NSArray<NSString *> *) paddedArrayFromConfigurationString:(NSString *)configString
+- (nullable NSArray<NSString *> *) paddedArrayFromConfigurationJSONString:(NSString *)configString
 {
     if (configString.length == 0) {
         return nil;
     }
-    // Trim away outer @@'s in case person wrote them in
-    NSMutableCharacterSet *trimmable = [NSMutableCharacterSet whitespaceAndNewlineCharacterSet];
-    [trimmable addCharactersInString:@"@ "];
-    configString = [configString stringByTrimmingCharactersInSet:trimmable];
-    // Check for length again
-    if (configString.length == 0) {
+    NSData *jsonData = [configString dataUsingEncoding:NSUTF8StringEncoding];
+    NSError *jsonParsingError = nil;
+    id jsonObject = [NSJSONSerialization JSONObjectWithData:jsonData
+                                                    options:NSJSONReadingMutableContainers
+                                                      error:&jsonParsingError];
+    if (jsonParsingError != nil || jsonObject == nil || ![jsonObject isKindOfClass:[NSMutableArray class]]) {
+        return nil;
+    }
+    NSMutableArray<NSString *> *items = (NSMutableArray<NSString *> *)jsonObject;
+    if (items.count == 0) {
         return nil;
     }
     // There may intentionally be *less* items than number of pages,
     // so fill-in from the front, if needed
-    NSMutableArray<NSString *> *items = [[configString componentsSeparatedByString:@"@@"] mutableCopy];
     NSUInteger numPages = [self numberOfPages];
     if (items.count < numPages) {
         NSString *firstItem = items.firstObject;
@@ -96,9 +99,9 @@
 
 #pragma mark - Static Button Titles
 
-- (void) buildStaticButtonTitlesFromString
+- (void) buildStaticButtonTitlesFromJSONString
 {
-    self.staticButtonTitles = [self paddedArrayFromConfigurationString:self.staticButtonTitlesString];;
+    self.staticButtonTitles = [self paddedArrayFromConfigurationJSONString:self.staticButtonTitlesString];;
 }
 
 - (void) updateStaticButtonTitleForCurrentPage
@@ -114,9 +117,9 @@
 
 #pragma mark - Fixed Background Images
 
-- (void) buildFixedBackgroundImageNamesFromString
+- (void) buildFixedBackgroundImageNamesFromJSONString
 {
-    self.fixedBackgroundImageNames = [self paddedArrayFromConfigurationString:self.fixedBackgroundImageNamesString];
+    self.fixedBackgroundImageNames = [self paddedArrayFromConfigurationJSONString:self.fixedBackgroundImageNamesString];
 }
 
 - (void) updateFixedBackgroundImageForCurrentScroll
