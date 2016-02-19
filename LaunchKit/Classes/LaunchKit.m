@@ -25,6 +25,7 @@ static BOOL USE_LOCAL_LAUNCHKIT_SERVER = NO;
 static NSString* const BASE_API_URL_REMOTE = @"https://api.launchkit.io/";
 static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 
+static NSTimeInterval const DEFAULT_MAX_ONBOARDING_WAIT_TIME_INTERVAL = 15.0;
 
 #pragma mark - Extending LKConfig to allow LaunchKit to modify parameters
 
@@ -148,6 +149,8 @@ static LaunchKit *_sharedInstance;
         self.debugMeasureUsage = YES;
         self.apiClient.measureUsage = YES;
 #endif
+
+        self.maxOnboardingWaitTimeInterval = DEFAULT_MAX_ONBOARDING_WAIT_TIME_INTERVAL;
 
         self.bundlesManager = [[LKBundlesManager alloc] initWithAPIClient:self.apiClient];
 
@@ -562,6 +565,7 @@ static LaunchKit *_sharedInstance;
 {
     __weak LaunchKit *weakSelf = self;
     [self.uiManager presentOnboardingUIOnWindow:window
+                            maxWaitTimeInterval:self.maxOnboardingWaitTimeInterval
                               completionHandler:^(LKViewControllerFlowResult flowResult,
                                                   LKBundleInfo *bundleInfo,
                                                   NSDate *onboardingStartTime,

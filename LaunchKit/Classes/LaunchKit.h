@@ -86,6 +86,12 @@ FOUNDATION_EXPORT const unsigned char LaunchKitVersionString[];
 @property (readonly, nonatomic, nullable) LKAppUser *currentUser;
 
 /**
+ * This sets the maximum time that LaunchKit should wait while attempting to load your onboarding UI.
+ * Default is 15 seconds.
+ */
+@property (assign, nonatomic) NSTimeInterval maxOnboardingWaitTimeInterval;
+
+/**
  * If true, LKAppUserIsSuper() will always return true, ignoring the value from the server.
  * @discussion This only works when debugging (i.e. when DEBUG = 1)
  */

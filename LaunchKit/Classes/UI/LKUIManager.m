@@ -183,6 +183,7 @@
 
 
 - (void)presentOnboardingUIOnWindow:(UIWindow *)window
+                maxWaitTimeInterval:(NSTimeInterval)maxWaitTimeInterval
                   completionHandler:(LKOnboardingUIDismissHandler)completionHandler;
 {
     if (window == nil) {
@@ -194,6 +195,9 @@
     }
     self.onboardingWindow = window;
     LKOnboardingViewController *onboarding = [[LKOnboardingViewController alloc] init];
+    if (maxWaitTimeInterval > 0.0) {
+        onboarding.maxWaitTimeInterval = maxWaitTimeInterval;
+    }
     self.postOnboardingRootViewController = window.rootViewController;
 
     // Present it without animation, just swap out root view controller
