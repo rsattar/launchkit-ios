@@ -151,7 +151,11 @@
 
     CGFloat percentageScrolledToNextPage = offsetDifference / pageSize;
 
-    self.fixedBackgroundImage2.alpha = percentageScrolledToNextPage;
+    self.fixedBackgroundImage1.alpha = 1.0-percentageScrolledToNextPage;
+    if (self.fixedBackgroundImage1.image == nil) {
+        // Fading from nil image to a valid image, so fade it in
+        self.fixedBackgroundImage2.alpha = percentageScrolledToNextPage;
+    }
 }
 
 - (void) updateFixedBackgroundImageForCurrentPageAnimated:(BOOL)animated
@@ -164,17 +168,27 @@
     UIImage *image = [self fixedImageAtIndex:index clampToPages:YES];
     if (!animated) {
         self.fixedBackgroundImage1.image = image;
+        // Ensure we are back at alpha 1.0, unless we are
+        // dragging, in which case we're going to be updating our
+        // alpha values in -updateFixedBackgroundImageForCurrentScroll
+        if (!self.scrollView.isDragging) {
+            self.fixedBackgroundImage1.alpha = 1.0;
+        }
     } else {
+        // Animate image1 to transparent, with image 2 behind,
+        // then snap image2 to image1 (and make image 1 opaque)
         // Animate into image2, and fade image2 in over image1
-        self.fixedBackgroundImage2.alpha = 0.0;
-        self.fixedBackgroundImage2.image = image;
+        self.fixedBackgroundImage2.image = image; // ensure image2 is set
         [UIView animateWithDuration:0.35 animations:^{
+            self.fixedBackgroundImage1.alpha = 0.0;
+            // in case we were fading from a nil image
             self.fixedBackgroundImage2.alpha = 1.0;
         } completion:^(BOOL finished) {
             // Swap image into image1, hide image2
             self.fixedBackgroundImage1.image = image;
             self.fixedBackgroundImage2.image = nil;
-            self.fixedBackgroundImage2.alpha = 0.0;
+            self.fixedBackgroundImage1.alpha = 1.0;
+            self.fixedBackgroundImage2.alpha = 1.0;
         }];
     }
 }
