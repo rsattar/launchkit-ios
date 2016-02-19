@@ -148,10 +148,11 @@
     self.viewAppearanceTime = [NSDate date];
 
     if (self.maxWaitTimeInterval > 0) {
+        __weak LKOnboardingViewController *weakSelf = self;
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(self.maxWaitTimeInterval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            if (!self.remoteOnboardingViewController) {
-                LKLogError(@"Actual onboarding UI failed to load from remote after %.1f seconds, failing...", self.maxWaitTimeInterval);
-                [self finishOnboardingWithResult:LKViewControllerFlowResultFailed];
+            if (!weakSelf.remoteOnboardingViewController) {
+                LKLogError(@"Actual onboarding UI failed to load from remote after %.1f seconds, failing...", weakSelf.maxWaitTimeInterval);
+                [weakSelf finishOnboardingWithResult:LKViewControllerFlowResultFailed];
             }
         });
     }
