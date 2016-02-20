@@ -208,7 +208,8 @@
 {
     NSDate *endTime = [NSDate date];
     if (self.dismissalHandler) {
-        self.dismissalHandler(result, self.bundleInfo, self.actualOnboardingStartTime, endTime, self.preOnboardingDuration);
+        LKBundleInfo *actualOnboardingBundleInfo = self.remoteOnboardingViewController.bundleInfo;
+        self.dismissalHandler(result, actualOnboardingBundleInfo, self.actualOnboardingStartTime, endTime, self.preOnboardingDuration);
     }
     self.dismissalHandler = nil;
     [self markFinishedFlowResult:result];
