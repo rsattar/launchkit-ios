@@ -54,21 +54,28 @@
     [self.bundlesManager loadBundleWithId:remoteUIId completion:^(NSBundle *bundle, NSError *error) {
 
         UIStoryboard *storyboard = nil;
-        if ([bundle URLForResource:remoteUIId withExtension:@"storyboardc"] != nil) {
-            storyboard = [UIStoryboard storyboardWithName:remoteUIId bundle:bundle];
-        }
-        if (storyboard == nil) {
-            // Hmm there isn't a storyboard that matches the name of the bundle/remote-id, so try finding any storyboard for now :okay:
-            NSArray *storyboardUrls = [bundle URLsForResourcesWithExtension:@"storyboardc" subdirectory:nil];
-            if (storyboardUrls.count > 0) {
-                NSString *storyboardName = ((NSURL *)storyboardUrls[0]).lastPathComponent.stringByDeletingPathExtension;
-                storyboard = [UIStoryboard storyboardWithName:storyboardName bundle:bundle];
+        if (bundle != nil) {
+            if ([bundle URLForResource:remoteUIId withExtension:@"storyboardc"] != nil) {
+                storyboard = [UIStoryboard storyboardWithName:remoteUIId bundle:bundle];
+            }
+            if (storyboard == nil) {
+                // Hmm there isn't a storyboard that matches the name of the bundle/remote-id, so try finding any storyboard for now :okay:
+                NSArray *storyboardUrls = [bundle URLsForResourcesWithExtension:@"storyboardc" subdirectory:nil];
+                if (storyboardUrls.count > 0) {
+                    NSString *storyboardName = ((NSURL *)storyboardUrls[0]).lastPathComponent.stringByDeletingPathExtension;
+                    storyboard = [UIStoryboard storyboardWithName:storyboardName bundle:bundle];
+                }
             }
         }
-        if (storyboard == nil && (error == nil || error.code == 404)) {
+        if ((bundle == nil || storyboard == nil) && (error == nil || error.code == 404)) {
             error = [self uiNotFoundError];
+            if (completion) {
+                completion(nil, error);
+            }
+            return;
         }
 
+        // At this point we have a valid storyboard, so try to load a vc inside
         LKViewController *viewController = nil;
         @try {
             viewController = [storyboard instantiateInitialViewController];
