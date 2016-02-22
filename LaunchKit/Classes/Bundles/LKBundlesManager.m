@@ -100,6 +100,18 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
 - (void) updateServerBundlesUpdatedTimeWithTime:(NSDate *)bundlesUpdatedTime
 {
+    if (bundlesUpdatedTime == nil) {
+        // Bundles updated time was given to us as nil, there was likely some
+        // error in the retrieval of such data, so we should fail loading bundles
+        if (!self.downloadingRemoteBundles) {
+            // If we're already downloading remote bundles, then maybe we let those
+            // finish before failing? ¯\_(ツ)_/¯
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self notifyAnyPendingBundleLoadHandlers];
+            });
+        }
+        return;
+    }
     NSTimeInterval localTimestamp = self.localBundlesFolderUpdatedTime.timeIntervalSince1970;
     NSTimeInterval serverTimestamp = bundlesUpdatedTime.timeIntervalSince1970;
     if (localTimestamp == serverTimestamp) {

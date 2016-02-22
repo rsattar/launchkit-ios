@@ -345,6 +345,7 @@ static LaunchKit *_sharedInstance;
             // "Update" our config with a nil, which will trigger
             // it to fire a refresh handler, if this is the first launch
             [_weakSelf.config updateParameters:nil];
+            [_weakSelf updateServerBundlesUpdatedTimeFromConfig];
         } else {
             NSDictionary *responseDict = _weakTrack.response;
             if (_weakSelf.verboseLogging) {
@@ -461,6 +462,9 @@ static LaunchKit *_sharedInstance;
         // Interval would be 0.0 if timeString was nil, or timeString was not a valid double
         NSDate *timestamp = [NSDate dateWithTimeIntervalSince1970:interval];
         [self.bundlesManager updateServerBundlesUpdatedTimeWithTime:timestamp];
+    } else {
+        // Pass in nil, to indicate an error
+        [self.bundlesManager updateServerBundlesUpdatedTimeWithTime:nil];
     }
 }
 
