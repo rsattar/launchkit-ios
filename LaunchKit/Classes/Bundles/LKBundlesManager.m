@@ -269,6 +269,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 {
     NSFileManager *fileManager = [NSFileManager defaultManager];
     self.localBundleMap = [NSMutableDictionary dictionaryWithCapacity:1];
+    self.localBundlesFolderUpdatedTime = [NSDate distantPast];
 
     if (LOAD_PREPACKAGED_BUNDLES) {
         // First fill in whatever we have in our pre-packaged main bundle (if any)
@@ -388,8 +389,6 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     NSDate *localUpdateTime = [LKBundlesManager updateTimeInLocalBundlesFolder];
     if (LOAD_SERVER_BUNDLE_UPDATE_TIME && localUpdateTime) {
         self.localBundlesFolderUpdatedTime = localUpdateTime;
-    } else {
-        self.localBundlesFolderUpdatedTime = [NSDate distantPast];
     }
 }
 
