@@ -28,6 +28,8 @@
 
 @property (strong, nonatomic, nullable) LKViewController *remoteOnboardingViewController;
 
+@property (strong, nonatomic, nullable) NSTimer *maxLoadingTimeoutTimer;
+
 // Measuring Time
 @property (strong, nonatomic, nullable) NSDate *viewAppearanceTime;
 @property (assign, nonatomic) NSTimeInterval preOnboardingDuration;
@@ -36,6 +38,11 @@
 @end
 
 @implementation LKOnboardingViewController
+
+- (void) dealloc
+{
+    [self destroyMaxLoadingTimeoutTimerIfNeeded];
+}
 
 - (void) loadView
 {
@@ -147,27 +154,43 @@
 
     self.viewAppearanceTime = [NSDate date];
 
-    if (self.maxWaitTimeInterval > 0) {
-        __weak LKOnboardingViewController *weakSelf = self;
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(self.maxWaitTimeInterval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            if (!weakSelf.remoteOnboardingViewController) {
-                LKLogError(@"Actual onboarding UI failed to load from remote after %.1f seconds, failing...", weakSelf.maxWaitTimeInterval);
-                [weakSelf finishOnboardingWithResult:LKViewControllerFlowResultFailed];
-            }
-        });
+    if (!self.remoteOnboardingViewController) {
+        [self startLoadingTimeoutTimerIfNeeded];
     }
 }
 
-#pragma mark - Navigation
-/*
-#pragma mark - Navigation
+#pragma mark - Timeout
 
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+- (void) startLoadingTimeoutTimerIfNeeded
+{
+    if (self.maxWaitTimeInterval <= 0) {
+        // No time set, so no timer to start
+        return;
+    }
+    self.maxLoadingTimeoutTimer = [NSTimer scheduledTimerWithTimeInterval:self.maxWaitTimeInterval
+                                                                   target:self
+                                                                 selector:@selector(onMaxLoadingTimeoutTimerFired:)
+                                                                 userInfo:nil
+                                                                  repeats:NO];
 }
-*/
+
+- (void) onMaxLoadingTimeoutTimerFired:(NSTimer *)timer
+{
+    [self destroyMaxLoadingTimeoutTimerIfNeeded];
+
+    if (!self.remoteOnboardingViewController) {
+        LKLogError(@"Actual onboarding UI failed to load from remote after %.1f seconds, failing...", self.maxWaitTimeInterval);
+        [self finishOnboardingWithResult:LKViewControllerFlowResultFailed];
+    }
+}
+
+- (void) destroyMaxLoadingTimeoutTimerIfNeeded
+{
+    if (self.maxLoadingTimeoutTimer.valid) {
+        [self.maxLoadingTimeoutTimer invalidate];
+    }
+    self.maxLoadingTimeoutTimer = nil;
+}
 
 #pragma mark - Actual onboarding UI
 
@@ -187,6 +210,7 @@
     if (![self isViewLoaded]) {
         return;
     }
+    [self destroyMaxLoadingTimeoutTimerIfNeeded];
     // TODO: (Optional) On iPads, show onboarding UI in a form sheet size
     [self addChildViewController:self.remoteOnboardingViewController];
     self.remoteOnboardingViewController.flowDelegate = self;
