@@ -230,6 +230,9 @@
 
 - (void) finishFlowWithResult:(LKViewControllerFlowResult)result userInfo:(NSDictionary *)userInfo
 {
+    // In case we were called before the timeout fired
+    [self destroyMaxLoadingTimeoutTimerIfNeeded];
+
     NSDate *endTime = [NSDate date];
     if (self.dismissalHandler) {
         LKBundleInfo *actualOnboardingBundleInfo = self.remoteOnboardingViewController.bundleInfo;
