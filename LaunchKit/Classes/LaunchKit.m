@@ -597,9 +597,9 @@ static LaunchKit *_sharedInstance;
 
 - (void)showUIWithName:(NSString *)uiName fromViewController:(UIViewController *)presentingViewController completion:(void (^)(LKViewControllerFlowResult flowResult, NSError *error))completion
 {
-    [[LaunchKit sharedInstance] loadRemoteUIWithId:uiName completion:^(LKViewController *viewController, NSError *error) {
+    [self.uiManager loadRemoteUIWithId:uiName completion:^(LKViewController *viewController, NSError *error) {
         if (viewController) {
-            [[LaunchKit sharedInstance] presentRemoteUIViewController:viewController fromViewController:presentingViewController animated:YES dismissalHandler:^(LKViewControllerFlowResult flowResult) {
+            [self presentRemoteUIViewController:viewController fromViewController:presentingViewController animated:YES dismissalHandler:^(LKViewControllerFlowResult flowResult) {
                 if (completion) {
                     completion(flowResult, nil);
                 }
@@ -613,11 +613,6 @@ static LaunchKit *_sharedInstance;
 }
 
 #pragma mark - Remote UI
-
-- (void)loadRemoteUIWithId:(nonnull NSString *)remoteUIId completion:(nonnull LKRemoteUILoadHandler)completion
-{
-    [self.uiManager loadRemoteUIWithId:remoteUIId completion:completion];
-}
 
 
 - (void)presentRemoteUIViewController:(nonnull LKViewController *)viewController
