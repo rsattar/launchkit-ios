@@ -264,10 +264,11 @@ typedef NS_ENUM(NSInteger, LKRootViewControllerAnimation) {
         CGRect endFrame = window.bounds;
         endFrame.origin.y += CGRectGetHeight(endFrame);
 
+        window.rootViewController = toViewController;
+        [window insertSubview:fromViewController.view aboveSubview:window.rootViewController.view];
+
         NSTimeInterval duration = 0.35;
         [UIView transitionWithView:window duration:duration options:UIViewAnimationOptionAllowAnimatedContent animations:^{
-            window.rootViewController = toViewController;
-            [window insertSubview:fromViewController.view aboveSubview:window.rootViewController.view];
             fromViewController.view.frame = endFrame;
         } completion:^(BOOL finished) {
             [fromViewController.view removeFromSuperview];
