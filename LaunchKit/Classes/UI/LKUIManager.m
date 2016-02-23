@@ -254,33 +254,44 @@ typedef NS_ENUM(NSInteger, LKRootViewControllerAnimation) {
         }
     };
 
+    UIViewController *fromViewController = window.rootViewController;
+
     if (animation == LKRootViewControllerAnimationNone) {
         window.rootViewController = toViewController;
         doneTransitioning();
     } else if (animation == LKRootViewControllerAnimationModalDismiss) {
-        NSTimeInterval duration = 0.35;
-        [UIView transitionWithView:window duration:duration options:UIViewAnimationOptionAllowAnimatedContent animations:^{
-            [window insertSubview:toViewController.view belowSubview:window.rootViewController.view];
-            CGRect endFrame = window.rootViewController.view.frame;
-            endFrame.origin.y += CGRectGetHeight(endFrame);
-            window.rootViewController.view.frame = endFrame;
-        } completion:^(BOOL finished) {
-            window.rootViewController = toViewController;
-            doneTransitioning();
-        }];
-    } else if (animation== LKRootViewControllerAnimationModalPresentation) {
+
+        CGRect endFrame = window.bounds;
+        endFrame.origin.y += CGRectGetHeight(endFrame);
 
         NSTimeInterval duration = 0.35;
+        [UIView transitionWithView:window duration:duration options:UIViewAnimationOptionAllowAnimatedContent animations:^{
+            window.rootViewController = toViewController;
+            [window insertSubview:fromViewController.view aboveSubview:window.rootViewController.view];
+            fromViewController.view.frame = endFrame;
+        } completion:^(BOOL finished) {
+            [fromViewController.view removeFromSuperview];
+            doneTransitioning();
+        }];
+
+    } else if (animation== LKRootViewControllerAnimationModalPresentation) {
+
+        window.rootViewController = toViewController;
+        [window insertSubview:fromViewController.view belowSubview:window.rootViewController.view];
+
+        // Move rootVC off bounds to "animate" it in
         CGRect startFrame = window.bounds;
         startFrame.origin.y += CGRectGetHeight(startFrame);
         toViewController.view.frame = startFrame;
+
+        NSTimeInterval duration = 0.35;
         [UIView transitionWithView:window duration:duration options:UIViewAnimationOptionAllowAnimatedContent animations:^{
-            [window insertSubview:toViewController.view aboveSubview:window.rootViewController.view];
             toViewController.view.frame = window.bounds;
         } completion:^(BOOL finished) {
-            window.rootViewController = toViewController;
+            [fromViewController.view removeFromSuperview];
             doneTransitioning();
         }];
+
     }
 }
 

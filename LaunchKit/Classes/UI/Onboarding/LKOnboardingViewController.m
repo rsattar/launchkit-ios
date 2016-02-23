@@ -152,6 +152,14 @@
 {
     [super viewDidAppear:animated];
 
+    // NOTE: We may get called again accidentally, when we are
+    // transitioning from being the rootViewController of the
+    // window during the hand-off back the app's UI (see LKUIManager).
+    // So check if we already have finished and do nothing, if so.
+    if (self.finishedFlowResult != LKViewControllerFlowResultNotSet) {
+        return;
+    }
+
     self.viewAppearanceTime = [NSDate date];
 
     if (!self.remoteOnboardingViewController) {
