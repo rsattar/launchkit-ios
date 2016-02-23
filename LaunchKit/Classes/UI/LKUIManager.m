@@ -213,7 +213,7 @@
     __weak LKUIManager *weakSelf = self;
     onboarding.dismissalHandler = ^(LKViewControllerFlowResult flowResult, LKBundleInfo *bundleInfo, NSDate *onboardingStartTime, NSDate *onboardingEndTime, NSTimeInterval preOnboardingDuration) {
 
-        [weakSelf transitionToRootViewController:weakSelf.postOnboardingRootViewController inWindow:weakSelf.onboardingWindow animation:LKRootViewControllerAnimationModalPresentation completion:^{
+        [weakSelf transitionToRootViewController:weakSelf.postOnboardingRootViewController inWindow:weakSelf.onboardingWindow animation:LKRootViewControllerAnimationModalDismiss completion:^{
 
             // Onboarding is done! First call
             if (completionHandler) {
