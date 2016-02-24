@@ -15,7 +15,7 @@ typedef NS_ENUM(NSInteger, LKResourceVersion) {
     LKResourceVersionPrepackaged,
 };
 
-@interface LKBundleInfo : NSObject <NSCoding>
+@interface LKBundleInfo : NSObject <NSCoding, NSCopying>
 
 @property (readonly, nonatomic) NSDate *createTime;
 @property (readonly, nonatomic) NSString *name;

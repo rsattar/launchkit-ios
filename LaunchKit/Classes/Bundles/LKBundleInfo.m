@@ -76,6 +76,16 @@
     [aCoder encodeInteger:self.resourceVersion forKey:@"resourceVersion"];
 }
 
+- (id)copyWithZone:(nullable NSZone *)zone
+{
+    LKBundleInfo *copy = [[[self class] allocWithZone:zone] initWithName:[self.name copy]
+                                                                 version:[self.version copy]
+                                                                     url:[self.url copy]
+                                                              createTime:[self.createTime copy]
+                                                         resourceVersion:self.resourceVersion];
+    return copy;
+}
+
 - (void) markResourceVersionAsNewest
 {
     self.resourceVersion = LKResourceVersionNewest;
