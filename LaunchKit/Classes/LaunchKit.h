@@ -142,6 +142,29 @@ FOUNDATION_EXPORT const unsigned char LaunchKitVersionString[];
 
 #pragma mark - Release Notes
 
+- (BOOL) appReleaseNotesAvailableForThisAppVersion;
+
+/*!
+ @method
+ 
+ @abstract
+ Presents App Release Notes, as configured on the LaunchKit server on the supplied view controller.
+ 
+ @discussion
+ This method should be used in a "fire and forget" style, in that it should be placed at a point in your
+ code where it would be appropriate to present release notes to the user. Often it would be used within
+ a -viewDidAppear: method (but perhaps not in a place where the user is logged out). Based on several
+ factors to determine whether to display release notes:
+
+ – Are there App Release Notes for this version of the app?
+
+ – Have we shown those App Release Notes before, on this device?
+
+ – Are App Release Notes enabled globally for your app by LaunchKit?
+ 
+ @param viewController The view controller from which you wish to present the App Release Notes view controller.
+ @param completion (Optional) A completion handler which is called when App Release Notes is dismissed.
+ */
 - (void) presentAppReleaseNotesIfNeededFromViewController:(nonnull UIViewController *)viewController
                                                completion:(nullable LKReleaseNotesCompletionHandler)completion;
 
