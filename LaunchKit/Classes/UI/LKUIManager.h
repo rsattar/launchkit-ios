@@ -37,6 +37,23 @@ typedef void (^LKOnboardingUICompletionHandler)(LKViewControllerFlowResult flowR
 - (instancetype)initWithBundlesManager:(LKBundlesManager *)bundlesManager;
 
 #pragma mark - Remote UI Loading
+/*!
+ @method
+
+ @abstract
+ Loads remote UI (generally cached to disk) you have configured at launchkit.io to work with this app.
+
+ @discussion
+ Given an id, LaunchKit will look for a UI with that id within its remote UI cache, and perhaps retrieve it
+ on demand. The view controller returned is a special view controller that is designed to work with the remote
+ nibs retrieved from LaunchKit. You can tell LaunchKit to present this view controller using
+ -presentRemoteUIViewController:fromViewController:animated:dismissalHandler
+
+ @param remoteUIId A string representing the id of the UI you want to load. This is configured at launchkit.io.
+ @param completion When the remote UI is available, an instance of the view controller is returned. If an error occurred,
+ the error is returned as well. You should ret
+
+ */
 - (void)loadRemoteUIWithId:(NSString *)remoteUIId completion:(LKRemoteUILoadHandler)completion;
 
 #pragma mark - Presenting UI
