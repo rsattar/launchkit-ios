@@ -120,6 +120,17 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
                 LKLog(@"Manifest is up-to-date, and remoteBundlesDownloaded = %d", self.remoteBundlesDownloaded);
             }
         }
+        if (!self.latestRemoteBundlesManifestRetrieved) {
+            // We haven't set this before, or we haven't actually retrieved the manifest,
+            // meaning that our remoteBundleMap is not set to anything. We want our remoteBundleMap
+            // to remain the source of truth, when doing lookups of what bundles we're supposed to have
+            // so copy our localBundleMap (which is the "latest") over to remoteBundleMap, so we have that
+            // mapping/representation
+            for (NSString *key in self.localBundleMap) {
+                LKBundleInfo *info = self.localBundleMap[key];
+                self.remoteBundleMap[key] = [info copy];
+            }
+        }
         // We have the same 'local' server time as our current, so
         // mark that we have the latest, and there's nothing else to do
         self.latestRemoteBundlesManifestRetrieved = YES;
