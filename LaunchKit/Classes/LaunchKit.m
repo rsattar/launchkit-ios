@@ -577,15 +577,13 @@ static LaunchKit *_sharedInstance;
                                                   NSTimeInterval preOnboardingDuration) {
 
                                   if (bundleInfo != nil) {
-                                      NSMutableDictionary *params = [NSMutableDictionary dictionary];
-                                      params[@"command"] = @"ui-shown";
-                                      params[@"ui_name"] = bundleInfo.name;
-                                      params[@"ui_version"] = bundleInfo.version;
-                                      params[@"flow_result"] = NSStringFromViewControllerFlowResult(flowResult);
-                                      params[@"start_time"] = @(onboardingStartTime.timeIntervalSince1970);
-                                      params[@"end_time"] = @(onboardingEndTime.timeIntervalSince1970);
-                                      params[@"load_duration"] = @(preOnboardingDuration);
-                                      [weakSelf trackProperties:params];
+                                      [weakSelf reportEvent:@"ui-shown"
+                                               uiBundleInfo:bundleInfo
+                                           additionalParams:@{@"flow_result" : NSStringFromViewControllerFlowResult(flowResult),
+                                                              @"start_time": @(onboardingStartTime.timeIntervalSince1970),
+                                                              @"end_time": @(onboardingEndTime.timeIntervalSince1970),
+                                                              @"load_duration": @(preOnboardingDuration)
+                                                              }];
                                   }
 
                                   if (completionHandler) {
@@ -593,7 +591,22 @@ static LaunchKit *_sharedInstance;
                                   }
                               }];
 
+    // TODO: Report a 'ui-showing' event
+}
 
+- (void) reportEvent:(nonnull NSString *)eventName uiBundleInfo:(nullable LKBundleInfo *)uiBundleInfo additionalParams:(nullable NSDictionary *)additionalParams
+{
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    // Add additionalParams first, so we can overwrite with the 'command' and ui bundle keys, if needed
+    if (additionalParams.count) {
+        [params addEntriesFromDictionary:additionalParams];
+    }
+    params[@"command"] = eventName;
+    if (uiBundleInfo != nil) {
+        params[@"ui_name"] = uiBundleInfo.name;
+        params[@"ui_version"] = uiBundleInfo.version;
+    }
+    [self trackProperties:params];
 }
 
 
@@ -630,11 +643,9 @@ static LaunchKit *_sharedInstance;
                                  dismissalHandler:dismissalHandler];
     // Notify LaunchKit that this view controller has been displayed"
     if (viewController.bundleInfo != nil) {
-        NSMutableDictionary *params = [NSMutableDictionary dictionary];
-        params[@"command"] = @"ui-shown";
-        params[@"ui_name"] = viewController.bundleInfo.name;
-        params[@"ui_version"] = viewController.bundleInfo.version;
-        [self trackProperties:params];
+        [self reportEvent:@"ui-shown"
+             uiBundleInfo:viewController.bundleInfo
+         additionalParams:nil];
     }
 }
 
