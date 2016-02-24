@@ -27,6 +27,10 @@ typedef void (^LKOnboardingUICompletionHandler)(LKViewControllerFlowResult flowR
 @class LKUIManager;
 @protocol LKUIManagerDelegate <NSObject>
 
+- (void)uiManagerRequestedToReportUIEvent:(nonnull NSString *)eventName
+                             uiBundleInfo:(nullable LKBundleInfo *)uiBundleInfo
+                     additionalParameters:(nullable NSDictionary *)additionalParameters;
+
 @end
 
 

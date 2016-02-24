@@ -649,6 +649,15 @@ static LaunchKit *_sharedInstance;
     }
 }
 
+#pragma mark - LKUIManagerDelegate
+
+- (void)uiManagerRequestedToReportUIEvent:(nonnull NSString *)eventName
+                             uiBundleInfo:(nullable LKBundleInfo *)uiBundleInfo
+                     additionalParameters:(nullable NSDictionary *)additionalParameters
+{
+    [self reportEvent:eventName uiBundleInfo:uiBundleInfo additionalParams:additionalParameters];
+}
+
 #pragma mark - Saving/Persisting our Session
 
 - (void)archiveSession

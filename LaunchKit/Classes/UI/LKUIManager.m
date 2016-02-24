@@ -161,6 +161,9 @@
     [self.remoteUIPresentingController presentViewController:self.remoteUIPresentedController animated:animated completion:nil];
     if (viewController.bundleInfo.name != nil) {
         [self markPresentationOfRemoteUI:viewController.bundleInfo.name];
+        [self.delegate uiManagerRequestedToReportUIEvent:@"ui-showing"
+                                                uiBundleInfo:viewController.bundleInfo
+                                        additionalParameters:nil];
     }
 }
 
@@ -234,6 +237,10 @@
             return;
         }
         [onboarding setActualOnboardingUI:viewController];
+
+        [weakSelf.delegate uiManagerRequestedToReportUIEvent:@"ui-showing"
+                                                uiBundleInfo:viewController.bundleInfo
+                                        additionalParameters:nil];
     }];
 }
 
