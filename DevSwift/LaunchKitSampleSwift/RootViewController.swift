@@ -53,5 +53,10 @@ class RootViewController: UIViewController {
         })
     }
 
+    @IBAction func onShowAppReleaseNotesButtonTriggered(sender: UIButton) {
+        LaunchKit.sharedInstance().forcePresentationOfAppReleaseNotesFromViewController(self) { (success) -> Void in
+            print("Release notes shown on demand, finished with success: \(success)")
+        }
+    }
 }
 
