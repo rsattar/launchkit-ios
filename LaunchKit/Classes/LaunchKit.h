@@ -167,7 +167,23 @@ FOUNDATION_EXPORT const unsigned char LaunchKitVersionString[];
  */
 - (void) presentAppReleaseNotesIfNeededFromViewController:(nonnull UIViewController *)viewController
                                                completion:(nullable LKReleaseNotesCompletionHandler)completion;
+/*!
+ @method
 
+ @abstract
+ Presents App Release Notes, as configured on the LaunchKit server on the supplied view controller, ignoring whether it
+ has been shown before.
+
+ @discussion
+ This method should be used to display App Release Notes if displaying App Release Notes from a user 
+ interaction. It will ignore whether or not this version has been shown before, and display them
+ as long as they are available for this version of your app.
+
+ @param viewController The view controller from which you wish to present the App Release Notes view controller.
+ @param completion (Optional) A completion handler which is called when App Release Notes is dismissed.
+ */
+- (void) forcePresentationOfAppReleaseNotesFromViewController:(nonnull UIViewController *)viewController
+                                                   completion:(nullable LKReleaseNotesCompletionHandler)completion;
 
 #pragma mark - Onboarding UI
 - (void)presentOnboardingUIOnWindow:(nonnull UIWindow *)window

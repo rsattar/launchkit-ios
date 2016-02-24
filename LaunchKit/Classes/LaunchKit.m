@@ -535,10 +535,24 @@ static LaunchKit *_sharedInstance;
 - (void) presentAppReleaseNotesIfNeededFromViewController:(nonnull UIViewController *)viewController
                                                completion:(nullable LKReleaseNotesCompletionHandler)completion
 {
+    [self presentAppReleaseNotesFromViewController:viewController ignoreIfShownBefore:NO completion:completion];
+}
+
+- (void) forcePresentationOfAppReleaseNotesFromViewController:(nonnull UIViewController *)viewController
+                                                   completion:(nullable LKReleaseNotesCompletionHandler)completion
+{
+    [self presentAppReleaseNotesFromViewController:viewController ignoreIfShownBefore:YES completion:completion];
+}
+
+- (void) presentAppReleaseNotesFromViewController:(nonnull UIViewController *)viewController
+                              ignoreIfShownBefore:(BOOL)ignoreIfShownBefore
+                                       completion:(nullable LKReleaseNotesCompletionHandler)completion
+{
+
     // WhatsNew feature is enabled on LaunchKit
     BOOL whatsNewEnabled = LKConfigBool(@"io.launchkit.whatsNewEnabled", YES);
     // We have shown this UI before (for this app version)
-    BOOL alreadyPresented = [self.uiManager remoteUIPresentedForThisAppVersion:@"WhatsNew"];
+    BOOL alreadyPresented = !ignoreIfShownBefore && [self.uiManager remoteUIPresentedForThisAppVersion:@"WhatsNew"];
     // This session has upgraded app versions at least once
     BOOL lkSessionHasSeenAppReleaseNotesAtLeastOnce = [self.config.parameters[@"io.launchkit.currentVersionDuration"] isKindOfClass:[NSNumber class]];
     BOOL forceDisplay = NO;
