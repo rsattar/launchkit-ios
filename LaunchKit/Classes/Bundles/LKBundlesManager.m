@@ -30,8 +30,8 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
 @interface LKBundlesManager ()
 
-@property (strong, nonatomic) NSMutableDictionary *remoteBundleMap;
-@property (strong, nonatomic) NSMutableDictionary *localBundleMap;
+@property (strong, nonatomic) NSMutableDictionary<NSString *, LKBundleInfo *> *remoteBundleMap;
+@property (strong, nonatomic) NSMutableDictionary<NSString *, LKBundleInfo *> *localBundleMap;
 
 @property (strong, nonatomic) LKAPIClient *apiClient;
 @property (assign, nonatomic) BOOL retrievingRemoteBundlesManifest;
