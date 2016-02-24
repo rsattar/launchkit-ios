@@ -567,7 +567,6 @@ static LaunchKit *_sharedInstance;
 - (void)presentOnboardingUIOnWindow:(UIWindow *)window
                   completionHandler:(LKOnboardingUICompletionHandler)completionHandler;
 {
-    __weak LaunchKit *weakSelf = self;
     [self.uiManager presentOnboardingUIOnWindow:window
                             maxWaitTimeInterval:self.maxOnboardingWaitTimeInterval
                               completionHandler:^(LKViewControllerFlowResult flowResult,
@@ -575,17 +574,6 @@ static LaunchKit *_sharedInstance;
                                                   NSDate *onboardingStartTime,
                                                   NSDate *onboardingEndTime,
                                                   NSTimeInterval preOnboardingDuration) {
-
-                                  if (bundleInfo != nil) {
-                                      [weakSelf reportEvent:@"ui-shown"
-                                               uiBundleInfo:bundleInfo
-                                           additionalParams:@{@"flow_result" : NSStringFromViewControllerFlowResult(flowResult),
-                                                              @"start_time": @(onboardingStartTime.timeIntervalSince1970),
-                                                              @"end_time": @(onboardingEndTime.timeIntervalSince1970),
-                                                              @"load_duration": @(preOnboardingDuration)
-                                                              }];
-                                  }
-
                                   if (completionHandler) {
                                       completionHandler(flowResult);
                                   }
@@ -641,12 +629,6 @@ static LaunchKit *_sharedInstance;
                                fromViewController:presentingViewController
                                          animated:animated
                                  dismissalHandler:dismissalHandler];
-    // Notify LaunchKit that this view controller has been displayed"
-    if (viewController.bundleInfo != nil) {
-        [self reportEvent:@"ui-shown"
-             uiBundleInfo:viewController.bundleInfo
-         additionalParams:nil];
-    }
 }
 
 #pragma mark - LKUIManagerDelegate

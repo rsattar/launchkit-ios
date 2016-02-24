@@ -157,7 +157,19 @@
     }
     self.remoteUIPresentedController = viewController;
     self.remoteUIPresentingController = presentingViewController;
-    self.remoteUIControllerDismissalHandler = dismissalHandler;
+    __weak LKUIManager *weakSelf = self;
+    self.remoteUIControllerDismissalHandler = ^(LKViewControllerFlowResult flowResult) {
+        // Same as dismiss, but include the report on the UI event
+        if (viewController.bundleInfo != nil) {
+            // Notify LaunchKit that this view controller has been displayed
+            [weakSelf.delegate uiManagerRequestedToReportUIEvent:@"ui-shown"
+                                                    uiBundleInfo:viewController.bundleInfo
+                                            additionalParameters:@{@"flow_result" : NSStringFromViewControllerFlowResult(flowResult)}];
+        }
+        if (dismissalHandler) {
+            dismissalHandler(flowResult);
+        }
+    };
     [self.remoteUIPresentingController presentViewController:self.remoteUIPresentedController animated:animated completion:nil];
     if (viewController.bundleInfo.name != nil) {
         [self markPresentationOfRemoteUI:viewController.bundleInfo.name];
@@ -218,7 +230,20 @@
 
         [weakSelf transitionToRootViewController:weakSelf.postOnboardingRootViewController inWindow:weakSelf.onboardingWindow animation:LKRootViewControllerAnimationModalDismiss completion:^{
 
-            // Onboarding is done! First call
+            // Onboarding is done! First record the UI event
+            if (bundleInfo != nil) {
+                NSDictionary *resultInfo = @{@"flow_result" : NSStringFromViewControllerFlowResult(flowResult),
+                                             @"start_time": @(onboardingStartTime.timeIntervalSince1970),
+                                             @"end_time": @(onboardingEndTime.timeIntervalSince1970),
+                                             @"load_duration": @(preOnboardingDuration)
+                                             };
+                [weakSelf.delegate uiManagerRequestedToReportUIEvent:@"ui-shown"
+                                                        uiBundleInfo:bundleInfo
+                                                additionalParameters:resultInfo];
+            }
+
+
+            // Then call the completion
             if (completionHandler) {
                 completionHandler(flowResult, bundleInfo, onboardingStartTime, onboardingEndTime, preOnboardingDuration);
             }
