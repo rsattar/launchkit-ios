@@ -70,6 +70,6 @@ typedef void (^LKOnboardingUICompletionHandler)(LKViewControllerFlowResult flowR
 #pragma mark - Onboarding UI
 - (void)presentOnboardingUIOnWindow:(nullable UIWindow *)window
                 maxWaitTimeInterval:(NSTimeInterval)maxWaitTimeInterval
-                  completionHandler:(nullable LKOnboardingUIDismissHandler)completionHandler;
+                  completionHandler:(nullable LKOnboardingUICompletionHandler)completionHandler;
 
 @end

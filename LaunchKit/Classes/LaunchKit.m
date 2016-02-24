@@ -569,32 +569,7 @@ static LaunchKit *_sharedInstance;
 {
     [self.uiManager presentOnboardingUIOnWindow:window
                             maxWaitTimeInterval:self.maxOnboardingWaitTimeInterval
-                              completionHandler:^(LKViewControllerFlowResult flowResult,
-                                                  LKBundleInfo *bundleInfo,
-                                                  NSDate *onboardingStartTime,
-                                                  NSDate *onboardingEndTime,
-                                                  NSTimeInterval preOnboardingDuration) {
-                                  if (completionHandler) {
-                                      completionHandler(flowResult);
-                                  }
-                              }];
-
-    // TODO: Report a 'ui-showing' event
-}
-
-- (void) reportEvent:(nonnull NSString *)eventName uiBundleInfo:(nullable LKBundleInfo *)uiBundleInfo additionalParams:(nullable NSDictionary *)additionalParams
-{
-    NSMutableDictionary *params = [NSMutableDictionary dictionary];
-    // Add additionalParams first, so we can overwrite with the 'command' and ui bundle keys, if needed
-    if (additionalParams.count) {
-        [params addEntriesFromDictionary:additionalParams];
-    }
-    params[@"command"] = eventName;
-    if (uiBundleInfo != nil) {
-        params[@"ui_name"] = uiBundleInfo.name;
-        params[@"ui_version"] = uiBundleInfo.version;
-    }
-    [self trackProperties:params];
+                              completionHandler:completionHandler];
 }
 
 
@@ -637,7 +612,17 @@ static LaunchKit *_sharedInstance;
                              uiBundleInfo:(nullable LKBundleInfo *)uiBundleInfo
                      additionalParameters:(nullable NSDictionary *)additionalParameters
 {
-    [self reportEvent:eventName uiBundleInfo:uiBundleInfo additionalParams:additionalParameters];
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    // Add additionalParameters first, so we can overwrite with the 'command' and ui bundle keys, if needed
+    if (additionalParameters.count) {
+        [params addEntriesFromDictionary:additionalParameters];
+    }
+    params[@"command"] = eventName;
+    if (uiBundleInfo != nil) {
+        params[@"ui_name"] = uiBundleInfo.name;
+        params[@"ui_version"] = uiBundleInfo.version;
+    }
+    [self trackProperties:params];
 }
 
 #pragma mark - Saving/Persisting our Session

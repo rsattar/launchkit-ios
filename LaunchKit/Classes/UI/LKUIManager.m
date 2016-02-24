@@ -206,7 +206,7 @@
 
 - (void)presentOnboardingUIOnWindow:(UIWindow *)window
                 maxWaitTimeInterval:(NSTimeInterval)maxWaitTimeInterval
-                  completionHandler:(LKOnboardingUIDismissHandler)completionHandler;
+                  completionHandler:(LKOnboardingUICompletionHandler)completionHandler;
 {
     if (window == nil) {
         window = [UIApplication sharedApplication].keyWindow;
@@ -245,7 +245,7 @@
 
             // Then call the completion
             if (completionHandler) {
-                completionHandler(flowResult, bundleInfo, onboardingStartTime, onboardingEndTime, preOnboardingDuration);
+                completionHandler(flowResult);
             }
 
             // Cleanup
