@@ -13,13 +13,13 @@
 #import "LKViewController.h"
 
 typedef void (^LKReleaseNotesCompletionHandler)(BOOL didPresent);
-typedef void (^LKRemoteUILoadHandler)(LKViewController *viewController, NSError *error);
+typedef void (^LKRemoteUILoadHandler)(LKViewController * _Nullable viewController, NSError * _Nullable error);
 typedef void (^LKRemoteUIDismissalHandler)(LKViewControllerFlowResult flowResult);
 // Used internally, returning additional usage stats
 typedef void (^LKOnboardingUIDismissHandler)(LKViewControllerFlowResult flowResult,
-                                             LKBundleInfo *bundleInfo,
-                                             NSDate *onboardingStartTime,
-                                             NSDate *onboardingEndTime,
+                                             LKBundleInfo * _Nullable bundleInfo,
+                                             NSDate * _Nonnull onboardingStartTime,
+                                             NSDate * _Nonnull onboardingEndTime,
                                              NSTimeInterval preOnboardingDuration);
 // Used externally, to report overall flow result
 typedef void (^LKOnboardingUICompletionHandler)(LKViewControllerFlowResult flowResult);
@@ -32,9 +32,9 @@ typedef void (^LKOnboardingUICompletionHandler)(LKViewControllerFlowResult flowR
 
 @interface LKUIManager : NSObject
 
-@property (weak, nonatomic) NSObject <LKUIManagerDelegate> *delegate;
+@property (weak, nonatomic, nullable) NSObject <LKUIManagerDelegate> *delegate;
 
-- (instancetype)initWithBundlesManager:(LKBundlesManager *)bundlesManager;
+- (nonnull instancetype)initWithBundlesManager:(nonnull LKBundlesManager *)bundlesManager;
 
 #pragma mark - Remote UI Loading
 /*!
@@ -54,18 +54,18 @@ typedef void (^LKOnboardingUICompletionHandler)(LKViewControllerFlowResult flowR
  the error is returned as well. You should ret
 
  */
-- (void)loadRemoteUIWithId:(NSString *)remoteUIId completion:(LKRemoteUILoadHandler)completion;
+- (void)loadRemoteUIWithId:(nonnull NSString *)remoteUIId completion:(nullable LKRemoteUILoadHandler)completion;
 
 #pragma mark - Presenting UI
-- (void)presentRemoteUIViewController:(LKViewController *)viewController
-                   fromViewController:(UIViewController *)presentingViewController
+- (void)presentRemoteUIViewController:(nonnull LKViewController *)viewController
+                   fromViewController:(nonnull UIViewController *)presentingViewController
                              animated:(BOOL)animated
-                     dismissalHandler:(LKRemoteUIDismissalHandler)dismissalHandler;
-- (BOOL)remoteUIPresentedForThisAppVersion:(NSString *)remoteUIId;
+                     dismissalHandler:(nullable LKRemoteUIDismissalHandler)dismissalHandler;
+- (BOOL)remoteUIPresentedForThisAppVersion:(nonnull NSString *)remoteUIId;
 
 #pragma mark - Onboarding UI
-- (void)presentOnboardingUIOnWindow:(UIWindow *)window
+- (void)presentOnboardingUIOnWindow:(nullable UIWindow *)window
                 maxWaitTimeInterval:(NSTimeInterval)maxWaitTimeInterval
-                  completionHandler:(LKOnboardingUIDismissHandler)completionHandler;
+                  completionHandler:(nullable LKOnboardingUIDismissHandler)completionHandler;
 
 @end
