@@ -32,6 +32,8 @@
 /* Begin PBXFileReference section */
 		5EC29698A7F3F2F7159D11F7 /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		654D4F021B62C68D00D8731D /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		6578A0E31C7D302800A814E6 /* LaunchKitSampleSwift-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "LaunchKitSampleSwift-Bridging-Header.h"; sourceTree = "<group>"; };
+		6578A0E71C7D309B00A814E6 /* LaunchKit_SampleAppHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LaunchKit_SampleAppHelpers.h; sourceTree = "<group>"; };
 		65DA47D01B619F9D00A048AF /* LaunchKitSampleSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LaunchKitSampleSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		65DA47D41B619F9D00A048AF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		65DA47D51B619F9D00A048AF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -102,6 +104,8 @@
 				65DA47DE1B619F9D00A048AF /* LaunchScreen.xib */,
 				65DA47D31B619F9D00A048AF /* Supporting Files */,
 				654D4F021B62C68D00D8731D /* Settings.bundle */,
+				6578A0E31C7D302800A814E6 /* LaunchKitSampleSwift-Bridging-Header.h */,
+				6578A0E71C7D309B00A814E6 /* LaunchKit_SampleAppHelpers.h */,
 			);
 			path = LaunchKitSampleSwift;
 			sourceTree = "<group>";
@@ -205,7 +209,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftMigration = 0700;
-				LastSwiftUpdateCheck = 0700;
+				LastSwiftUpdateCheck = 0720;
 				LastUpgradeCheck = 0710;
 				ORGANIZATIONNAME = "Cluster Labs, Inc.";
 				TargetAttributes = {
@@ -489,10 +493,13 @@
 			baseConfigurationReference = D7E57E7174F15104E521EB1A /* Pods-LaunchKitSampleSwift.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = LaunchKitSampleSwift/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "io.launchkit.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "LaunchKitSampleSwift/LaunchKitSampleSwift-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
@@ -501,10 +508,12 @@
 			baseConfigurationReference = FED39D978B1A4563615C11B3 /* Pods-LaunchKitSampleSwift.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = LaunchKitSampleSwift/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "io.launchkit.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "LaunchKitSampleSwift/LaunchKitSampleSwift-Bridging-Header.h";
 			};
 			name = Release;
 		};

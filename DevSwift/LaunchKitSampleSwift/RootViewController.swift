@@ -30,7 +30,7 @@ class RootViewController: UIViewController {
     }
 
     func showUIWithName(uiName:String) {
-        LaunchKit.sharedInstance().loadRemoteUIWithId(uiName, completion: { [unowned self] (viewController, error) -> Void in
+        LaunchKit.sharedInstance().uiManager.loadRemoteUIWithId(uiName, completion: { [unowned self] (viewController, error) -> Void in
             if let viewController = viewController {
                 LaunchKit.sharedInstance().presentRemoteUIViewController(viewController, fromViewController: self, animated: true, dismissalHandler: nil);
             } else {
