@@ -20,7 +20,7 @@ import LaunchKit
 ...
 override func viewDidAppear(animated: Bool) {
     super.viewDidAppear(animated)
-    LaunchKit.sharedInstance().presentAppReleaseNotesFromViewController(self) { (didPresent) -> Void in
+    LaunchKit.sharedInstance().presentAppReleaseNotesIfNeededFromViewController(self) { (didPresent) -> Void in
         if didPresent {
             print("Woohoo, we showed the release notes card!")
         }
@@ -37,7 +37,7 @@ Objective C:
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    [[LaunchKit sharedInstance] presentAppReleaseNotesFromViewController:self completion:^(BOOL didPresent) {
+    [[LaunchKit sharedInstance] presentAppReleaseNotesIfNeededFromViewController:self completion:^(BOOL didPresent) {
         if (didPresent) {
             NSLog(@"Woohoo, we showed the release notes card!");
         }
@@ -45,10 +45,13 @@ Objective C:
 }
 ```
 
-That's pretty much it! 
+That's pretty much it! LaunchKit will show you release notes in your app if:
+
+* You _have_ release notes available for this particular version of your app, and
+* You _haven't_ shown those release notes before, on that device.
 
 #### Debugging
-If you'd like to _always_ present the release notes card (while debugging), you can set a debug flag:
+If you'd like to _always_ present the release notes card (ignoring whether LaunchKit has shown them before, while debugging), you can set a debug flag:
 
 Swift:
 

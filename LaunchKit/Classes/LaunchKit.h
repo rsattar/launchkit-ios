@@ -142,8 +142,8 @@ FOUNDATION_EXPORT const unsigned char LaunchKitVersionString[];
 
 #pragma mark - Release Notes
 
-- (void) presentAppReleaseNotesFromViewController:(nonnull UIViewController *)viewController
-                                       completion:(nullable LKReleaseNotesCompletionHandler)completion;
+- (void) presentAppReleaseNotesIfNeededFromViewController:(nonnull UIViewController *)viewController
+                                               completion:(nullable LKReleaseNotesCompletionHandler)completion;
 
 
 #pragma mark - Onboarding UI

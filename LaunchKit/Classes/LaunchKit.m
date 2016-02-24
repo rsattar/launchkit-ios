@@ -532,8 +532,8 @@ static LaunchKit *_sharedInstance;
 
 #pragma mark - What's New
 
-- (void) presentAppReleaseNotesFromViewController:(nonnull UIViewController *)viewController
-                                       completion:(nullable LKReleaseNotesCompletionHandler)completion
+- (void) presentAppReleaseNotesIfNeededFromViewController:(nonnull UIViewController *)viewController
+                                               completion:(nullable LKReleaseNotesCompletionHandler)completion
 {
     // WhatsNew feature is enabled on LaunchKit
     BOOL whatsNewEnabled = LKConfigBool(@"io.launchkit.whatsNewEnabled", YES);

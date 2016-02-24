@@ -26,7 +26,7 @@
 {
     [super viewDidAppear:animated];
 
-    [[LaunchKit sharedInstance] presentAppReleaseNotesFromViewController:self completion:^(BOOL didPresent) {
+    [[LaunchKit sharedInstance] presentAppReleaseNotesIfNeededFromViewController:self completion:^(BOOL didPresent) {
         NSLog(@"Did present: %d", didPresent);
     }];
 
