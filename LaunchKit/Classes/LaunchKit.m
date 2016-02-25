@@ -531,6 +531,20 @@ static LaunchKit *_sharedInstance;
 
 #pragma mark - What's New
 
+- (BOOL) appReleaseNotesAvailable
+{
+    // WhatsNew feature is enabled on LaunchKit
+    BOOL whatsNewEnabled = LKConfigBool(@"io.launchkit.whatsNewEnabled", YES);
+    // Check against our remote bundles manifest if this app version *should* have
+    // has WhatsNew bundle.
+    BOOL manifestAvailable = self.bundlesManager.latestRemoteBundlesManifestRetrieved;
+    if (!manifestAvailable) {
+        LKLogWarning(@"Calling %s before LaunchKit is ready", __PRETTY_FUNCTION__);
+    }
+    LKBundleInfo *info = [self.bundlesManager remoteBundleInfoWithName:@"WhatsNew"];
+    return whatsNewEnabled && manifestAvailable && (info != nil);
+}
+
 - (void) presentAppReleaseNotesIfNeededFromViewController:(nonnull UIViewController *)viewController
                                                completion:(nullable LKReleaseNotesCompletionHandler)completion
 {

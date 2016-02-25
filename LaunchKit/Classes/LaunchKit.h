@@ -152,7 +152,19 @@ typedef void (^LKUIManifestRefreshHandler)();
 
 #pragma mark - Release Notes
 
-- (BOOL) appReleaseNotesAvailableForThisAppVersion;
+/*!
+ @method
+ 
+ @abstract
+ Used to check if App Release Notes are available for this app, based on app version, build, and
+ publish status on LaunchKit's service. This is useful if you'd like to display a button to show
+ App Release Notes on demand. That button can be potentially disabled (or hidden) depending on the
+ result.
+ 
+ @return YES if App Release Notes are available (not necessarily downloaded, though), or NO if none
+ are available for this app, based on version and build.
+ */
+- (BOOL) appReleaseNotesAvailable;
 
 /*!
  @method
