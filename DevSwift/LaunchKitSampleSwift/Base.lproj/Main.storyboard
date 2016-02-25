@@ -31,6 +31,9 @@
                             <constraint firstItem="Ls7-gF-ZTs" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="lBD-eL-GdV"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="showAppReleaseNotesButton" destination="Ls7-gF-ZTs" id="0bS-KY-uLV"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>

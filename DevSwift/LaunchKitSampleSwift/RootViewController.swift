@@ -11,8 +11,14 @@ import LaunchKit
 
 class RootViewController: UIViewController {
 
+    @IBOutlet weak var showAppReleaseNotesButton: UIButton!
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        LKUIManifestRefreshed { () -> Void in
+            // If App Release Notes are not available, disable the button
+            self.showAppReleaseNotesButton.enabled = LaunchKit.sharedInstance().appReleaseNotesAvailable()
+        }
     }
 
     override func viewDidAppear(animated: Bool) {
