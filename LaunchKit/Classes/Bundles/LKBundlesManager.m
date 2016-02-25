@@ -120,7 +120,8 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
                 LKLog(@"Manifest is up-to-date, and remoteBundlesDownloaded = %d", self.remoteBundlesDownloaded);
             }
         }
-        if (!self.latestRemoteBundlesManifestRetrieved) {
+        BOOL previouslyRetrieved = self.latestRemoteBundlesManifestRetrieved;
+        if (!previouslyRetrieved) {
             // We haven't set this before, or we haven't actually retrieved the manifest,
             // meaning that our remoteBundleMap is not set to anything. We want our remoteBundleMap
             // to remain the source of truth, when doing lookups of what bundles we're supposed to have
@@ -134,6 +135,9 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
         // We have the same 'local' server time as our current, so
         // mark that we have the latest, and there's nothing else to do
         self.latestRemoteBundlesManifestRetrieved = YES;
+        if (!previouslyRetrieved) {
+            [self.delegate bundlesManagerRemoteManifestWasRefreshed:self];
+        }
         // Check against any remoteBundleMap we may have whether or not we need to download anything
         NSMutableArray *infosNeedingDownload = [self remoteBundleInfosNeedingDownloadForceRetrieve:NO];
         self.remoteBundlesDownloaded = (infosNeedingDownload.count == 0);
@@ -415,6 +419,9 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
         dispatch_async(dispatch_get_main_queue(), ^{
             self.lastManifestRetrievalTime = [NSDate date];
             self.latestRemoteBundlesManifestRetrieved = (error == nil);
+            if (self.latestRemoteBundlesManifestRetrieved) {
+                [self.delegate bundlesManagerRemoteManifestWasRefreshed:self];
+            }
 #if DEBUG
             if (self.debugMode) {
                 LKLog(@"LKBundlesManager: Finished retrieving remote bundle manifest.");

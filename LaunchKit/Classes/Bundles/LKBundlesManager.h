@@ -16,7 +16,16 @@ extern NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles;
 
 typedef void (^LKRemoteBundleLoadHandler)(NSBundle * bundle, NSError * error);
 
+@class LKBundlesManager;
+@protocol LKBundlesManagerDelegate <NSObject>
+
+- (void) bundlesManagerRemoteManifestWasRefreshed:(LKBundlesManager *)manager;
+
+@end
+
 @interface LKBundlesManager : NSObject
+
+@property (weak, nonatomic) NSObject <LKBundlesManagerDelegate> *delegate;
 
 @property (assign, nonatomic) BOOL debugMode;
 @property (assign, nonatomic) BOOL verboseLogging;
