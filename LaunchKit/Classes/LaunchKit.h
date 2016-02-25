@@ -26,6 +26,8 @@ FOUNDATION_EXPORT double LaunchKitVersionNumber;
 //! Project version string for LaunchKit.
 FOUNDATION_EXPORT const unsigned char LaunchKitVersionString[];
 
+typedef void (^LKUIManifestRefreshHandler)();
+
 @interface LaunchKit : NSObject
 
 /*!
@@ -84,6 +86,14 @@ FOUNDATION_EXPORT const unsigned char LaunchKitVersionString[];
  * According to LaunchKit, what information is availabe for the current app user. See https://launchkit.io/users
  */
 @property (readonly, nonatomic, nullable) LKAppUser *currentUser;
+
+/**
+ * Set this handler if you'd like to see when LaunchKit is updated with what remote UI
+ * (e.g. App Release Notes) is available for your app (based on version, build, etc.). It will
+ * be called whenever the ui manifest is refreshed (at least once a session, and possibly more,
+ * if you are editing and publishing UI on LaunchKit's service.
+ */
+@property (copy, nonatomic, nullable) LKUIManifestRefreshHandler uiManifestRefreshHandler;
 
 /**
  * This sets the maximum time that LaunchKit should wait while attempting to load your onboarding UI.
@@ -233,4 +243,15 @@ FOUNDATION_EXPORT const unsigned char LaunchKitVersionString[];
 
  */
 + (void)useLocalLaunchKitServer:(BOOL)useLocalLaunchKitServer;
-@end
+
+@end // End LaunchKit class declaration
+
+
+#pragma mark - LaunchKit UI Convenience Functions
+/**
+ * A block to LKUIManifestReady will get called on the very first
+ * network retrieval of the manifest containing which downloadable components
+ * are available this app, based on app version + build, etc. This is a good
+ * place to check whether presentable UI (like App Release Notes) is available.
+ */
+extern void LKUIManifestRefreshed(LKUIManifestRefreshHandler _Nullable refreshHandler);

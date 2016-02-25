@@ -623,6 +623,11 @@ static LaunchKit *_sharedInstance;
 
 - (void) bundlesManagerRemoteManifestWasRefreshed:(LKBundlesManager *)manager
 {
+    // Internally, bundles manifest and ui manifest are the same (bundles is the superset
+    // of ui), so report ui manifest changes
+    if (self.uiManifestRefreshHandler) {
+        self.uiManifestRefreshHandler();
+    }
 }
 
 #pragma mark - LKUIManagerDelegate
@@ -859,4 +864,12 @@ extern void LKConfigRefreshed(LKConfigRefreshHandler _Nullable refreshHandler)
 BOOL LKAppUserIsSuper()
 {
     return [LaunchKit sharedInstance].currentUser.isSuper;
+}
+
+
+#pragma mark - LaunchKit UI Convenience Functions
+
+extern void LKUIManifestRefreshed(LKUIManifestRefreshHandler _Nullable readyHandler)
+{
+    [LaunchKit sharedInstance].uiManifestRefreshHandler = readyHandler;
 }
