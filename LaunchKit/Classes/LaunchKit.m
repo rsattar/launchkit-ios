@@ -57,7 +57,7 @@ static NSTimeInterval const DEFAULT_MAX_ONBOARDING_WAIT_TIME_INTERVAL = 15.0;
 
 #pragma mark - LaunchKit Implementation
 
-@interface LaunchKit () <LKUIManagerDelegate>
+@interface LaunchKit () <LKBundlesManagerDelegate, LKUIManagerDelegate>
 
 @property (copy, nonatomic) NSString *apiToken;
 
@@ -83,7 +83,6 @@ static NSTimeInterval const DEFAULT_MAX_ONBOARDING_WAIT_TIME_INTERVAL = 15.0;
 
 // Config
 @property (readwrite, strong, nonatomic, nonnull) LKConfig *config;
-
 
 // Displaying UI
 @property (strong, nonatomic) LKUIManager *uiManager;
@@ -618,6 +617,12 @@ static LaunchKit *_sharedInstance;
                                fromViewController:presentingViewController
                                          animated:animated
                                  dismissalHandler:dismissalHandler];
+}
+
+#pragma mark - LKBundlesManagerDelegate
+
+- (void) bundlesManagerRemoteManifestWasRefreshed:(LKBundlesManager *)manager
+{
 }
 
 #pragma mark - LKUIManagerDelegate
