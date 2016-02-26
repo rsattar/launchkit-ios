@@ -212,6 +212,11 @@ typedef void (^LKUIManifestRefreshHandler)();
                   completionHandler:(nullable LKOnboardingUICompletionHandler)completionHandler;
 
 
+#pragma mark - App Review Card
+- (void) presentAppReviewCardIfNeededFromViewController:(nonnull UIViewController *)viewController
+                                             completion:(nullable LKAppReviewCardCompletionHandler)completion;
+
+
 #pragma mark - Remote UI
 
 /*!

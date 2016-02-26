@@ -600,6 +600,28 @@ static LaunchKit *_sharedInstance;
 }
 
 
+#pragma mark - App Review Card
+- (void) presentAppReviewCardIfNeededFromViewController:(nonnull UIViewController *)viewController
+                                             completion:(nullable LKAppReviewCardCompletionHandler)completion
+{
+    [self.uiManager presentAppReviewCardIfNeededFromViewController:viewController completion:^(LKViewControllerFlowResult flowResult) {
+
+        BOOL agreedToReview = (flowResult == LKViewControllerFlowResultCompleted);
+        if (agreedToReview) {
+            // Sure!
+            //NSString *appStoreUrlString = LKConfigString(@"appStoreUrl", @"itms-apps://itunes.apple.com/app/id596595032");
+            //[[UIApplication sharedApplication] openURL:[NSURL URLWithString:appStoreUrlString]];
+        } else {
+            // No Thanks, or Cancel, or failed
+        }
+
+        if (completion) {
+            completion(flowResult);
+        }
+    }];
+}
+
+
 #pragma mark -
 
 - (void)showUIWithName:(NSString *)uiName fromViewController:(UIViewController *)presentingViewController completion:(void (^)(LKViewControllerFlowResult flowResult, NSError *error))completion
