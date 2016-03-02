@@ -68,6 +68,8 @@
 		654CC89E1C0FBF1F00131ABE /* LKCardPresentationController.h in Headers */ = {isa = PBXBuildFile; fileRef = 654CC8651C0FBF1F00131ABE /* LKCardPresentationController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		654CC89F1C0FBF1F00131ABE /* LKCardPresentationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 654CC8661C0FBF1F00131ABE /* LKCardPresentationController.m */; };
 		654CC8A11C0FBF9000131ABE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 654CC8A01C0FBF9000131ABE /* libz.tbd */; };
+		65E5CF061C877A4500482825 /* LKLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 65E5CF041C877A4500482825 /* LKLabel.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		65E5CF071C877A4500482825 /* LKLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 65E5CF051C877A4500482825 /* LKLabel.m */; };
 		65FC8FCE1C5C0EA500C203F6 /* LKGradientView.h in Headers */ = {isa = PBXBuildFile; fileRef = 65FC8FC81C5C0EA500C203F6 /* LKGradientView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		65FC8FCF1C5C0EA500C203F6 /* LKGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = 65FC8FC91C5C0EA500C203F6 /* LKGradientView.m */; };
 		65FC8FD01C5C0EA500C203F6 /* LKPageControl.h in Headers */ = {isa = PBXBuildFile; fileRef = 65FC8FCA1C5C0EA500C203F6 /* LKPageControl.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -140,6 +142,8 @@
 		654CC8A01C0FBF9000131ABE /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		6593C8A91BE405DB006E5AD2 /* LaunchKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LaunchKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6593C8AE1BE405DB006E5AD2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		65E5CF041C877A4500482825 /* LKLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKLabel.h; sourceTree = "<group>"; };
+		65E5CF051C877A4500482825 /* LKLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKLabel.m; sourceTree = "<group>"; };
 		65FC8FC81C5C0EA500C203F6 /* LKGradientView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKGradientView.h; sourceTree = "<group>"; };
 		65FC8FC91C5C0EA500C203F6 /* LKGradientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LKGradientView.m; sourceTree = "<group>"; };
 		65FC8FCA1C5C0EA500C203F6 /* LKPageControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LKPageControl.h; sourceTree = "<group>"; };
@@ -257,6 +261,8 @@
 				65FC8FC91C5C0EA500C203F6 /* LKGradientView.m */,
 				654CC8511C0FBF1F00131ABE /* LKImageView.h */,
 				654CC8521C0FBF1F00131ABE /* LKImageView.m */,
+				65E5CF041C877A4500482825 /* LKLabel.h */,
+				65E5CF051C877A4500482825 /* LKLabel.m */,
 				654CC8531C0FBF1F00131ABE /* LKNavigationController.h */,
 				654CC8541C0FBF1F00131ABE /* LKNavigationController.m */,
 				65FC8FCA1C5C0EA500C203F6 /* LKPageControl.h */,
@@ -380,6 +386,7 @@
 				654CC8741C0FBF1F00131ABE /* LKAPIClient.h in Headers */,
 				654CC88F1C0FBF1F00131ABE /* LKNavigationController.h in Headers */,
 				654CC86F1C0FBF1F00131ABE /* LKConfig.h in Headers */,
+				65E5CF061C877A4500482825 /* LKLabel.h in Headers */,
 				654CC88D1C0FBF1F00131ABE /* LKImageView.h in Headers */,
 				654CC87C1C0FBF1F00131ABE /* NSString+LKURLEncoded.h in Headers */,
 				654CC89A1C0FBF1F00131ABE /* UIView+LKAdditions.h in Headers */,
@@ -463,6 +470,7 @@
 				654CC87F1C0FBF1F00131ABE /* LK_SSZipArchive.m in Sources */,
 				054014651C1F07230022860A /* LKTrackOperation.m in Sources */,
 				0540145E1C1F070E0022860A /* lk_unzip.c in Sources */,
+				65E5CF071C877A4500482825 /* LKLabel.m in Sources */,
 				654CC86E1C0FBF1F00131ABE /* LKBundlesManager.m in Sources */,
 				654CC89B1C0FBF1F00131ABE /* UIView+LKAdditions.m in Sources */,
 				654CC8941C0FBF1F00131ABE /* LKPushCustomSegue.m in Sources */,
