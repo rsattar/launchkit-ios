@@ -208,11 +208,40 @@ typedef void (^LKUIManifestRefreshHandler)();
                                                    completion:(nullable LKReleaseNotesCompletionHandler)completion;
 
 #pragma mark - Onboarding UI
+/*!
+ @method
+
+ @abstract
+ Presents Onboarding UI, as configured on the LaunchKit server on the supplied window.
+
+ @discussion
+ When presenting onboarding UI, LaunchKit stores a reference to the existing rootViewController, and replaces
+ it with the onboarding view controller. When the onboarding flow is finished, LaunchKit performs a transition
+ animation and replaces the onboarding view controller with the original rootViewController.
+ 
+ Before calling this method, ensure that your window has been set with the intended rootViewController.
+ 
+ While the actual onboarding resources may be retrieving from LaunchKit remotely, LaunchKit will display a 
+ temporary view, which replicates your application's launch storyboard or xib. If LaunchKit is unable to retrieve
+ the actual onboarding UI within a certain amount of time (default 15 seconds), it will finish the process with
+ a flowResult of LKViewControllerFlowResultFailed.
+
+ @param window The UIWindow upon which to present onboarding. Normally this is just your AppDelegate's window
+ property
+ @param completionHandler (Optional) A completion handler which is called when onboarding is complete. It contains
+ a flowResult enumeration, indicating how the user completed the onboarding (or if there was an error).
+ 
+ @see maxOnboardingWaitTimeInterval
+ */
 - (void)presentOnboardingUIOnWindow:(nonnull UIWindow *)window
                   completionHandler:(nullable LKOnboardingUICompletionHandler)completionHandler;
 
 
 #pragma mark - App Review Card
+/*!
+ @method
+ @warning In Private Beta Testing
+ */
 - (void) presentAppReviewCardIfNeededFromViewController:(nonnull UIViewController *)viewController
                                              completion:(nullable LKAppReviewCardCompletionHandler)completion;
 
