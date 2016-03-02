@@ -226,17 +226,21 @@
     self.onboardingWindow.rootViewController = onboarding;
 
     __weak LKUIManager *weakSelf = self;
-    onboarding.dismissalHandler = ^(LKViewControllerFlowResult flowResult, LKBundleInfo *bundleInfo, NSDate *onboardingStartTime, NSDate *onboardingEndTime, NSTimeInterval preOnboardingDuration) {
+    onboarding.dismissalHandler = ^(LKViewControllerFlowResult flowResult, NSDictionary *additionalFlowParameters, LKBundleInfo *bundleInfo, NSDate *onboardingStartTime, NSDate *onboardingEndTime, NSTimeInterval preOnboardingDuration) {
 
         [weakSelf transitionToRootViewController:weakSelf.postOnboardingRootViewController inWindow:weakSelf.onboardingWindow animation:LKRootViewControllerAnimationModalDismiss completion:^{
 
             // Onboarding is done! First record the UI event
             if (bundleInfo != nil) {
-                NSDictionary *resultInfo = @{@"flow_result" : NSStringFromViewControllerFlowResult(flowResult),
-                                             @"start_time": @(onboardingStartTime.timeIntervalSince1970),
-                                             @"end_time": @(onboardingEndTime.timeIntervalSince1970),
-                                             @"load_duration": @(preOnboardingDuration)
-                                             };
+                NSMutableDictionary *resultInfo = [NSMutableDictionary dictionary];
+                if (additionalFlowParameters) {
+                    [resultInfo addEntriesFromDictionary:additionalFlowParameters];
+                }
+                [resultInfo addEntriesFromDictionary:@{@"flow_result" : NSStringFromViewControllerFlowResult(flowResult),
+                                                       @"start_time": @(onboardingStartTime.timeIntervalSince1970),
+                                                       @"end_time": @(onboardingEndTime.timeIntervalSince1970),
+                                                       @"load_duration": @(preOnboardingDuration)
+                                                       }];
                 [weakSelf.delegate uiManagerRequestedToReportUIEvent:@"ui-shown"
                                                         uiBundleInfo:bundleInfo
                                                 additionalParameters:resultInfo];

@@ -17,6 +17,7 @@ typedef void (^LKRemoteUILoadHandler)(LKViewController * _Nullable viewControlle
 typedef void (^LKRemoteUIDismissalHandler)(LKViewControllerFlowResult flowResult);
 // Used internally, returning additional usage stats
 typedef void (^LKOnboardingUIDismissHandler)(LKViewControllerFlowResult flowResult,
+                                             NSDictionary * _Nullable additionalFlowParameters,
                                              LKBundleInfo * _Nullable bundleInfo,
                                              NSDate * _Nonnull onboardingStartTime,
                                              NSDate * _Nonnull onboardingEndTime,

@@ -496,6 +496,12 @@
     // Pass the selected object to the new view controller.
 }
 */
+- (IBAction)onSkipButtonTriggered:(UIButton *)sender
+{
+    NSDictionary *info = @{@"current_page": @([self currentPage])};
+    [self finishFlowWithResult:LKViewControllerFlowResultCancelled userInfo:info];
+}
+
 - (IBAction)onStaticContinueButtonTriggered:(UIButton *)sender
 {
     [self moveToNextOnboardingPage:nil];
