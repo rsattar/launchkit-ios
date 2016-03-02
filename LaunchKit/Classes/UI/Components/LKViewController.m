@@ -334,7 +334,7 @@ NSString * NSStringFromViewControllerFlowResult(LKViewControllerFlowResult resul
         case LKViewControllerFlowResultFailed:
             return @"failed";
         default:
-            NSLog(@"Couldn't understand flow result %ld; returning 'unknown'", result);
+            NSLog(@"Couldn't understand flow result %ld; returning 'unknown'", (long)result);
             return @"unknown";
     }
 }
