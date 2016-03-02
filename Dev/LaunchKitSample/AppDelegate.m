@@ -29,6 +29,11 @@ static NSString *const LAUNCHKIT_TOKEN = @"YOUR_LAUNCHKIT_TOKEN";
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{@"launchKitToken" : LAUNCHKIT_TOKEN}];
     [self.window makeKeyAndVisible];
     [self startLaunchKitIfPossible];
+
+    LaunchKit *lk = [LaunchKit sharedInstance];
+    [lk presentOnboardingUIOnWindow:self.window completionHandler:^(LKViewControllerFlowResult flowResult) {
+        NSLog(@"Showed onboarding!");
+    }];
     return YES;
 }
 

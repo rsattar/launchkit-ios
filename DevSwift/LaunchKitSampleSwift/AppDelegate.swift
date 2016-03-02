@@ -46,7 +46,7 @@ class AppDelegate: UIResponder, UIAlertViewDelegate, UIApplicationDelegate {
         // In case, you the developer, has directly modified the launchkit token here
 
         self.startLaunchKitIfPossible()
-
+        LaunchKit.sharedInstance().presentOnboardingUIOnWindow(self.window!, completionHandler: nil)
         return true
     }
 
