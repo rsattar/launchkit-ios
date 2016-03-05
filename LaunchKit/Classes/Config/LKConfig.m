@@ -144,4 +144,15 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
     return defaultValue;
 }
 
+#pragma mark - Private Convenience Getters
+
+- (nullable NSDate *) dateForKey:(NSString * __nonnull)key defaultValue:(nullable NSDate *)defaultValue
+{
+    NSTimeInterval timestamp = [self doubleForKey:key defaultValue:-1.0];
+    if (timestamp >= 0.0) {
+        return [NSDate dateWithTimeIntervalSince1970:timestamp];
+    }
+    return nil;
+}
+
 @end

@@ -33,6 +33,7 @@ static NSTimeInterval const DEFAULT_MAX_ONBOARDING_WAIT_TIME_INTERVAL = 15.0;
 
 @property (readwrite, strong, nonatomic, nonnull) NSDictionary *parameters;
 - (BOOL) updateParameters:(NSDictionary  * __nullable)parameters;
+- (nullable NSDate *) dateForKey:(NSString * __nonnull)key defaultValue:(nullable NSDate *)defaultValue;
 
 @end
 
