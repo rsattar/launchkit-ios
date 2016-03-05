@@ -47,7 +47,7 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
     return strippedDict;
 }
 
-- (BOOL) updateParameters:(NSDictionary *)parameters
+- (BOOL) updateParameters:(NSDictionary * __nullable)parameters
 {
     // Also first config-updated and refresh handler the *first* time that
     // config is updated, whether or not it is actually different

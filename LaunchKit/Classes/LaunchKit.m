@@ -32,7 +32,7 @@ static NSTimeInterval const DEFAULT_MAX_ONBOARDING_WAIT_TIME_INTERVAL = 15.0;
 @interface LKConfig (Private)
 
 @property (readwrite, strong, nonatomic, nonnull) NSDictionary *parameters;
-- (BOOL) updateParameters:(NSDictionary *)parameters;
+- (BOOL) updateParameters:(NSDictionary  * __nullable)parameters;
 
 @end
 
