@@ -566,14 +566,38 @@ static LaunchKit *_sharedInstance;
     // WhatsNew feature is enabled on LaunchKit
     BOOL whatsNewEnabled = LKConfigBool(@"io.launchkit.whatsNewEnabled", YES);
     // We have shown this UI before (for this app version)
-    BOOL alreadyPresented = !ignoreIfShownBefore && [self.uiManager remoteUIPresentedForThisAppVersion:@"WhatsNew"];
+    BOOL alreadyPresentedForThisAppVersion = !ignoreIfShownBefore && [self.uiManager remoteUIPresentedForThisAppVersion:@"WhatsNew"];
     // This session has upgraded app versions at least once
-    BOOL lkSessionHasSeenAppReleaseNotesAtLeastOnce = [self.config.parameters[@"io.launchkit.currentVersionDuration"] isKindOfClass:[NSNumber class]];
+    NSTimeInterval currentVersionDuration = [self.config doubleForKey:@"io.launchkit.currentVersionDuration"
+                                                         defaultValue:0.0];
+    NSTimeInterval installDurationSinceLK = [self.config doubleForKey:@"io.launchkit.installDuration"
+                                                         defaultValue:0.0];
+    // Easy case: Since LK was installed, there has been a version update, indicating
+    // that currentVersionDuration is less than the total installDuration (since LK was
+    // set up on this app).
+    // This means that the user is NOT new (to us)
+    // (The actual install vs current time can be *slightly* off, so
+    // check against a (small) range
+    BOOL userHasUsedPreviousVersionOfApp = (fabs(installDurationSinceLK - currentVersionDuration) > 10.0);
+
+    if (!userHasUsedPreviousVersionOfApp) {
+        // The user is new (to us). However, the user could actually be
+        // NOT new (to the app). We can make a reasonable guess by checking
+        // the creation date of the app Documents/ folder
+        NSDate *localInstallDate = [self dateDocumentsFolderWasCreated];
+        NSDate *lkSessionStartDate = [[NSDate date] dateByAddingTimeInterval:-installDurationSinceLK];
+        // (Assumption) localInstallDate should always be <= lkSessionStartdate
+        NSTimeInterval timeBetweenInstallAndLKSession = [lkSessionStartDate timeIntervalSinceDate:localInstallDate];
+        // If the user is *roughly* more than a day old,
+        // consider them an existing user (who has updated)
+        userHasUsedPreviousVersionOfApp = (timeBetweenInstallAndLKSession > 86400);
+    }
+
     BOOL forceDisplay = NO;
 #if DEBUG
     forceDisplay = self.debugAlwaysPresentAppReleaseNotes;
 #endif
-    if ((whatsNewEnabled && !alreadyPresented && lkSessionHasSeenAppReleaseNotesAtLeastOnce) || forceDisplay) {
+    if ((whatsNewEnabled && !alreadyPresentedForThisAppVersion && userHasUsedPreviousVersionOfApp) || forceDisplay) {
 
         // TODO(Riz): Mark our app-launch current and previous versions, so we know if we have upgraded or not
         [self showUIWithName:@"WhatsNew" fromViewController:viewController completion:^(LKViewControllerFlowResult flowResult, NSError *error) {
@@ -587,6 +611,18 @@ static LaunchKit *_sharedInstance;
             completion(NO);
         }
     }
+}
+
+- (NSDate *)dateDocumentsFolderWasCreated
+{
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSURL *documentsFolderUrl = [fileManager URLsForDirectory:NSDocumentDirectory
+                                                    inDomains:NSUserDomainMask].lastObject;
+    NSError *error = nil;
+    NSDictionary<NSString *,id> *attributes = [fileManager attributesOfItemAtPath:documentsFolderUrl.path
+                                                                            error:&error];
+    NSDate *documentsFolderCreationDate = attributes[NSFileCreationDate];
+    return documentsFolderCreationDate;
 }
 
 
