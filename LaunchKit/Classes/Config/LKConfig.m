@@ -19,6 +19,9 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
 @property (readwrite, strong, nonatomic, nonnull) NSDictionary *parameters;
 @property (readwrite, nonatomic) BOOL isReady;
 
+// Define delegate internally here (LaunchKit.m will access via private extension)
+@property (weak, nonatomic, nullable) id <LKConfigDelegate> delegate;
+
 @end
 
 @implementation LKConfig
@@ -68,8 +71,13 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
         self.isReady = YES;
 
         // Fire ready handler if first refresh
-        if (isFirstRefresh && self.readyHandler != nil) {
-            self.readyHandler();
+        if (isFirstRefresh) {
+            if ([self.delegate respondsToSelector:@selector(configIsReady:)]) {
+                [self.delegate configIsReady:self];
+            }
+            if (self.readyHandler != nil) {
+                self.readyHandler();
+            }
         }
 
         NSDictionary *strippedOld = [self dictionaryWithoutLaunchKitKeys:oldParameters];
@@ -82,8 +90,13 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
                                                                          LKConfigNewParametersKey: strippedNew}];
         }
         // Fire config refresh handler (for both updates and isFirstRefresh)
-        if (self.refreshHandler != nil && (isFirstRefresh || appVisibleConfigsChanged)) {
-            self.refreshHandler(strippedOld, strippedNew);
+        if (appVisibleConfigsChanged || isFirstRefresh) {
+            if ([self.delegate respondsToSelector:@selector(configWasRefreshed:)]) {
+                [self.delegate configWasRefreshed:self];
+            }
+            if (self.refreshHandler != nil) {
+                self.refreshHandler(strippedOld, strippedNew);
+            }
         }
 
         return YES;

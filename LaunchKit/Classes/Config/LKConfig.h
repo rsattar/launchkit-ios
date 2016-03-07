@@ -15,6 +15,19 @@ extern NSString *const __nonnull LKConfigNewParametersKey;
 typedef void (^LKConfigReadyHandler)();
 typedef void (^LKConfigRefreshHandler)(NSDictionary * __nonnull oldParameters, NSDictionary * __nonnull newParameters);
 
+@class LKConfig;
+/**
+ * LKConfigDelegate is an internal implementation detail.
+ */
+@protocol LKConfigDelegate <NSObject>
+
+@optional
+- (void) configIsReady:(nonnull LKConfig *)config;
+- (void) configWasRefreshed:(nonnull LKConfig *)config;
+
+@end
+
+
 @interface LKConfig : NSObject
 
 /**
