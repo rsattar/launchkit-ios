@@ -562,7 +562,28 @@ static LaunchKit *_sharedInstance;
                               ignoreIfShownBefore:(BOOL)ignoreIfShownBefore
                                        completion:(nullable LKReleaseNotesCompletionHandler)completion
 {
+    BOOL shouldShowReleaseNotes = [self possibleToPresentAppReleaseNotesIgnoringIfShownBefore:ignoreIfShownBefore];
+    BOOL forceDisplay = NO;
+#if DEBUG
+    forceDisplay = self.debugAlwaysPresentAppReleaseNotes;
+#endif
+    if (shouldShowReleaseNotes || forceDisplay) {
 
+        [self showUIWithName:@"WhatsNew" fromViewController:viewController completion:^(LKViewControllerFlowResult flowResult, NSError *error) {
+            BOOL didPresent = flowResult == LKViewControllerFlowResultCompleted || flowResult == LKViewControllerFlowResultCancelled;
+            if (completion) {
+                completion(didPresent);
+            }
+        }];
+    } else {
+        if (completion) {
+            completion(NO);
+        }
+    }
+}
+
+- (BOOL) possibleToPresentAppReleaseNotesIgnoringIfShownBefore:(BOOL)ignoreIfShownBefore
+{
     // WhatsNew feature is enabled on LaunchKit
     BOOL whatsNewEnabled = LKConfigBool(@"io.launchkit.whatsNewEnabled", YES);
     // We have shown this UI before (for this app version)
@@ -593,24 +614,7 @@ static LaunchKit *_sharedInstance;
         userHasUsedPreviousVersionOfApp = (timeBetweenInstallAndLKSession > 86400);
     }
 
-    BOOL forceDisplay = NO;
-#if DEBUG
-    forceDisplay = self.debugAlwaysPresentAppReleaseNotes;
-#endif
-    if ((whatsNewEnabled && !alreadyPresentedForThisAppVersion && userHasUsedPreviousVersionOfApp) || forceDisplay) {
-
-        // TODO(Riz): Mark our app-launch current and previous versions, so we know if we have upgraded or not
-        [self showUIWithName:@"WhatsNew" fromViewController:viewController completion:^(LKViewControllerFlowResult flowResult, NSError *error) {
-            BOOL didPresent = flowResult == LKViewControllerFlowResultCompleted || flowResult == LKViewControllerFlowResultCancelled;
-            if (completion) {
-                completion(didPresent);
-            }
-        }];
-    } else {
-        if (completion) {
-            completion(NO);
-        }
-    }
+    return (whatsNewEnabled && !alreadyPresentedForThisAppVersion && userHasUsedPreviousVersionOfApp);
 }
 
 - (NSDate *)dateDocumentsFolderWasCreated
