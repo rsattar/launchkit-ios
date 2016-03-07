@@ -17,6 +17,7 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
 @interface LKConfig ()
 
 @property (readwrite, strong, nonatomic, nonnull) NSDictionary *parameters;
+@property (readwrite, nonatomic) BOOL isReady;
 
 @end
 
@@ -31,6 +32,7 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
         } else {
             _parameters = @{};
         }
+        self.isReady = NO;
     }
     return self;
 }
@@ -49,9 +51,6 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
 
 - (BOOL) updateParameters:(NSDictionary * __nullable)parameters
 {
-    // Also first config-updated and refresh handler the *first* time that
-    // config is updated, whether or not it is actually different
-    static BOOL isFirstRefresh = YES;
     if (parameters == nil) {
         parameters = self.parameters;
     }
@@ -59,11 +58,16 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
     if (![parameters isKindOfClass:[NSDictionary class]]) {
         return NO;
     }
+    // Also first call ready-handler and refresh-handler the *first* time that
+    // config is updated, whether or not it is actually different
+    BOOL isFirstRefresh = !self.isReady;
     if (![parameters isEqualToDictionary:_parameters] || isFirstRefresh) {
         NSDictionary *oldParameters = self.parameters;
         self.parameters = [parameters copy];
 
-        // Fire ready handler
+        self.isReady = YES;
+
+        // Fire ready handler if first refresh
         if (isFirstRefresh && self.readyHandler != nil) {
             self.readyHandler();
         }
@@ -82,7 +86,6 @@ NSString *const LKConfigNewParametersKey = @"LKConfigNewParametersKey";
             self.refreshHandler(strippedOld, strippedNew);
         }
 
-        isFirstRefresh = NO;
         return YES;
     }
     return NO;

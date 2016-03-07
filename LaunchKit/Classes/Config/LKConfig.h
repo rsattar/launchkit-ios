@@ -30,6 +30,11 @@ typedef void (^LKConfigRefreshHandler)(NSDictionary * __nonnull oldParameters, N
  * tasks for your app.
  */
 @property (copy, nonatomic, nullable) LKConfigReadyHandler readyHandler;
+/**
+ * Returns YES if config has been updated at least once this app session.
+ * @see readyHandler
+ */
+@property (readonly, nonatomic) BOOL isReady;
 
 /**
  * An optional block you can pass in, which will be called whenever the config has changed.
