@@ -31,6 +31,7 @@ static NSTimeInterval const DEFAULT_MAX_ONBOARDING_WAIT_TIME_INTERVAL = 15.0;
 
 @interface LKConfig (Private)
 
+@property (weak, nonatomic, nullable) id <LKConfigDelegate> delegate;
 @property (readwrite, strong, nonatomic, nonnull) NSDictionary *parameters;
 - (BOOL) updateParameters:(NSDictionary  * __nullable)parameters;
 - (nullable NSDate *) dateForKey:(NSString * __nonnull)key defaultValue:(nullable NSDate *)defaultValue;
@@ -58,7 +59,7 @@ static NSTimeInterval const DEFAULT_MAX_ONBOARDING_WAIT_TIME_INTERVAL = 15.0;
 
 #pragma mark - LaunchKit Implementation
 
-@interface LaunchKit () <LKBundlesManagerDelegate, LKUIManagerDelegate>
+@interface LaunchKit () <LKBundlesManagerDelegate, LKConfigDelegate, LKUIManagerDelegate>
 
 @property (copy, nonatomic) NSString *apiToken;
 
@@ -163,6 +164,7 @@ static LaunchKit *_sharedInstance;
         // Prepare the different tools and unarchive session
         self.sessionParameters = @{};
         self.config = [[LKConfig alloc] initWithParameters:nil];
+        self.config.delegate = self;
         self.analytics = [[LKAnalytics alloc] initWithAPIClient:self.apiClient];
         [self retrieveSessionFromArchiveIfAvailable];
 
@@ -705,6 +707,13 @@ static LaunchKit *_sharedInstance;
     if (self.uiManifestRefreshHandler) {
         self.uiManifestRefreshHandler();
     }
+}
+
+#pragma mark - LKConfigDelegate
+
+- (void) configIsReady:(nonnull LKConfig *)config
+{
+    // TODO: Load any pending operations when config is ready
 }
 
 #pragma mark - LKUIManagerDelegate
