@@ -601,6 +601,7 @@ static LaunchKit *_sharedInstance;
     BOOL whatsNewEnabled = LKConfigBool(@"io.launchkit.whatsNewEnabled", YES);
     // We have shown this UI before (for this app version)
     BOOL alreadyPresentedForThisAppVersion = !ignoreIfShownBefore && [self.uiManager remoteUIPresentedForThisAppVersion:@"WhatsNew"];
+    BOOL showToNewUsers = LKConfigBool(@"io.launchkit.whatsNewShowToNewUsers", NO);
     // This session has upgraded app versions at least once
     NSTimeInterval currentVersionDuration = [self.config doubleForKey:@"io.launchkit.currentVersionDuration"
                                                          defaultValue:0.0];
@@ -627,7 +628,7 @@ static LaunchKit *_sharedInstance;
         userHasUsedPreviousVersionOfApp = (timeBetweenInstallAndLKSession > 86400);
     }
 
-    return (whatsNewEnabled && !alreadyPresentedForThisAppVersion && userHasUsedPreviousVersionOfApp);
+    return (whatsNewEnabled && !alreadyPresentedForThisAppVersion && (userHasUsedPreviousVersionOfApp || showToNewUsers));
 }
 
 - (NSDate *)dateDocumentsFolderWasCreated
