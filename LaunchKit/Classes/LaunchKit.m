@@ -85,6 +85,7 @@ static NSTimeInterval const DEFAULT_MAX_ONBOARDING_WAIT_TIME_INTERVAL = 15.0;
 
 // Config
 @property (readwrite, strong, nonatomic, nonnull) LKConfig *config;
+@property (readwrite, strong, nonatomic, nonnull) NSMutableArray <void (^)()>*configReadyBlocks;
 
 // Displaying UI
 @property (strong, nonatomic) LKUIManager *uiManager;
@@ -165,6 +166,7 @@ static LaunchKit *_sharedInstance;
         self.sessionParameters = @{};
         self.config = [[LKConfig alloc] initWithParameters:nil];
         self.config.delegate = self;
+        self.configReadyBlocks = [NSMutableArray arrayWithCapacity:1];
         self.analytics = [[LKAnalytics alloc] initWithAPIClient:self.apiClient];
         [self retrieveSessionFromArchiveIfAvailable];
 
@@ -564,23 +566,32 @@ static LaunchKit *_sharedInstance;
                               ignoreIfShownBefore:(BOOL)ignoreIfShownBefore
                                        completion:(nullable LKReleaseNotesCompletionHandler)completion
 {
-    BOOL shouldShowReleaseNotes = [self possibleToPresentAppReleaseNotesIgnoringIfShownBefore:ignoreIfShownBefore];
-    BOOL forceDisplay = NO;
+    // Make a closure here, in case we need to wait for config to be ready
+    void (^presentReleaseNotesIfPossible)() = ^ {
+        BOOL shouldShowReleaseNotes = [self possibleToPresentAppReleaseNotesIgnoringIfShownBefore:ignoreIfShownBefore];
+        BOOL forceDisplay = NO;
 #if DEBUG
-    forceDisplay = self.debugAlwaysPresentAppReleaseNotes;
+        forceDisplay = self.debugAlwaysPresentAppReleaseNotes;
 #endif
-    if (shouldShowReleaseNotes || forceDisplay) {
+        if (shouldShowReleaseNotes || forceDisplay) {
 
-        [self showUIWithName:@"WhatsNew" fromViewController:viewController completion:^(LKViewControllerFlowResult flowResult, NSError *error) {
-            BOOL didPresent = flowResult == LKViewControllerFlowResultCompleted || flowResult == LKViewControllerFlowResultCancelled;
+            [self showUIWithName:@"WhatsNew" fromViewController:viewController completion:^(LKViewControllerFlowResult flowResult, NSError *error) {
+                BOOL didPresent = flowResult == LKViewControllerFlowResultCompleted || flowResult == LKViewControllerFlowResultCancelled;
+                if (completion) {
+                    completion(didPresent);
+                }
+            }];
+        } else {
             if (completion) {
-                completion(didPresent);
+                completion(NO);
             }
-        }];
-    } else {
-        if (completion) {
-            completion(NO);
         }
+    };
+
+    if (self.config.isReady) {
+        presentReleaseNotesIfPossible();
+    } else {
+        [self.configReadyBlocks addObject:presentReleaseNotesIfPossible];
     }
 }
 
@@ -713,7 +724,11 @@ static LaunchKit *_sharedInstance;
 
 - (void) configIsReady:(nonnull LKConfig *)config
 {
-    // TODO: Load any pending operations when config is ready
+    // Load any pending operations when config is ready
+    for (void (^readyBlock)() in self.configReadyBlocks) {
+        readyBlock();
+    }
+    [self.configReadyBlocks removeAllObjects];
 }
 
 #pragma mark - LKUIManagerDelegate
