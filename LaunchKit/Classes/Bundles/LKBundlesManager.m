@@ -17,6 +17,10 @@ static BOOL const LOAD_CACHED_BUNDLES = YES;
 static BOOL const LOAD_SERVER_BUNDLE_UPDATE_TIME = YES;
 static BOOL const STORE_SERVER_BUNDLE_UPDATE_TIME = YES;
 
+static NSString *const APP_USAGE_KEY = @"appUsageInfo";
+static NSString *const APP_USAGE_VERSION_KEY = @"appVersion";
+static NSString *const APP_USAGE_BUILD_KEY = @"appBuild";
+
 static LKBundlesManager *_sharedInstance;
 
 NSString *const LKBundlesManagerDidFinishRetrievingBundlesManifest = @"LKBundlesManagerDidFinishRetrievingBundlesManifest";
@@ -42,6 +46,7 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
 // This is stored on our [application support]/launchkit/bundles folder
 @property (strong, nonatomic) NSDate *localBundlesFolderUpdatedTime;
+@property (strong, nonatomic) NSDictionary *appUsageInfo;
 
 @property (strong, nonatomic) NSDate *lastManifestRetrievalTime;
 @property (strong, nonatomic) NSURLSession *remoteUIDownloadSession;
@@ -77,6 +82,12 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     if ([lastManifestRetrievalTime isKindOfClass:[NSDate class]]) {
         _lastManifestRetrievalTime = lastManifestRetrievalTime;
     }
+
+    NSDictionary *usageDict = state[APP_USAGE_KEY];
+    if ([usageDict isKindOfClass:[NSDictionary class]]) {
+        _appUsageInfo = [usageDict mutableCopy];
+    }
+    [self deleteBundlesCacheDirectoryIfNeeded];
 }
 
 - (NSDictionary *)stateDictionary
@@ -85,6 +96,11 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     if (self.lastManifestRetrievalTime) {
         state[@"lastManifestRetrievalTime"] = self.lastManifestRetrievalTime;
     }
+    NSMutableDictionary *lastAppUsageInfo = [NSMutableDictionary dictionaryWithCapacity:2];
+    lastAppUsageInfo[APP_USAGE_VERSION_KEY] = [LKAPIClient appBundleVersion];
+    lastAppUsageInfo[APP_USAGE_BUILD_KEY] = [LKAPIClient appBuildNumber];
+    state[APP_USAGE_KEY] = lastAppUsageInfo;
+
     return state;
 }
 
@@ -276,6 +292,33 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
         if (deleteBundlesDirError != nil && !([deleteBundlesDirError.domain isEqualToString:@"NSCocoaErrorDomain"] && deleteBundlesDirError.code == NSFileNoSuchFileError)) {
             LKLogWarning(@"Unable to delete bundles cache directory: %@", deleteBundlesDirError);
         }
+    }
+}
+
+- (void)deleteBundlesCacheDirectoryIfNeeded
+{
+    BOOL shouldDelete = NO;
+    if (self.appUsageInfo) {
+        NSString *currentAppVersion = [LKAPIClient appBundleVersion];
+        NSString *currentAppBuild = [LKAPIClient appBuildNumber];
+
+        NSString *lastAppVersion = self.appUsageInfo[APP_USAGE_VERSION_KEY];
+        NSString *lastAppBuild = self.appUsageInfo[APP_USAGE_BUILD_KEY];
+
+        // TODO(Riz): Ensure debugMode and verboseLogging can be set
+        // at or before LK instantiation, otherwise we can't use LKLog
+        // to notify that the bundles cache dir is being deleted.
+        if (![lastAppVersion isEqualToString:currentAppVersion]) {
+            shouldDelete = YES;
+        } else if (![lastAppBuild isEqualToString:currentAppBuild]) {
+            shouldDelete = YES;
+        }
+    } else {
+        shouldDelete = YES;
+    }
+
+    if (shouldDelete) {
+        [LKBundlesManager deleteBundlesCacheDirectory];
     }
 }
 

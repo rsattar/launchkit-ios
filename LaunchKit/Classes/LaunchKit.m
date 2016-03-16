@@ -185,10 +185,12 @@ static LaunchKit *_sharedInstance;
 
         [self createListeners];
 
+        // TODO(Riz): Move this to within LKBundlesManager
 #if DEBUG_DESTROY_BUNDLE_CACHE_ON_START
         [LKBundlesManager deleteBundlesCacheDirectory];
 #endif
 
+        // TODO(Riz): Move this to within LKBundlesManager
         [self.bundlesManager rebuildLocalBundlesMap];
     }
     return self;
