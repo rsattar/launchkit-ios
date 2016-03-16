@@ -52,15 +52,6 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
 
 @implementation LKBundlesManager
 
-+ (instancetype) defaultManager
-{
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        _sharedInstance = [[LKBundlesManager alloc] init];
-    });
-    return _sharedInstance;
-}
-
 - (instancetype) initWithAPIClient:(LKAPIClient *)apiClient
 {
     self = [super init];
