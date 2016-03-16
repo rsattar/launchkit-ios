@@ -52,4 +52,9 @@ extern NSString* const LKAPIFailedAuthenticationChallenge;
 #pragma mark - Measuring Usage
 - (void) resetUsageMeasurements;
 
+#pragma mark - System Information getters
++ (NSString *)appBundleIdentifier;
++ (NSString *)appBundleVersion;
++ (NSString *)appBuildNumber;
+
 @end

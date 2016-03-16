@@ -56,9 +56,9 @@ static NSCalendar *_globalGregorianCalendar;
 {
     self = [super init];
     if (self) {
-        _cachedBundleIdentifier = [LKAPIClient bundleIdentifier];
-        _cachedBundleVersion = [LKAPIClient bundleVersion];;
-        _cachedBuildNumber = [LKAPIClient buildNumber];
+        _cachedBundleIdentifier = [LKAPIClient appBundleIdentifier];
+        _cachedBundleVersion = [LKAPIClient appBundleVersion];;
+        _cachedBuildNumber = [LKAPIClient appBuildNumber];
         _cachedOSVersion = [NSString stringWithFormat:@"iOS %@", [LKAPIClient softwareVersion]];
         _cachedHardwareModel = [LKAPIClient hardwareModel];
         _cachedLocaleIdentifier = [NSLocale currentLocale].localeIdentifier;
@@ -426,14 +426,14 @@ static NSCalendar *_globalGregorianCalendar;
 #pragma mark - System Information getters
 
 
-+ (NSString *)bundleIdentifier
++ (NSString *)appBundleIdentifier
 {
     NSString *bundle = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString*)kCFBundleIdentifierKey];
     return bundle;
 }
 
 
-+ (NSString *)bundleVersion
++ (NSString *)appBundleVersion
 {
     // Example: 1.5.2
     NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
@@ -444,7 +444,7 @@ static NSCalendar *_globalGregorianCalendar;
 }
 
 
-+ (NSString *)buildNumber
++ (NSString *)appBuildNumber
 {
     // Example: 10
     NSString *build = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
