@@ -190,19 +190,29 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     return self.latestRemoteBundlesManifestRetrieved && self.remoteBundlesDownloaded;
 }
 
++ (nullable NSData *)dataFromLocalBundlesFileNamed:(NSString *)filename
+{
+  NSURL *bundlesURL = [LKBundlesManager bundlesCacheDirectoryURLCreateIfNeeded:YES];
+  NSURL *fileURL = [bundlesURL URLByAppendingPathComponent:filename];
+  if (![[NSFileManager defaultManager] fileExistsAtPath:fileURL.path]) {
+    // File doesn't exist; maybe it was deleted by iOS?
+    return nil;
+  }
+
+  NSData *fileData = [NSData dataWithContentsOfURL:fileURL];
+  return fileData;
+}
+
 + (nullable NSDate *)updateTimeInLocalBundlesFolder
 {
     if (!STORE_SERVER_BUNDLE_UPDATE_TIME) {
         return nil;
     }
-    NSURL *bundlesURL = [LKBundlesManager bundlesCacheDirectoryURLCreateIfNeeded:YES];
-    NSURL *bundlesCanaryFileURL = [bundlesURL URLByAppendingPathComponent:@"LKWuzHere.txt"];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:bundlesCanaryFileURL.path]) {
-        // File doesn't exist; maybe it was deleted by iOS, or we never finished downloading bundles?
+
+    NSData *updateTimeStringData = [LKBundlesManager dataFromLocalBundlesFileNamed:@"LKWuzHere.txt"];
+    if (updateTimeStringData == nil) {
         return nil;
     }
-
-    NSData *updateTimeStringData = [NSData dataWithContentsOfURL:bundlesCanaryFileURL];
     NSString *updateTimeString = [[NSString alloc] initWithData:updateTimeStringData encoding:NSUTF8StringEncoding];
     NSTimeInterval timeInterval = [updateTimeString doubleValue];
     if (timeInterval == 0.0) {
