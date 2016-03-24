@@ -555,27 +555,31 @@ static LaunchKit *_sharedInstance;
 - (void) presentAppReleaseNotesIfNeededFromViewController:(nonnull UIViewController *)viewController
                                                completion:(nullable LKReleaseNotesCompletionHandler)completion
 {
-    [self presentAppReleaseNotesFromViewController:viewController ignoreIfShownBefore:NO completion:completion];
+    [self presentAppReleaseNotesFromViewController:viewController
+                               onDirectUserRequest:NO
+                                        completion:completion];
 }
 
 - (void) forcePresentationOfAppReleaseNotesFromViewController:(nonnull UIViewController *)viewController
                                                    completion:(nullable LKReleaseNotesCompletionHandler)completion
 {
-    [self presentAppReleaseNotesFromViewController:viewController ignoreIfShownBefore:YES completion:completion];
+    [self presentAppReleaseNotesFromViewController:viewController
+                               onDirectUserRequest:YES
+                                        completion:completion];
 }
 
 - (void) presentAppReleaseNotesFromViewController:(nonnull UIViewController *)viewController
-                              ignoreIfShownBefore:(BOOL)ignoreIfShownBefore
+                              onDirectUserRequest:(BOOL)isDirectUserRequest
                                        completion:(nullable LKReleaseNotesCompletionHandler)completion
 {
     // Make a closure here, in case we need to wait for config to be ready
     void (^presentReleaseNotesIfPossible)() = ^ {
-        BOOL shouldShowReleaseNotes = [self possibleToPresentAppReleaseNotesIgnoringIfShownBefore:ignoreIfShownBefore];
-        BOOL forceDisplay = NO;
+        BOOL shouldShowReleaseNotes = [self possibleToPresentAppReleaseNotesIgnoringUserHistory:isDirectUserRequest];
+        BOOL debugAlwaysAttemptDisplay = NO;
 #if DEBUG
-        forceDisplay = self.debugAlwaysPresentAppReleaseNotes;
+        debugAlwaysAttemptDisplay = self.debugAlwaysPresentAppReleaseNotes;
 #endif
-        if (shouldShowReleaseNotes || forceDisplay) {
+        if (shouldShowReleaseNotes || debugAlwaysAttemptDisplay) {
 
             [self showUIWithName:@"WhatsNew" fromViewController:viewController completion:^(LKViewControllerFlowResult flowResult, NSError *error) {
                 BOOL didPresent = flowResult == LKViewControllerFlowResultCompleted || flowResult == LKViewControllerFlowResultCancelled;
@@ -597,12 +601,15 @@ static LaunchKit *_sharedInstance;
     }
 }
 
-- (BOOL) possibleToPresentAppReleaseNotesIgnoringIfShownBefore:(BOOL)ignoreIfShownBefore
+- (BOOL) possibleToPresentAppReleaseNotesIgnoringUserHistory:(BOOL)ignoreUserHistory
 {
     // WhatsNew feature is enabled on LaunchKit
     BOOL whatsNewEnabled = LKConfigBool(@"io.launchkit.whatsNewEnabled", YES);
+    if (ignoreUserHistory) {
+        return whatsNewEnabled;
+    }
     // We have shown this UI before (for this app version)
-    BOOL alreadyPresentedForThisAppVersion = !ignoreIfShownBefore && [self.uiManager remoteUIPresentedForThisAppVersion:@"WhatsNew"];
+    BOOL alreadyPresentedForThisAppVersion = [self.uiManager remoteUIPresentedForThisAppVersion:@"WhatsNew"];
     BOOL showToNewUsers = LKConfigBool(@"io.launchkit.whatsNewShowToNewUsers", NO);
     // This session has upgraded app versions at least once
     NSTimeInterval currentVersionDuration = [self.config doubleForKey:@"io.launchkit.currentVersionDuration"
