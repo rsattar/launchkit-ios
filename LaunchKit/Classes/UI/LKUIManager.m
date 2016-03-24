@@ -340,7 +340,18 @@ typedef NS_ENUM(NSInteger, LKRootViewControllerAnimation) {
     __weak LKUIManager *weakSelf = self;
     [self loadRemoteUIWithId:@"AppReviewCard" completion:^(LKViewController *viewController, NSError *error) {
         if (viewController) {
+            LKBundleInfo *bundleInfo = viewController.bundleInfo;
+            // Report UI showing, for review card
+            [weakSelf.delegate uiManagerRequestedToReportUIEvent:@"ui-showing"
+                                                    uiBundleInfo:bundleInfo
+                                            additionalParameters:nil];
+
             [weakSelf presentRemoteUIViewController:viewController fromViewController:presentingViewController animated:YES dismissalHandler:^(LKViewControllerFlowResult flowResult) {
+                // Report UI shown (with result), for review card
+                NSString *flowResultString = NSStringFromViewControllerFlowResult(flowResult);
+                [weakSelf.delegate uiManagerRequestedToReportUIEvent:@"ui-shown"
+                                                        uiBundleInfo:bundleInfo
+                                                additionalParameters:@{@"flow_result" : flowResultString}];
                 if (completion) {
                     completion(flowResult);
                 }
