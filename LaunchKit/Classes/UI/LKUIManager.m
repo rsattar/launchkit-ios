@@ -154,6 +154,9 @@
     }
     if ([viewController isKindOfClass:[LKViewController class]]) {
         ((LKViewController *)viewController).flowDelegate = self;
+    } else {
+        LKLogWarning(@"Main remote UI view controller is not of type LKViewController. It is a %@",
+                     NSStringFromClass([viewController class]));
     }
     self.remoteUIPresentedController = viewController;
     self.remoteUIPresentingController = presentingViewController;
@@ -197,6 +200,10 @@
                 handler(flowResult);
             }
         }];
+    } else {
+        LKLogWarning(@"Could not dismiss %@ as it doesn't match the current presented controller (%@).",
+                     controller.bundleInfo.name,
+                     self.remoteUIPresentedController.bundleInfo.name);
     }
 }
 
