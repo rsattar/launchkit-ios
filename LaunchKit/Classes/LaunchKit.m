@@ -155,6 +155,7 @@ static LaunchKit *_sharedInstance;
         self.maxOnboardingWaitTimeInterval = DEFAULT_MAX_ONBOARDING_WAIT_TIME_INTERVAL;
 
         self.bundlesManager = [[LKBundlesManager alloc] initWithAPIClient:self.apiClient];
+        self.bundlesManager.delegate = self;
 
         self.trackingInterval = DEFAULT_TRACKING_INTERVAL;
         self.trackingRequests = [NSMutableArray array];
