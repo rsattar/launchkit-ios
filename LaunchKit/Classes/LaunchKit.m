@@ -734,10 +734,13 @@ static LaunchKit *_sharedInstance;
 
 - (void) configIsReady:(nonnull LKConfig *)config
 {
-    // Load any pending operations when config is ready
-    for (void (^readyBlock)() in self.configReadyBlocks) {
-        readyBlock();
-    }
+    NSMutableArray <void (^)()>*readyBlocks = [self.configReadyBlocks copy];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        // Load any pending operations when config is ready
+        for (void (^readyBlock)() in readyBlocks) {
+            readyBlock();
+        }
+    });
     [self.configReadyBlocks removeAllObjects];
 }
 
