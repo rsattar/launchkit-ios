@@ -596,7 +596,9 @@ static LaunchKit *_sharedInstance;
     };
 
     if (self.config.isReady) {
-        presentReleaseNotesIfPossible();
+        dispatch_async(dispatch_get_main_queue(), ^{
+            presentReleaseNotesIfPossible();
+        });
     } else {
         [self.configReadyBlocks addObject:presentReleaseNotesIfPossible];
     }
