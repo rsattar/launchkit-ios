@@ -573,6 +573,15 @@ static LaunchKit *_sharedInstance;
                               onDirectUserRequest:(BOOL)isDirectUserRequest
                                        completion:(nullable LKReleaseNotesCompletionHandler)completion
 {
+    if (![NSThread isMainThread]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            LKLogWarning(@"Attempted to show release notes on a background thread. Adjust your code to call this on the main thread.");
+            [self presentAppReleaseNotesFromViewController:viewController
+                                       onDirectUserRequest:isDirectUserRequest
+                                                completion:completion];
+        });
+        return;
+    }
     // Make a closure here, in case we need to wait for config to be ready
     void (^presentReleaseNotesIfPossible)() = ^ {
         BOOL shouldShowReleaseNotes = [self possibleToPresentAppReleaseNotesIgnoringUserHistory:isDirectUserRequest];
@@ -596,9 +605,7 @@ static LaunchKit *_sharedInstance;
     };
 
     if (self.config.isReady) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            presentReleaseNotesIfPossible();
-        });
+        presentReleaseNotesIfPossible();
     } else {
         [self.configReadyBlocks addObject:presentReleaseNotesIfPossible];
     }
@@ -661,6 +668,13 @@ static LaunchKit *_sharedInstance;
 - (void)presentOnboardingUIOnWindow:(UIWindow *)window
                   completionHandler:(LKOnboardingUICompletionHandler)completionHandler;
 {
+    if (![NSThread isMainThread]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            LKLogWarning(@"Attempted to show onboarding UI on a background thread. Adjust your code to call this on the main thread.");
+            [self presentOnboardingUIOnWindow:window completionHandler:completionHandler];
+        });
+        return;
+    }
     [self.uiManager presentOnboardingUIOnWindow:window
                             maxWaitTimeInterval:self.maxOnboardingWaitTimeInterval
                               completionHandler:completionHandler];
@@ -671,6 +685,13 @@ static LaunchKit *_sharedInstance;
 - (void) presentAppReviewCardIfNeededFromViewController:(nonnull UIViewController *)viewController
                                              completion:(nullable LKAppReviewCardCompletionHandler)completion
 {
+    if (![NSThread isMainThread]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            LKLogWarning(@"Attempted to show review card on a background thread. Adjust your code to call this on the main thread.");
+            [self presentAppReviewCardIfNeededFromViewController:viewController completion:completion];
+        });
+        return;
+    }
     [self.uiManager presentAppReviewCardIfNeededFromViewController:viewController completion:^(LKViewControllerFlowResult flowResult) {
 
         BOOL agreedToReview = (flowResult == LKViewControllerFlowResultCompleted);
