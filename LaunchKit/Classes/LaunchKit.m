@@ -68,6 +68,7 @@ static NSTimeInterval const DEFAULT_MAX_ONBOARDING_WAIT_TIME_INTERVAL = 15.0;
 
 @property (strong, nonatomic) LKAPIClient *apiClient;
 @property (strong, nonatomic) NSTimer *trackingTimer;
+@property (assign, nonatomic) NSInteger numTrackingRequestsCompleted;
 @property (assign, nonatomic) NSTimeInterval trackingInterval;
 @property (assign, nonatomic) BOOL trackingRequestInProgress;
 // LaunchKit executes track requests sequentially, so queue them
@@ -381,6 +382,7 @@ static LaunchKit *_sharedInstance;
             [_weakSelf archiveSession];
         }
         _weakSelf.trackingRequestInProgress = NO;
+        _weakSelf.numTrackingRequestsCompleted++;
         [_weakSelf startNextTrackingRequestIfPossible];
         if (completion) {
             completion();
