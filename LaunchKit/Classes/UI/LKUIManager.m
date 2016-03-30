@@ -165,9 +165,10 @@
         // Same as dismiss, but include the report on the UI event
         if (viewController.bundleInfo != nil) {
             // Notify LaunchKit that this view controller has been displayed
+            NSString *flowResultString = NSStringFromViewControllerFlowResult(flowResult);
             [weakSelf.delegate uiManagerRequestedToReportUIEvent:@"ui-shown"
                                                     uiBundleInfo:viewController.bundleInfo
-                                            additionalParameters:@{@"flow_result" : NSStringFromViewControllerFlowResult(flowResult)}];
+                                            additionalParameters:@{@"flow_result" : flowResultString}];
         }
         if (dismissalHandler) {
             dismissalHandler(flowResult);
@@ -176,6 +177,7 @@
     [self.remoteUIPresentingController presentViewController:self.remoteUIPresentedController animated:animated completion:nil];
     if (viewController.bundleInfo.name != nil) {
         [self markPresentationOfRemoteUI:viewController.bundleInfo.name];
+        // Notify LaunchKit that this view controller is being displayed
         [self.delegate uiManagerRequestedToReportUIEvent:@"ui-showing"
                                                 uiBundleInfo:viewController.bundleInfo
                                         additionalParameters:nil];
@@ -348,17 +350,7 @@ typedef NS_ENUM(NSInteger, LKRootViewControllerAnimation) {
     [self loadRemoteUIWithId:@"AppReviewCard" completion:^(LKViewController *viewController, NSError *error) {
         if (viewController) {
             LKBundleInfo *bundleInfo = viewController.bundleInfo;
-            // Report UI showing, for review card
-            [weakSelf.delegate uiManagerRequestedToReportUIEvent:@"ui-showing"
-                                                    uiBundleInfo:bundleInfo
-                                            additionalParameters:nil];
-
             [weakSelf presentRemoteUIViewController:viewController fromViewController:presentingViewController animated:YES dismissalHandler:^(LKViewControllerFlowResult flowResult) {
-                // Report UI shown (with result), for review card
-                NSString *flowResultString = NSStringFromViewControllerFlowResult(flowResult);
-                [weakSelf.delegate uiManagerRequestedToReportUIEvent:@"ui-shown"
-                                                        uiBundleInfo:bundleInfo
-                                                additionalParameters:@{@"flow_result" : flowResultString}];
                 if (completion) {
                     completion(flowResult);
                 }
