@@ -24,6 +24,9 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 // TODO(Riz): We don't really need this, just need it for getting serverTimeOffset
 @property (strong, nonatomic) LKAPIClient *apiClient;
 
+// Turn on/off the entire module
+@property (assign, nonatomic) BOOL analyticsEnabled;
+
 // Tracking the app's UI
 @property (assign, nonatomic) BOOL shouldReportScreens;
 @property (strong, nonatomic) NSTimer *currentViewControllerInspectionTimer;
@@ -51,6 +54,7 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
     self = [super init];
     if (self) {
         self.apiClient = apiClient;
+        self.analyticsEnabled = NO;
         self.shouldReportScreens = YES;
         self.shouldReportTaps = YES;
         self.viewControllersVisited = [NSMutableArray arrayWithCapacity:VISITED_VIEW_CONTROLLERS_BUFFER_SIZE];
@@ -68,12 +72,12 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 - (NSDictionary *)commitTrackableProperties;
 {
     NSMutableDictionary *propertiesToInclude = [NSMutableDictionary dictionaryWithCapacity:2];
-    if (self.viewControllersVisited.count) {
+    if (self.viewControllersVisited.count && self.analyticsEnabled) {
         propertiesToInclude[@"screens"] = [self.viewControllersVisited copy];
     }
 
     [self commitCurrentTapsAtWindowSize:self.currentWindowSize];
-    if (self.tapBatches.count) {
+    if (self.tapBatches.count && self.analyticsEnabled) {
         propertiesToInclude[@"tapBatches"] = [self.tapBatches copy];
     }
 
@@ -134,6 +138,9 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 
 - (void)restartInspectingCurrentViewController
 {
+    if (!self.analyticsEnabled) {
+        return;
+    }
     [self stopInspectingCurrentViewController];
     [self inspectCurrentViewController];
     self.currentViewControllerInspectionTimer = [NSTimer scheduledTimerWithTimeInterval:2.0
@@ -153,6 +160,9 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 
 - (void)inspectCurrentViewController
 {
+    if (!self.analyticsEnabled) {
+        return;
+    }
     UIViewController *rootViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
     UIViewController *currentViewController = [self presentedViewControllerInViewController:rootViewController];
     NSString *className = NSStringFromClass([currentViewController class]);
@@ -166,6 +176,9 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 
 - (void)markEndOfVisitationForCurrentViewController
 {
+    if (!self.analyticsEnabled) {
+        return;
+    }
     if (self.currentViewControllerClassName.length && self.currentViewControllerStartTimestamp) {
         NSInteger numToBeOverMax = (self.viewControllersVisited.count+1)-VISITED_VIEW_CONTROLLERS_BUFFER_SIZE;
         if (numToBeOverMax > 0) {
@@ -237,6 +250,9 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 
 - (void)startDetectingTapsOnWindow
 {
+    if (!self.analyticsEnabled) {
+        return;
+    }
     if (!self.tapRecognizer) {
         self.tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleWindowTap:)];
         self.tapRecognizer.cancelsTouchesInView = NO;
@@ -262,6 +278,9 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 /// Will not commit if there are no taps. If commited, will reset the taps collecting array
 - (void)commitCurrentTapsAtWindowSize:(CGSize)windowSize
 {
+    if (!self.analyticsEnabled) {
+        return;
+    }
     if (self.currentBatchTaps.count > 0) {
         // Commit our current batch of taps at this window size
         NSDictionary *batch = @{@"screen" : @{@"w" : @(self.currentWindowSize.width),
@@ -274,6 +293,9 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 
 - (void)handleWindowTap:(UITapGestureRecognizer *)recognizer
 {
+    if (!self.analyticsEnabled) {
+        return;
+    }
     if (recognizer.state != UIGestureRecognizerStateEnded) {
         return;
     }
