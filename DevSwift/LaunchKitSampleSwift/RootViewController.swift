@@ -9,9 +9,16 @@
 import UIKit
 import LaunchKit
 
+enum FirstLaunchUI {
+    case releaseNotes
+    case reviewCard
+}
+
 class RootViewController: UIViewController {
 
     @IBOutlet weak var showAppReleaseNotesButton: UIButton!
+
+    let firstLaunchUI = FirstLaunchUI.releaseNotes
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,8 +31,15 @@ class RootViewController: UIViewController {
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
 
-        LaunchKit.sharedInstance().presentAppReleaseNotesIfNeededFromViewController(self) { (success) -> Void in
-            print("Release notes finished with success: \(success)")
+        switch firstLaunchUI {
+        case .releaseNotes:
+            LaunchKit.sharedInstance().presentAppReleaseNotesIfNeededFromViewController(self) { (success) -> Void in
+                print("Release notes finished with success: \(success)")
+            }
+        case .reviewCard:
+            LaunchKit.sharedInstance().presentAppReviewCardIfNeededFromViewController(self) { (flowResult) -> Void in
+                print("App review card finished with flow result: \(NSStringFromViewControllerFlowResult(flowResult))")
+            }
         }
 
     }
