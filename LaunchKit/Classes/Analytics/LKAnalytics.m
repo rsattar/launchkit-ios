@@ -88,15 +88,37 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
     return propertiesToInclude;
 }
 
+- (void) updateAnalyticsEnabled:(BOOL)analyticsEnabled
+{
+    if (self.analyticsEnabled = analyticsEnabled) {
+        return;
+    }
+
+    self.analyticsEnabled = analyticsEnabled;
+
+    // regardless of whether they were already being measured
+    // start/stop timers and recognizers
+    [self handleScreenReportingStateChange];
+    [self handleTapReportingStateChange];
+}
+
 - (void) updateReportingScreens:(BOOL)shouldReport
 {
     if (self.shouldReportScreens == shouldReport) {
         return;
     }
-
-    UIApplicationState state = [UIApplication sharedApplication].applicationState;
-
     self.shouldReportScreens = shouldReport;
+    [self handleScreenReportingStateChange];
+
+    if (self.verboseLogging) {
+        LKLog(@"Report Screens turned %@ via remote command", (self.shouldReportScreens ? @"on" : @"off"));
+    }
+}
+
+// Actually start/stop screen reporting systems, based on 'shouldReportScreens'
+- (void) handleScreenReportingStateChange
+{
+    UIApplicationState state = [UIApplication sharedApplication].applicationState;
     if (self.shouldReportScreens) {
         if (state == UIApplicationStateActive) {
             [self restartInspectingCurrentViewController];
@@ -106,10 +128,6 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
         // Clear out our current visitation
         [self markEndOfVisitationForCurrentViewController];
     }
-
-    if (self.verboseLogging) {
-        LKLog(@"Report Screens turned %@ via remote command", (self.shouldReportScreens ? @"on" : @"off"));
-    }
 }
 
 - (void) updateReportingTaps:(BOOL)shouldReport
@@ -117,20 +135,24 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
     if (self.shouldReportTaps == shouldReport) {
         return;
     }
-
-    UIApplicationState state = [UIApplication sharedApplication].applicationState;
-
     self.shouldReportTaps = shouldReport;
+    [self handleTapReportingStateChange];
+
+    if (self.verboseLogging) {
+        LKLog(@"Report Taps turned %@ via remote command", (self.shouldReportTaps ? @"on" : @"off"));
+    }
+}
+
+// Actually start/stop tap reporting systems, based on'shouldReportTaps'
+- (void) handleTapReportingStateChange
+{
+    UIApplicationState state = [UIApplication sharedApplication].applicationState;
     if (self.shouldReportTaps) {
         if (state == UIApplicationStateActive) {
             [self startDetectingTapsOnWindow];
         }
     } else {
         [self stopDetectingTapsOnWindow];
-    }
-
-    if (self.verboseLogging) {
-        LKLog(@"Report Taps turned %@ via remote command", (self.shouldReportTaps ? @"on" : @"off"));
     }
 }
 
