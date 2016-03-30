@@ -68,6 +68,7 @@ static NSTimeInterval const DEFAULT_MAX_ONBOARDING_WAIT_TIME_INTERVAL = 15.0;
 
 @property (strong, nonatomic) LKAPIClient *apiClient;
 @property (strong, nonatomic) NSTimer *trackingTimer;
+@property (assign, nonatomic) BOOL intervalTrackingEnabled;
 @property (assign, nonatomic) NSInteger numTrackingRequestsCompleted;
 @property (assign, nonatomic) NSTimeInterval trackingInterval;
 @property (assign, nonatomic) BOOL trackingRequestInProgress;
@@ -158,6 +159,7 @@ static LaunchKit *_sharedInstance;
         self.bundlesManager = [[LKBundlesManager alloc] initWithAPIClient:self.apiClient];
         self.bundlesManager.delegate = self;
 
+        self.intervalTrackingEnabled = YES;
         self.trackingInterval = DEFAULT_TRACKING_INTERVAL;
         self.trackingRequests = [NSMutableArray array];
 
@@ -407,10 +409,14 @@ static LaunchKit *_sharedInstance;
     }
 
     if (self.trackingTimer.isValid) {
-        // We have an existing tracking timer, but since we just tracked, restart it
-        // NOTE: Even if we don't restart the tracking timer here, it would still
-        // fire at the previous interval, as it is a repeating timer.
-        [self restartTrackingFireImmediately:NO];
+        if (self.intervalTrackingEnabled) {
+            // We have an existing tracking timer, but since we just tracked, restart it
+            // NOTE: Even if we don't restart the tracking timer here, it would still
+            // fire at the previous interval, as it is a repeating timer.
+            [self restartTrackingFireImmediately:NO];
+        } else {
+            [self stopTracking];
+        }
     }
 }
 
@@ -454,9 +460,15 @@ static LaunchKit *_sharedInstance;
     }
     self.trackingInterval = newInterval;
 
-    UIApplicationState state = [UIApplication sharedApplication].applicationState;
-    if (state == UIApplicationStateActive) {
-        [self restartTrackingFireImmediately:YES];
+    if (self.intervalTrackingEnabled) {
+        UIApplicationState state = [UIApplication sharedApplication].applicationState;
+        if (state == UIApplicationStateActive) {
+            [self restartTrackingFireImmediately:YES];
+        }
+    } else {
+        if (self.verboseLogging) {
+            LKLog(@"Not restarting tracking timer, because self.intervalTrackingEnabled is NO.");
+        }
     }
 
     if (self.verboseLogging) {
@@ -487,13 +499,23 @@ static LaunchKit *_sharedInstance;
 - (void)applicationWillResignActive:(NSNotification *)notification
 {
     // Flush any tracked data
-    [self trackProperties:nil];
+    if (self.intervalTrackingEnabled) {
+        [self trackProperties:nil];
+    }
 
     [self stopTracking];
 }
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification
 {
+    // Only restart interval tracking if intervalTrackingEnabled is YES, and
+    // always let it through if it's the very first tracking request
+    if (self.numTrackingRequestsCompleted > 0 && !self.intervalTrackingEnabled) {
+        if (self.verboseLogging) {
+            LKLog(@"Not restarting track, because `intervalTrackingEnabled` is NO.");
+        }
+        return;
+    }
     // Sometimes (especially on app startup), we might already have
     // manually requested a track call (i.e. for -setUserIdentifier:email:name)
     // So if we're already tracking something then, don't need to fire immediately
