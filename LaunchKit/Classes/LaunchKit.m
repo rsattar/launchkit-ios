@@ -607,6 +607,7 @@ static LaunchKit *_sharedInstance;
         return;
     }
     // Make a closure here, in case we need to wait for config to be ready
+    __weak LaunchKit *_weakSelf = self;
     void (^presentReleaseNotesIfPossible)() = ^ {
         BOOL shouldShowReleaseNotes = [self possibleToPresentAppReleaseNotesIgnoringUserHistory:isDirectUserRequest];
         BOOL debugAlwaysAttemptDisplay = NO;
@@ -614,7 +615,7 @@ static LaunchKit *_sharedInstance;
         debugAlwaysAttemptDisplay = self.debugAlwaysPresentAppReleaseNotes;
 #endif
         if (shouldShowReleaseNotes || debugAlwaysAttemptDisplay) {
-            [self.uiManager presentAppReleaseNotesFromViewController:viewController completion:completion];
+            [_weakSelf.uiManager presentAppReleaseNotesFromViewController:viewController completion:completion];
         } else {
             if (completion) {
                 completion(NO);
