@@ -346,20 +346,12 @@ typedef NS_ENUM(NSInteger, LKRootViewControllerAnimation) {
 - (void) presentAppReviewCardIfNeededFromViewController:(nonnull UIViewController *)presentingViewController
                                              completion:(nullable LKAppReviewCardCompletionHandler)completion
 {
-    __weak LKUIManager *weakSelf = self;
-    [self loadRemoteUIWithId:@"AppReviewCard" completion:^(LKViewController *viewController, NSError *error) {
-        if (viewController) {
-            LKBundleInfo *bundleInfo = viewController.bundleInfo;
-            [weakSelf presentRemoteUIViewController:viewController fromViewController:presentingViewController animated:YES dismissalHandler:^(LKViewControllerFlowResult flowResult) {
-                if (completion) {
-                    completion(flowResult);
-                }
-            }];
-        } else {
+    [self showUIWithName:@"AppReviewCard" fromViewController:presentingViewController completion:^(LKViewControllerFlowResult flowResult, NSError *error) {
+        if (error) {
             LKLogError(@"AppReviewCard presentation failed due to error: %@", error);
-            if (completion) {
-                completion(LKViewControllerFlowResultFailed);
-            }
+        }
+        if (completion) {
+            completion(flowResult);
         }
     }];
 }
