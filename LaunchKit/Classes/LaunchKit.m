@@ -614,13 +614,7 @@ static LaunchKit *_sharedInstance;
         debugAlwaysAttemptDisplay = self.debugAlwaysPresentAppReleaseNotes;
 #endif
         if (shouldShowReleaseNotes || debugAlwaysAttemptDisplay) {
-
-            [self showUIWithName:@"WhatsNew" fromViewController:viewController completion:^(LKViewControllerFlowResult flowResult, NSError *error) {
-                BOOL didPresent = flowResult == LKViewControllerFlowResultCompleted || flowResult == LKViewControllerFlowResultCancelled;
-                if (completion) {
-                    completion(didPresent);
-                }
-            }];
+            [self.uiManager presentAppReleaseNotesFromViewController:viewController completion:completion];
         } else {
             if (completion) {
                 completion(NO);
@@ -704,7 +698,6 @@ static LaunchKit *_sharedInstance;
                               completionHandler:completionHandler];
 }
 
-
 #pragma mark - App Review Card
 - (void) presentAppReviewCardIfNeededFromViewController:(nonnull UIViewController *)viewController
                                              completion:(nullable LKAppReviewCardCompletionHandler)completion
@@ -731,40 +724,6 @@ static LaunchKit *_sharedInstance;
             completion(flowResult);
         }
     }];
-}
-
-
-#pragma mark -
-
-- (void)showUIWithName:(NSString *)uiName fromViewController:(UIViewController *)presentingViewController completion:(void (^)(LKViewControllerFlowResult flowResult, NSError *error))completion
-{
-    [self.uiManager loadRemoteUIWithId:uiName completion:^(LKViewController *viewController, NSError *error) {
-        if (viewController) {
-            [self presentRemoteUIViewController:viewController fromViewController:presentingViewController animated:YES dismissalHandler:^(LKViewControllerFlowResult flowResult) {
-                if (completion) {
-                    completion(flowResult, nil);
-                }
-            }];
-        } else {
-            if (completion) {
-                completion(LKViewControllerFlowResultFailed, error);
-            }
-        }
-    }];
-}
-
-#pragma mark - Remote UI
-
-
-- (void)presentRemoteUIViewController:(nonnull LKViewController *)viewController
-                   fromViewController:(nonnull UIViewController *)presentingViewController
-                             animated:(BOOL)animated
-                     dismissalHandler:(nullable LKRemoteUIDismissalHandler)dismissalHandler
-{
-    [self.uiManager presentRemoteUIViewController:viewController
-                               fromViewController:presentingViewController
-                                         animated:animated
-                                 dismissalHandler:dismissalHandler];
 }
 
 #pragma mark - LKBundlesManagerDelegate

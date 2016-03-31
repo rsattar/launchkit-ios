@@ -78,4 +78,8 @@ typedef void (^LKAppReviewCardCompletionHandler)(LKViewControllerFlowResult flow
 - (void) presentAppReviewCardIfNeededFromViewController:(nonnull UIViewController *)presentingViewController
                                              completion:(nullable LKAppReviewCardCompletionHandler)completion;
 
+#pragma mark - App Release Notes
+- (void) presentAppReleaseNotesFromViewController:(nonnull UIViewController *)viewController
+                                       completion:(nullable LKReleaseNotesCompletionHandler)completion;
+
 @end

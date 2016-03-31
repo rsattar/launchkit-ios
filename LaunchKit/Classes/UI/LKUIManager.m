@@ -365,6 +365,38 @@ typedef NS_ENUM(NSInteger, LKRootViewControllerAnimation) {
 }
 
 
+#pragma mark - App Release Notes
+- (void) presentAppReleaseNotesFromViewController:(nonnull UIViewController *)viewController
+                                       completion:(nullable LKReleaseNotesCompletionHandler)completion
+{
+    [self showUIWithName:@"WhatsNew" fromViewController:viewController completion:^(LKViewControllerFlowResult flowResult, NSError *error) {
+        BOOL didPresent = flowResult == LKViewControllerFlowResultCompleted || flowResult == LKViewControllerFlowResultCancelled;
+        if (completion) {
+            completion(didPresent);
+        }
+    }];
+}
+
+#pragma mark -
+
+- (void)showUIWithName:(NSString *)uiName fromViewController:(UIViewController *)presentingViewController completion:(void (^)(LKViewControllerFlowResult flowResult, NSError *error))completion
+{
+    [self loadRemoteUIWithId:uiName completion:^(LKViewController *viewController, NSError *error) {
+        if (viewController) {
+            [self presentRemoteUIViewController:viewController fromViewController:presentingViewController animated:YES dismissalHandler:^(LKViewControllerFlowResult flowResult) {
+                if (completion) {
+                    completion(flowResult, nil);
+                }
+            }];
+        } else {
+            if (completion) {
+                completion(LKViewControllerFlowResultFailed, error);
+            }
+        }
+    }];
+}
+
+
 #pragma mark - LKViewControllerFlowDelegate
 
 
