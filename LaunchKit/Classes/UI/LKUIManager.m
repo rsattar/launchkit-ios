@@ -381,9 +381,10 @@ typedef NS_ENUM(NSInteger, LKRootViewControllerAnimation) {
 
 - (void)showUIWithName:(NSString *)uiName fromViewController:(UIViewController *)presentingViewController completion:(void (^)(LKViewControllerFlowResult flowResult, NSError *error))completion
 {
+    __weak LKUIManager *weakSelf = self;
     [self loadRemoteUIWithId:uiName completion:^(LKViewController *viewController, NSError *error) {
         if (viewController) {
-            [self presentRemoteUIViewController:viewController fromViewController:presentingViewController animated:YES dismissalHandler:^(LKViewControllerFlowResult flowResult) {
+            [weakSelf presentRemoteUIViewController:viewController fromViewController:presentingViewController animated:YES dismissalHandler:^(LKViewControllerFlowResult flowResult) {
                 if (completion) {
                     completion(flowResult, nil);
                 }
