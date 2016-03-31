@@ -162,14 +162,6 @@
     self.remoteUIPresentingController = presentingViewController;
     __weak LKUIManager *weakSelf = self;
     self.remoteUIControllerDismissalHandler = ^(LKViewControllerFlowResult flowResult) {
-        // Same as dismiss, but include the report on the UI event
-        if (viewController.bundleInfo != nil) {
-            // Notify LaunchKit that this view controller has been displayed
-            NSString *flowResultString = NSStringFromViewControllerFlowResult(flowResult);
-            [weakSelf.delegate uiManagerRequestedToReportUIEvent:@"ui-shown"
-                                                    uiBundleInfo:viewController.bundleInfo
-                                            additionalParameters:@{@"flow_result" : flowResultString}];
-        }
         if (dismissalHandler) {
             dismissalHandler(flowResult);
         }
@@ -177,10 +169,6 @@
     [self.remoteUIPresentingController presentViewController:self.remoteUIPresentedController animated:animated completion:nil];
     if (viewController.bundleInfo.name != nil) {
         [self markPresentationOfRemoteUI:viewController.bundleInfo.name];
-        // Notify LaunchKit that this view controller is being displayed
-        [self.delegate uiManagerRequestedToReportUIEvent:@"ui-showing"
-                                                uiBundleInfo:viewController.bundleInfo
-                                        additionalParameters:nil];
     }
 }
 
@@ -376,7 +364,22 @@ typedef NS_ENUM(NSInteger, LKRootViewControllerAnimation) {
     __weak LKUIManager *weakSelf = self;
     [self loadRemoteUIWithId:uiName completion:^(LKViewController *viewController, NSError *error) {
         if (viewController) {
+            // Notify LaunchKit that this view controller is being displayed
+            [weakSelf.delegate uiManagerRequestedToReportUIEvent:@"ui-showing"
+                                                uiBundleInfo:viewController.bundleInfo
+                                        additionalParameters:nil];
+
             [weakSelf presentRemoteUIViewController:viewController fromViewController:presentingViewController animated:YES dismissalHandler:^(LKViewControllerFlowResult flowResult) {
+
+                // report that the UI was shown
+                if (viewController.bundleInfo != nil) {
+                    // Notify LaunchKit that this view controller has been displayed
+                    NSString *flowResultString = NSStringFromViewControllerFlowResult(flowResult);
+                    [weakSelf.delegate uiManagerRequestedToReportUIEvent:@"ui-shown"
+                                                            uiBundleInfo:viewController.bundleInfo
+                                                    additionalParameters:@{@"flow_result" : flowResultString}];
+                }
+
                 if (completion) {
                     completion(flowResult, nil);
                 }
