@@ -34,6 +34,9 @@
 		654D4F021B62C68D00D8731D /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		6578A0E31C7D302800A814E6 /* LaunchKitSampleSwift-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "LaunchKitSampleSwift-Bridging-Header.h"; sourceTree = "<group>"; };
 		6578A0E71C7D309B00A814E6 /* LaunchKit_SampleAppHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LaunchKit_SampleAppHelpers.h; sourceTree = "<group>"; };
+		657E41521CAF0D7F00166D81 /* LaunchKit.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = LaunchKit.podspec; path = ../LaunchKit.podspec; sourceTree = "<group>"; };
+		657E41531CAF0D7F00166D81 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		657E41541CAF0D7F00166D81 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		65DA47D01B619F9D00A048AF /* LaunchKitSampleSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LaunchKitSampleSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		65DA47D41B619F9D00A048AF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		65DA47D51B619F9D00A048AF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -74,9 +77,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		657E41511CAF0D6A00166D81 /* Podspec Metadata */ = {
+			isa = PBXGroup;
+			children = (
+				657E41521CAF0D7F00166D81 /* LaunchKit.podspec */,
+				657E41531CAF0D7F00166D81 /* README.md */,
+				657E41541CAF0D7F00166D81 /* LICENSE */,
+			);
+			name = "Podspec Metadata";
+			sourceTree = "<group>";
+		};
 		65DA47C71B619F9D00A048AF = {
 			isa = PBXGroup;
 			children = (
+				657E41511CAF0D6A00166D81 /* Podspec Metadata */,
 				65DA47D21B619F9D00A048AF /* LaunchKitSampleSwift */,
 				65DA47E81B619F9D00A048AF /* LaunchKitSampleSwiftTests */,
 				65DA47D11B619F9D00A048AF /* Products */,
