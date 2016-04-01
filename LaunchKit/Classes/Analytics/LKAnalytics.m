@@ -90,7 +90,7 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
 
 - (void) updateAnalyticsEnabled:(BOOL)analyticsEnabled
 {
-    if (self.analyticsEnabled = analyticsEnabled) {
+    if (self.analyticsEnabled == analyticsEnabled) {
         return;
     }
 
