@@ -160,7 +160,6 @@
     }
     self.remoteUIPresentedController = viewController;
     self.remoteUIPresentingController = presentingViewController;
-    __weak LKUIManager *weakSelf = self;
     self.remoteUIControllerDismissalHandler = ^(LKViewControllerFlowResult flowResult) {
         if (dismissalHandler) {
             dismissalHandler(flowResult);
