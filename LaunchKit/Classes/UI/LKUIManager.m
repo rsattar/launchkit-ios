@@ -355,8 +355,17 @@ typedef NS_ENUM(NSInteger, LKRootViewControllerAnimation) {
                                        completion:(nullable LKReleaseNotesCompletionHandler)completion
 {
     [self showUIWithName:@"WhatsNew" fromViewController:viewController completion:^(LKViewControllerFlowResult flowResult, NSError *error) {
-        BOOL didPresent = flowResult == LKViewControllerFlowResultCompleted || flowResult == LKViewControllerFlowResultCancelled;
+
+        if (error) {
+            if (error.code == 404) {
+                LKLogError(@"App Release Notes were not found for this app bundle (%@) version %@ (build %@). "
+                           "You may have not published any release notes for this bundle ID, version and build yet.", [LKAPIClient appBundleIdentifier], [LKAPIClient appBundleVersion], [LKAPIClient appBuildNumber]);
+            } else {
+                LKLogError(@"App Release Notes presentation failed due to error: %@", error);
+            }
+        }
         if (completion) {
+            BOOL didPresent = flowResult == LKViewControllerFlowResultCompleted || flowResult == LKViewControllerFlowResultCancelled;
             completion(didPresent);
         }
     }];
