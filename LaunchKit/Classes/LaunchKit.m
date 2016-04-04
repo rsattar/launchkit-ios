@@ -734,6 +734,20 @@ static LaunchKit *_sharedInstance;
         }
         return;
     }
+    BOOL testIfAppStoreIdExists = YES;
+#if DEBUG
+    testIfAppStoreIdExists = !self.debugAlwaysShowReviewCard;
+#endif
+    NSString *appStoreId = self.appiTunesStoreId;
+    if (testIfAppStoreIdExists && appStoreId.length == nil) {
+        if (self.verboseLogging) {
+            LKLog(@"App review card not shown because app is not in the iTunes Store (no iTunes Store ID available)");
+        }
+        if (completion) {
+            completion(NO, LKViewControllerFlowResultNotSet);
+        }
+        return;
+    }
     [self.uiManager presentAppReviewCardIfNeededFromViewController:viewController completion:^(BOOL didPresent, LKViewControllerFlowResult flowResult) {
 
         BOOL agreedToReview = (flowResult == LKViewControllerFlowResultCompleted);
