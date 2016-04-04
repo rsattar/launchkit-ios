@@ -719,6 +719,15 @@ static LaunchKit *_sharedInstance;
         });
         return;
     }
+    if (!self.shouldAskUserForAppReview) {
+        if (self.verboseLogging) {
+            LKLog(@"Not showing app review card because LaunchKit config says we don't need to.");
+        }
+        if (completion) {
+            completion(NO, LKViewControllerFlowResultNotSet);
+        }
+        return;
+    }
     [self.uiManager presentAppReviewCardIfNeededFromViewController:viewController completion:^(BOOL didPresent, LKViewControllerFlowResult flowResult) {
 
         BOOL agreedToReview = (flowResult == LKViewControllerFlowResultCompleted);
