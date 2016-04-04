@@ -760,22 +760,17 @@ static LaunchKit *_sharedInstance;
 #if TARGET_OS_SIMULATOR
             isSimulator = YES;
 #endif
-            if (!isSimulator) {
-                NSString *defaultUrlString = [NSString stringWithFormat:DEFAULT_ITUNES_URL_FORMAT, appStoreId];
-                NSString *appReviewURLString = LKConfigString(@"io.launchkit.appReviewURL", defaultUrlString);
-                NSURL *url = [NSURL URLWithString:appReviewURLString];
-                if (url != nil) {
-                    [[UIApplication sharedApplication] openURL:url];
-                } else {
-                    LKLogError(@"Did not have a valid URL to review the app, cancelling");
-                    // Override whatever happended with the UI, to mark this as failed
+            if (isSimulator) {
+                LKLog(@"Although user asked to review app, we cannot review apps in the Simulator. Skipping...");
+            } else {
+                BOOL didOpenURL = [self openAppReviewURL];
+                if (!didOpenURL) {
+                    // Override whatever happened with the UI, to mark this as failed
                     flowResult = LKViewControllerFlowResultFailed;
                 }
-            } else {
-                LKLog(@"Although user asked to review app, we cannot review apps in the Simulator. Skipping...");
             }
         } else {
-            // No Thanks, or Cancel, or failed
+            // No Thanks, or Cancel, or Failed
             if (self.verboseLogging) {
                 LKLog(@"Did not ask user, or user did not agree to rate/review app. Result: %@", NSStringFromViewControllerFlowResult(flowResult));
             }
@@ -785,6 +780,24 @@ static LaunchKit *_sharedInstance;
             completion(didPresent, flowResult);
         }
     }];
+}
+
+- (BOOL) openAppReviewURL
+{
+    NSString *appStoreId = self.appiTunesStoreId;
+    if (appStoreId.length == 0) {
+        LKLogError(@"Unable to open app review URL: No iTunes App Store ID available in LaunchKit (via Config)");
+        return NO;
+    }
+    NSString *defaultUrlString = [NSString stringWithFormat:DEFAULT_ITUNES_URL_FORMAT, appStoreId];
+    NSString *appReviewURLString = LKConfigString(@"io.launchkit.appReviewURL", defaultUrlString);
+    NSURL *url = [NSURL URLWithString:appReviewURLString];
+    if (url == nil) {
+        LKLogError(@"Unable to open app review URL: Did not have a valid URL to review the app, cancelling");
+        return NO;
+    }
+    [[UIApplication sharedApplication] openURL:url];
+    return YES;
 }
 
 #pragma mark - LKBundlesManagerDelegate
