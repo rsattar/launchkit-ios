@@ -27,6 +27,9 @@ static NSString* const BASE_API_URL_LOCAL = @"http://localhost:9101/";
 
 static NSTimeInterval const DEFAULT_MAX_ONBOARDING_WAIT_TIME_INTERVAL = 15.0;
 
+// This is used if config is
+static NSString* const DEFAULT_ITUNES_URL_FORMAT = @"itms-apps://itunes.apple.com/app/id%@";
+
 #pragma mark - Extending LKConfig to allow LaunchKit to modify parameters
 
 @interface LKConfig (Private)
@@ -753,10 +756,29 @@ static LaunchKit *_sharedInstance;
         BOOL agreedToReview = (flowResult == LKViewControllerFlowResultCompleted);
         if (agreedToReview) {
             // Sure!
-            //NSString *appStoreUrlString = LKConfigString(@"appStoreUrl", @"itms-apps://itunes.apple.com/app/id596595032");
-            //[[UIApplication sharedApplication] openURL:[NSURL URLWithString:appStoreUrlString]];
+            BOOL isSimulator = NO;
+#if TARGET_OS_SIMULATOR
+            isSimulator = YES;
+#endif
+            if (!isSimulator) {
+                NSString *defaultUrlString = [NSString stringWithFormat:DEFAULT_ITUNES_URL_FORMAT, appStoreId];
+                NSString *appReviewURLString = LKConfigString(@"io.launchkit.appReviewURL", defaultUrlString);
+                NSURL *url = [NSURL URLWithString:appReviewURLString];
+                if (url != nil) {
+                    [[UIApplication sharedApplication] openURL:url];
+                } else {
+                    LKLogError(@"Did not have a valid URL to review the app, cancelling");
+                    // Override whatever happended with the UI, to mark this as failed
+                    flowResult = LKViewControllerFlowResultFailed;
+                }
+            } else {
+                LKLog(@"Although user asked to review app, we cannot review apps in the Simulator. Skipping...");
+            }
         } else {
             // No Thanks, or Cancel, or failed
+            if (self.verboseLogging) {
+                LKLog(@"Did not ask user, or user did not agree to rate/review app. Result: %@", NSStringFromViewControllerFlowResult(flowResult));
+            }
         }
 
         if (completion) {
