@@ -95,6 +95,15 @@ typedef void (^LKUIManifestRefreshHandler)();
 @property (assign, nonatomic) NSTimeInterval maxOnboardingWaitTimeInterval;
 
 /**
+ * Returns YES if internal config (based on Cloud Config) says user should be asked for a review.
+ * Default is NO. This is generally based on whether the user has seen the review card already, 
+ * and whether they are a super user. 
+ * Note that config should be ready before checking this property.
+ * @see LKConfigReady
+ */
+@property (readonly, nonatomic) BOOL shouldAskUserForAppReview;
+
+/**
  * If true, LKAppUserIsSuper() will always return true, ignoring the value from the server.
  * @discussion This only works when debugging (i.e. when DEBUG = 1)
  */
