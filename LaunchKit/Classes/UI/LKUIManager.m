@@ -336,8 +336,8 @@ typedef NS_ENUM(NSInteger, LKRootViewControllerAnimation) {
     [self showUIWithName:@"AppReviewCard" fromViewController:presentingViewController completion:^(LKViewControllerFlowResult flowResult, NSError *error) {
         if (error) {
             if (error.code == 404) {
-                LKLogError(@"AppReviewCard was not found for this app bundle (%@). "
-                           "You may have not published a review card yet.", [LKAPIClient appBundleIdentifier]);
+                LKLog(@"AppReviewCard was not found for this app bundle (%@). "
+                      "You may have not published a review card yet.", [LKAPIClient appBundleIdentifier]);
             } else {
                 LKLogError(@"AppReviewCard presentation failed due to error: %@", error);
             }
@@ -358,8 +358,8 @@ typedef NS_ENUM(NSInteger, LKRootViewControllerAnimation) {
 
         if (error) {
             if (error.code == 404) {
-                LKLogError(@"App Release Notes were not found for this app bundle (%@) version %@ (build %@). "
-                           "You may have not published any release notes for this bundle ID, version and build yet.", [LKAPIClient appBundleIdentifier], [LKAPIClient appBundleVersion], [LKAPIClient appBuildNumber]);
+                LKLog(@"App Release Notes were not found for this app bundle (%@) version %@ (build %@). "
+                      "You may have not published any release notes for this bundle ID, version and build yet.", [LKAPIClient appBundleIdentifier], [LKAPIClient appBundleVersion], [LKAPIClient appBuildNumber]);
             } else {
                 LKLogError(@"App Release Notes presentation failed due to error: %@", error);
             }
