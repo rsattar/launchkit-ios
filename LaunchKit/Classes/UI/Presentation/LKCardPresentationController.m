@@ -133,6 +133,8 @@
             if (presentedLKVC.hasMeasureableSize) {
                 // Measure the size fitting within our maxRect, but allowing height to be measured as close to zero
                 // as possible (smallest height)
+                // TODO(Riz): Investigate a loop caused in iOS 8 where measuring systemLayoutSizeFittingSize causes
+                // -containerViewWillLayoutSubviews to be called
                 CGSize measuredSize = [self.presentedViewController.view systemLayoutSizeFittingSize:CGSizeMake(maxRect.size.width, 0)
                                                                        withHorizontalFittingPriority:UILayoutPriorityRequired
                                                                              verticalFittingPriority:UILayoutPriorityDefaultHigh];
