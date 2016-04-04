@@ -702,7 +702,11 @@ static LaunchKit *_sharedInstance;
 #pragma mark - App Review Card
 - (BOOL) shouldAskUserForAppReview
 {
-    return [self.config boolForKey:@"io.launchkit.shouldAskForAppReview" defaultValue:NO];
+    BOOL forceShow = NO;
+#if DEBUG
+    forceShow = self.debugAlwaysShowReviewCard;
+#endif
+    return forceShow || [self.config boolForKey:@"io.launchkit.shouldAskForAppReview" defaultValue:NO];
 }
 
 - (void) presentAppReviewCardIfNeededFromViewController:(nonnull UIViewController *)viewController

@@ -109,6 +109,13 @@ typedef void (^LKUIManifestRefreshHandler)();
  */
 @property (assign, nonatomic) BOOL debugAppUserIsAlwaysSuper;
 
+/**
+ * If true, shouldAskUserForAppReview will always be true, ignoring the value from the server.
+ * If asked to show a review card, LaunchKit will ignore any history with that user and
+ * always present the review card, provided you have published one for this app version.
+ * @discussion This only works when debugging (i.e. when DEBUG = 1)
+ */
+@property (assign, nonatomic) BOOL debugAlwaysShowReviewCard;
 
 /** 
  * Useful to see log statements from LaunchKit in your console. Only useful when DEBUG macro = 1
