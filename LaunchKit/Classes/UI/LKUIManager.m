@@ -335,7 +335,12 @@ typedef NS_ENUM(NSInteger, LKRootViewControllerAnimation) {
 {
     [self showUIWithName:@"AppReviewCard" fromViewController:presentingViewController completion:^(LKViewControllerFlowResult flowResult, NSError *error) {
         if (error) {
-            LKLogError(@"AppReviewCard presentation failed due to error: %@", error);
+            if (error.code == 404) {
+                LKLogError(@"AppReviewCard was not found for this app bundle (%@). "
+                           "You may have not published a review card yet.", [LKAPIClient appBundleIdentifier]);
+            } else {
+                LKLogError(@"AppReviewCard presentation failed due to error: %@", error);
+            }
         }
         if (completion) {
             completion(flowResult);
