@@ -24,7 +24,7 @@ typedef void (^LKOnboardingUIDismissHandler)(LKViewControllerFlowResult flowResu
                                              NSTimeInterval preOnboardingDuration);
 // Used externally, to report overall flow result
 typedef void (^LKOnboardingUICompletionHandler)(LKViewControllerFlowResult flowResult);
-typedef void (^LKAppReviewCardCompletionHandler)(LKViewControllerFlowResult flowResult);
+typedef void (^LKAppReviewCardCompletionHandler)(BOOL didPresent, LKViewControllerFlowResult flowResult);
 
 @class LKUIManager;
 @protocol LKUIManagerDelegate <NSObject>

@@ -343,7 +343,8 @@ typedef NS_ENUM(NSInteger, LKRootViewControllerAnimation) {
             }
         }
         if (completion) {
-            completion(flowResult);
+            BOOL didPresent = flowResult == LKViewControllerFlowResultCompleted || flowResult == LKViewControllerFlowResultCancelled;
+            completion(didPresent, flowResult);
         }
     }];
 }

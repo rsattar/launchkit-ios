@@ -719,7 +719,7 @@ static LaunchKit *_sharedInstance;
         });
         return;
     }
-    [self.uiManager presentAppReviewCardIfNeededFromViewController:viewController completion:^(LKViewControllerFlowResult flowResult) {
+    [self.uiManager presentAppReviewCardIfNeededFromViewController:viewController completion:^(BOOL didPresent, LKViewControllerFlowResult flowResult) {
 
         BOOL agreedToReview = (flowResult == LKViewControllerFlowResultCompleted);
         if (agreedToReview) {
@@ -731,7 +731,7 @@ static LaunchKit *_sharedInstance;
         }
 
         if (completion) {
-            completion(flowResult);
+            completion(didPresent, flowResult);
         }
     }];
 }

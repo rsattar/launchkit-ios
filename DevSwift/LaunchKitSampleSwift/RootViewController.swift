@@ -37,7 +37,7 @@ class RootViewController: UIViewController {
                 print("Release notes finished with success: \(success)")
             }
         case .reviewCard:
-            LaunchKit.sharedInstance().presentAppReviewCardIfNeededFromViewController(self) { (flowResult) -> Void in
+            LaunchKit.sharedInstance().presentAppReviewCardIfNeededFromViewController(self) { (didPresent, flowResult) -> Void in
                 print("App review card finished with flow result: \(NSStringFromViewControllerFlowResult(flowResult))")
             }
         }
