@@ -728,58 +728,67 @@ static LaunchKit *_sharedInstance;
         });
         return;
     }
-    if (!self.shouldAskUserForAppReview) {
-        if (self.verboseLogging) {
-            LKLog(@"Not showing app review card because LaunchKit config says we don't need to.");
+    // Make a closure here, in case we need to wait for config to be ready
+    __weak LaunchKit *_weakSelf = self;
+    void (^presentReviewCardIfPossible)() = ^ {
+        if (!self.shouldAskUserForAppReview) {
+            if (self.verboseLogging) {
+                LKLog(@"Not showing app review card because LaunchKit config says we don't need to.");
+            }
+            if (completion) {
+                completion(NO, LKViewControllerFlowResultNotSet);
+            }
+            return;
         }
-        if (completion) {
-            completion(NO, LKViewControllerFlowResultNotSet);
-        }
-        return;
-    }
-    BOOL testIfAppStoreIdExists = YES;
+        BOOL testIfAppStoreIdExists = YES;
 #if DEBUG
-    testIfAppStoreIdExists = !self.debugAlwaysShowReviewCard;
+        testIfAppStoreIdExists = !self.debugAlwaysShowReviewCard;
 #endif
-    NSString *appStoreId = self.appiTunesStoreId;
-    if (testIfAppStoreIdExists && appStoreId.length == nil) {
-        if (self.verboseLogging) {
-            LKLog(@"App review card not shown because app is not in the iTunes Store (no iTunes Store ID available)");
+        NSString *appStoreId = self.appiTunesStoreId;
+        if (testIfAppStoreIdExists && appStoreId.length == nil) {
+            if (self.verboseLogging) {
+                LKLog(@"App review card not shown because app is not in the iTunes Store (no iTunes Store ID available)");
+            }
+            if (completion) {
+                completion(NO, LKViewControllerFlowResultNotSet);
+            }
+            return;
         }
-        if (completion) {
-            completion(NO, LKViewControllerFlowResultNotSet);
-        }
-        return;
-    }
-    [self.uiManager presentAppReviewCardIfNeededFromViewController:viewController completion:^(BOOL didPresent, LKViewControllerFlowResult flowResult) {
+        [self.uiManager presentAppReviewCardIfNeededFromViewController:viewController completion:^(BOOL didPresent, LKViewControllerFlowResult flowResult) {
 
-        BOOL agreedToReview = (flowResult == LKViewControllerFlowResultCompleted);
-        if (agreedToReview) {
-            // Sure!
-            BOOL isSimulator = NO;
+            BOOL agreedToReview = (flowResult == LKViewControllerFlowResultCompleted);
+            if (agreedToReview) {
+                // Sure!
+                BOOL isSimulator = NO;
 #if TARGET_OS_SIMULATOR
-            isSimulator = YES;
+                isSimulator = YES;
 #endif
-            if (isSimulator) {
-                LKLog(@"Although user asked to review app, we cannot review apps in the Simulator. Skipping...");
+                if (isSimulator) {
+                    LKLog(@"Although user asked to review app, we cannot review apps in the Simulator. Skipping...");
+                } else {
+                    BOOL didOpenURL = [self openAppReviewURL];
+                    if (!didOpenURL) {
+                        // Override whatever happened with the UI, to mark this as failed
+                        flowResult = LKViewControllerFlowResultFailed;
+                    }
+                }
             } else {
-                BOOL didOpenURL = [self openAppReviewURL];
-                if (!didOpenURL) {
-                    // Override whatever happened with the UI, to mark this as failed
-                    flowResult = LKViewControllerFlowResultFailed;
+                // No Thanks, or Cancel, or Failed
+                if (self.verboseLogging) {
+                    LKLog(@"Did not ask user, or user did not agree to rate/review app. Result: %@", NSStringFromViewControllerFlowResult(flowResult));
                 }
             }
-        } else {
-            // No Thanks, or Cancel, or Failed
-            if (self.verboseLogging) {
-                LKLog(@"Did not ask user, or user did not agree to rate/review app. Result: %@", NSStringFromViewControllerFlowResult(flowResult));
+            
+            if (completion) {
+                completion(didPresent, flowResult);
             }
-        }
-
-        if (completion) {
-            completion(didPresent, flowResult);
-        }
-    }];
+        }];
+    };
+    if (self.config.isReady) {
+        presentReviewCardIfPossible();
+    } else {
+        [self.configReadyBlocks addObject:presentReviewCardIfPossible];
+    }
 }
 
 - (BOOL) openAppReviewURL
