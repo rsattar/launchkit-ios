@@ -81,6 +81,12 @@ typedef void (^LKUIManifestRefreshHandler)();
 @property (readonly, nonatomic, nullable) LKAppUser *currentUser;
 
 /**
+ * If you have told LaunchKit about this app in the App Store, then this will contains
+ * your app's iTunes Store ID.
+ */
+@property (readonly, nonatomic, nullable) NSString *appiTunesStoreId;
+
+/**
  * Set this handler if you'd like to see when LaunchKit is updated with what remote UI
  * (e.g. App Release Notes) is available for your app (based on version, build, etc.). It will
  * be called whenever the ui manifest is refreshed (at least once a session, and possibly more,

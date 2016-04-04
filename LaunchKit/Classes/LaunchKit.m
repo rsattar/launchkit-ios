@@ -561,6 +561,12 @@ static LaunchKit *_sharedInstance;
     return [LKAppUser debugUserIsAlwaysSuper];
 }
 
+#pragma mark - App Info
+- (NSString *)appiTunesStoreId
+{
+    return LKConfigString(@"io.launchkit.iTunesID", nil);
+}
+
 #pragma mark - What's New
 
 - (BOOL) appReleaseNotesAvailable
