@@ -200,4 +200,42 @@
     }
 }
 
+
+#pragma mark - iOS detection
+
+
++ (BOOL) isiOS8AndUp
+{
+    static BOOL isIOS8AndUp = NO;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        float ios_7_1 = 1047.25;
+#ifdef NSFoundationVersionNumber_iOS_7_1
+        ios_7_1 = NSFoundationVersionNumber_iOS_7_1;
+#endif
+        // See: https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/TransitionGuide/SupportingEarlieriOS.html#//apple_ref/doc/uid/TP40013174-CH14-SW1
+        float versionNumber = floor(NSFoundationVersionNumber);
+        isIOS8AndUp = (versionNumber > ios_7_1);
+    });
+    return isIOS8AndUp;
+}
+
+
++ (BOOL) isiOS9AndUp
+{
+    static BOOL isIOS9AndUp = NO;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        // Manually set this until we can move to Xcode 7
+        float ios_8_4 = 1144.17;
+#ifdef NSFoundationVersionNumber_iOS_8_4
+        ios_8_4 = NSFoundationVersionNumber_iOS_8_4;
+#endif
+        // See: https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/TransitionGuide/SupportingEarlieriOS.html#//apple_ref/doc/uid/TP40013174-CH14-SW1
+        float versionNumber = floor(NSFoundationVersionNumber);
+        isIOS9AndUp = (versionNumber > ios_8_4);
+    });
+    return isIOS9AndUp;
+}
+
 @end
