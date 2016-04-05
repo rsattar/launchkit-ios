@@ -101,10 +101,16 @@
         // Set the related bundleinfo into the initialviewcontroller, useful later (for tracking)
         viewController.bundleInfo = [self.bundlesManager localBundleInfoWithName:remoteUIId];
 
-        if ([UIPresentationController class]) {
-            if ([viewController.presentationStyleName isEqualToString:@"card"]) {
+        BOOL isCardStyleLayout = [viewController.presentationStyleName isEqualToString:@"card"];
+        if (isCardStyleLayout) {
+            if ([UIPresentationController class]) {
                 viewController.modalPresentationStyle = UIModalPresentationCustom;
                 viewController.transitioningDelegate = self;
+            } else {
+                // iOS 7
+                // Make it a "form sheet" so on iPads it won't be full screen
+                // On iOS 7 iPhones, this gets ignored and is still a full-screen presentation
+                viewController.modalPresentationStyle = UIModalPresentationFormSheet;
             }
         }
         if (viewController.transitioningDelegate != self) {
