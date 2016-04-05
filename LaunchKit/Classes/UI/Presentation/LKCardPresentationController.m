@@ -17,6 +17,8 @@
 
 @property (assign, nonatomic) CGFloat lkViewStartingCornerRadius;
 
+@property (strong, nonatomic) NSMutableDictionary *cachedMeasuredSizes;
+
 @end
 
 @implementation LKCardPresentationController
@@ -26,6 +28,7 @@
     self = [super initWithPresentedViewController:presentedViewController presentingViewController:presentingViewController];
     if (self) {
         // NOTE(Riz): Is it safe to query the presentedViewController's .view here?
+        self.cachedMeasuredSizes = [NSMutableDictionary dictionaryWithCapacity:2];
     }
     return self;
 }
@@ -128,27 +131,37 @@
         // "form sheet" view size is.
         CGSize formSheetDimensions = CGSizeMake(540, 620);
         CGSize preferredSize = maxRect.size;
+        LKViewController *presentedLKVC = nil;
         if ([self.presentedViewController isKindOfClass:[LKViewController class]]) {
-            LKViewController *presentedLKVC = (LKViewController *)self.presentedViewController;
-            if (presentedLKVC.hasMeasureableSize) {
-                // Measure the size fitting within our maxRect, but allowing height to be measured as close to zero
-                // as possible (smallest height)
-                // TODO(Riz): Investigate a loop caused in iOS 8 where measuring systemLayoutSizeFittingSize causes
-                // -containerViewWillLayoutSubviews to be called
-                CGSize measuredSize = [self.presentedViewController.view systemLayoutSizeFittingSize:CGSizeMake(maxRect.size.width, 0)
-                                                                       withHorizontalFittingPriority:UILayoutPriorityRequired
-                                                                             verticalFittingPriority:UILayoutPriorityDefaultHigh];
-                preferredSize = CGSizeMake(MIN(maxRect.size.width, measuredSize.width),
-                                           MIN(maxRect.size.height, measuredSize.height));
-            }
+            presentedLKVC = (LKViewController *)self.presentedViewController;
         }
+        if (presentedLKVC.hasMeasureableSize) {
+            CGSize measuredSize = [self measuredSizeOfView:self.presentedViewController.view
+                                                   atWidth:maxRect.size.width];
+            preferredSize = CGSizeMake(MIN(maxRect.size.width, measuredSize.width),
+                                       MIN(maxRect.size.height, measuredSize.height));
+        }
+        // Override preferred size (against measured and max rect), in some cases
         if (self.traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassRegular &&
             self.traitCollection.verticalSizeClass == UIUserInterfaceSizeClassRegular) {
-            preferredSize = formSheetDimensions;
+            if (presentedLKVC.hasMeasureableSize) {
+                CGSize measuredSize = [self measuredSizeOfView:self.presentedViewController.view
+                                                       atWidth:formSheetDimensions.width];
+                preferredSize = CGSizeMake(MIN(maxRect.size.width, measuredSize.width),
+                                           MIN(maxRect.size.height, measuredSize.height));
+            } else {
+                preferredSize = formSheetDimensions;
+            }
         } else if (CGRectGetWidth(bounds) == 375) {
-            // Ugh, hardcoded for iPhone 6 size :(
-            maxRect = bounds;
-            preferredSize = CGSizeMake(320, 568);
+            // Ugh, hardcoded for iPhone 6 sizes :(
+            if (presentedLKVC.hasMeasureableSize) {
+                CGSize measuredSize = [self measuredSizeOfView:self.presentedViewController.view
+                                                       atWidth:320];
+                preferredSize = CGSizeMake(MIN(maxRect.size.width, measuredSize.width),
+                                           MIN(maxRect.size.height, measuredSize.height));
+            } else {
+                preferredSize = CGSizeMake(320, 568);
+            }
         }
         // Pick the smallest of each dimension
         preferredSize.width = MIN(formSheetDimensions.width, MIN(preferredSize.width, CGRectGetWidth(maxRect)));
@@ -159,6 +172,28 @@
                                   preferredSize.height);
         return frame;
     }
+}
+
+- (CGSize)measuredSizeOfView:(UIView *)view atWidth:(CGFloat)maxWidth
+{
+    NSString *sizeString = self.cachedMeasuredSizes[@(maxWidth)];
+    CGSize measuredSize = CGSizeZero;
+    BOOL useCache = ![LKCardPresentationController isiOS9AndUp];
+    if (sizeString.length > 0 && useCache) {
+        measuredSize = CGSizeFromString(sizeString);
+    } else {
+        // Measure the size fitting within our maxRect, but allowing height to be measured as close to zero
+        // as possible (smallest height)
+        // TODO(Riz): Investigate a loop caused in iOS 8 where measuring systemLayoutSizeFittingSize causes
+        // -containerViewWillLayoutSubviews to be called
+        [view updateConstraintsIfNeeded];
+        measuredSize = [view systemLayoutSizeFittingSize:CGSizeMake(maxWidth, 0)
+                           withHorizontalFittingPriority:UILayoutPriorityRequired
+                                 verticalFittingPriority:UILayoutPriorityDefaultLow];
+
+        self.cachedMeasuredSizes[@(maxWidth)] = NSStringFromCGSize(measuredSize);
+    }
+    return measuredSize;
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
