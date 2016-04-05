@@ -121,8 +121,16 @@
     return [self isSmallerPhone:simulatedWindowBounds];
 }
 
+- (UIModalPresentationStyle)adaptivePresentationStyleForTraitCollection:(UITraitCollection *)traitCollection
+{
+    if (traitCollection.verticalSizeClass == UIUserInterfaceSizeClassCompact) {
+        return UIModalPresentationFullScreen;
+    }
+    return UIModalPresentationNone;
+}
+
 - (CGRect)frameOfPresentedViewInContainerView {
-    if ([self shouldPresentInFullscreen]) {
+    if (self.presentedViewController.traitCollection.verticalSizeClass == UIUserInterfaceSizeClassCompact || [self shouldPresentInFullscreen]) {
         return self.containerView.bounds;
     } else {
         CGRect bounds = self.containerView.bounds;
