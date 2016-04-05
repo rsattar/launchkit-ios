@@ -40,6 +40,8 @@ extern  NSString * _Nonnull NSStringFromViewControllerFlowResult(LKViewControlle
 @property (assign, nonatomic) IBInspectable BOOL statusBarShouldHide;
 @property (assign, nonatomic) IBInspectable NSInteger statusBarStyleValue;
 
+@property (assign, nonatomic) IBInspectable BOOL portraitOnlyOnNarrowScreens;
+
 @property (strong, nonatomic, nullable) IBInspectable NSString *unwindSegueClassName;
 @property (strong, nonatomic, nullable) IBInspectable NSString *presentationStyleName;
 

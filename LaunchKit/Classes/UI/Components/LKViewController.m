@@ -68,6 +68,28 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    if (!self.portraitOnlyOnNarrowScreens) {
+        return [super supportedInterfaceOrientations];
+    }
+
+    BOOL isNarrowScreen = NO;
+    if ([self respondsToSelector:@selector(traitCollection)]) {
+        // iOS 8+, use trait collection to determine how orientation should work
+        isNarrowScreen = self.traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassCompact ||
+                            self.traitCollection.verticalSizeClass == UIUserInterfaceSizeClassCompact;
+    } else {
+        // iOS 7. Just use interface idiom
+        isNarrowScreen = [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone;
+    }
+    if (isNarrowScreen) {
+        return UIInterfaceOrientationMaskPortrait;
+    } else {
+        return [super supportedInterfaceOrientations];
+    }
+}
+
 /*
 #pragma mark - Navigation
 
