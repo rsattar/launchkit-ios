@@ -11,14 +11,14 @@ import LaunchKit
 
 enum FirstLaunchUI {
     case releaseNotes
-    case reviewCard
+    case ratingPrompt
 }
 
 class RootViewController: UIViewController {
 
     @IBOutlet weak var showAppReleaseNotesButton: UIButton!
 
-    let firstLaunchUI = FirstLaunchUI.releaseNotes
+    let firstLaunchUI = FirstLaunchUI.ratingPrompt
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,9 +36,9 @@ class RootViewController: UIViewController {
             LaunchKit.sharedInstance().presentAppReleaseNotesIfNeededFromViewController(self) { (success) -> Void in
                 print("Release notes finished with success: \(success)")
             }
-        case .reviewCard:
-            LaunchKit.sharedInstance().presentAppReviewCardIfNeededFromViewController(self) { (didPresent, flowResult) -> Void in
-                print("App review card finished with flow result: \(NSStringFromViewControllerFlowResult(flowResult))")
+        case .ratingPrompt:
+            LaunchKit.sharedInstance().presentAppRatingPromptIfNeededFromViewController(self) { (didPresent, flowResult) -> Void in
+                print("App rating prompt finished with flow result: \(NSStringFromViewControllerFlowResult(flowResult))")
             }
         }
     }

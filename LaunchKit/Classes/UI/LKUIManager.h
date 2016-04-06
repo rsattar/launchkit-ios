@@ -24,7 +24,7 @@ typedef void (^LKOnboardingUIDismissHandler)(LKViewControllerFlowResult flowResu
                                              NSTimeInterval preOnboardingDuration);
 // Used externally, to report overall flow result
 typedef void (^LKOnboardingUICompletionHandler)(LKViewControllerFlowResult flowResult);
-typedef void (^LKAppReviewCardCompletionHandler)(BOOL didPresent, LKViewControllerFlowResult flowResult);
+typedef void (^LKAppRatingPromptCompletionHandler)(BOOL didPresent, LKViewControllerFlowResult flowResult);
 
 @class LKUIManager;
 @protocol LKUIManagerDelegate <NSObject>
@@ -92,8 +92,8 @@ typedef void (^LKAppReviewCardCompletionHandler)(BOOL didPresent, LKViewControll
                   completionHandler:(nullable LKOnboardingUICompletionHandler)completionHandler;
 
 #pragma mark - App Review Card
-- (void) presentAppReviewCardIfNeededFromViewController:(nonnull UIViewController *)presentingViewController
-                                             completion:(nullable LKAppReviewCardCompletionHandler)completion;
+- (void) presentAppRatingPromptIfNeededFromViewController:(nonnull UIViewController *)presentingViewController
+                                               completion:(nullable LKAppRatingPromptCompletionHandler)completion;
 
 #pragma mark - App Release Notes
 - (void) presentAppReleaseNotesFromViewController:(nonnull UIViewController *)viewController

@@ -335,9 +335,9 @@ typedef NS_ENUM(NSInteger, LKRootViewControllerAnimation) {
 }
 
 
-#pragma mark - App Review Card
-- (void) presentAppReviewCardIfNeededFromViewController:(nonnull UIViewController *)presentingViewController
-                                             completion:(nullable LKAppReviewCardCompletionHandler)completion
+#pragma mark - App Rating Prompt
+- (void) presentAppRatingPromptIfNeededFromViewController:(nonnull UIViewController *)presentingViewController
+                                               completion:(nullable LKAppRatingPromptCompletionHandler)completion
 {
     [self showUIWithName:@"AppReviewCard" fromViewController:presentingViewController completion:^(LKViewControllerFlowResult flowResult, NSError *error) {
         if (error) {

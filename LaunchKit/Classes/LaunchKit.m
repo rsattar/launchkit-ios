@@ -708,32 +708,32 @@ static LaunchKit *_sharedInstance;
                               completionHandler:completionHandler];
 }
 
-#pragma mark - App Review Card
-- (BOOL) shouldAskUserForAppReview
+#pragma mark - App Rating Prompt
+- (BOOL) shouldAskUserToRateApp
 {
     BOOL forceShow = NO;
 #if DEBUG
-    forceShow = self.debugAlwaysShowReviewCard;
+    forceShow = self.debugAlwaysShowAppRatingPrompt;
 #endif
     return forceShow || [self.config boolForKey:@"io.launchkit.shouldAskForAppReview" defaultValue:NO];
 }
 
-- (void) presentAppReviewCardIfNeededFromViewController:(nonnull UIViewController *)viewController
-                                             completion:(nullable LKAppReviewCardCompletionHandler)completion
+- (void) presentAppRatingPromptIfNeededFromViewController:(nonnull UIViewController *)viewController
+                                               completion:(nullable LKAppRatingPromptCompletionHandler)completion
 {
     if (![NSThread isMainThread]) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            LKLogWarning(@"Attempted to show review card on a background thread. Adjust your code to call this on the main thread.");
-            [self presentAppReviewCardIfNeededFromViewController:viewController completion:completion];
+            LKLogWarning(@"Attempted to show App Rating Prompt on a background thread. Adjust your code to call this on the main thread.");
+            [self presentAppRatingPromptIfNeededFromViewController:viewController completion:completion];
         });
         return;
     }
     // Make a closure here, in case we need to wait for config to be ready
     __weak LaunchKit *_weakSelf = self;
     void (^presentReviewCardIfPossible)() = ^ {
-        if (!self.shouldAskUserForAppReview) {
+        if (!self.shouldAskUserToRateApp) {
             if (self.verboseLogging) {
-                LKLog(@"Not showing app review card because LaunchKit config says we don't need to.");
+                LKLog(@"Not showing App Rating Prompt because LaunchKit config says we don't need to.");
             }
             if (completion) {
                 completion(NO, LKViewControllerFlowResultNotSet);
@@ -742,19 +742,19 @@ static LaunchKit *_sharedInstance;
         }
         BOOL testIfAppStoreIdExists = YES;
 #if DEBUG
-        testIfAppStoreIdExists = !self.debugAlwaysShowReviewCard;
+        testIfAppStoreIdExists = !self.debugAlwaysShowAppRatingPrompt;
 #endif
         NSString *appStoreId = self.appiTunesStoreId;
         if (testIfAppStoreIdExists && appStoreId.length == nil) {
             if (self.verboseLogging) {
-                LKLog(@"App review card not shown because app is not in the iTunes Store (no iTunes Store ID available)");
+                LKLog(@"App Rating Prompt not shown because app is not in the iTunes Store (no iTunes Store ID available)");
             }
             if (completion) {
                 completion(NO, LKViewControllerFlowResultNotSet);
             }
             return;
         }
-        [self.uiManager presentAppReviewCardIfNeededFromViewController:viewController completion:^(BOOL didPresent, LKViewControllerFlowResult flowResult) {
+        [self.uiManager presentAppRatingPromptIfNeededFromViewController:viewController completion:^(BOOL didPresent, LKViewControllerFlowResult flowResult) {
 
             BOOL agreedToReview = (flowResult == LKViewControllerFlowResultCompleted);
             if (agreedToReview) {

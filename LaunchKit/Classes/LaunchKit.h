@@ -107,7 +107,7 @@ typedef void (^LKUIManifestRefreshHandler)();
  * Note that config should be ready before checking this property.
  * @see LKConfigReady
  */
-@property (readonly, nonatomic) BOOL shouldAskUserForAppReview;
+@property (readonly, nonatomic) BOOL shouldAskUserToRateApp;
 
 /**
  * If true, LKAppUserIsSuper() will always return true, ignoring the value from the server.
@@ -116,12 +116,12 @@ typedef void (^LKUIManifestRefreshHandler)();
 @property (assign, nonatomic) BOOL debugAppUserIsAlwaysSuper;
 
 /**
- * If true, shouldAskUserForAppReview will always be true, ignoring the value from the server.
+ * If true, shouldAskUserToRateApp will always be true, ignoring the value from the server.
  * If asked to show a review card, LaunchKit will ignore any history with that user and
  * always present the review card, provided you have published one for this app version.
  * @discussion This only works when debugging (i.e. when DEBUG = 1)
  */
-@property (assign, nonatomic) BOOL debugAlwaysShowReviewCard;
+@property (assign, nonatomic) BOOL debugAlwaysShowAppRatingPrompt;
 
 /** 
  * Useful to see log statements from LaunchKit in your console. Only useful when DEBUG macro = 1
@@ -252,13 +252,13 @@ typedef void (^LKUIManifestRefreshHandler)();
                   completionHandler:(nullable LKOnboardingUICompletionHandler)completionHandler;
 
 
-#pragma mark - App Review Card
+#pragma mark - App Rating Prompt
 /*!
  @method
  @warning In Private Beta Testing
  */
-- (void) presentAppReviewCardIfNeededFromViewController:(nonnull UIViewController *)viewController
-                                             completion:(nullable LKAppReviewCardCompletionHandler)completion;
+- (void) presentAppRatingPromptIfNeededFromViewController:(nonnull UIViewController *)viewController
+                                               completion:(nullable LKAppRatingPromptCompletionHandler)completion;
 
 
 #pragma mark - Debugging (for LaunchKit developers :D)
