@@ -54,7 +54,7 @@ static NSUInteger const RECORDED_TAPS_BUFFER_SIZE = 200;
     self = [super init];
     if (self) {
         self.apiClient = apiClient;
-        self.analyticsEnabled = NO;
+        self.analyticsEnabled = YES;
         self.shouldReportScreens = YES;
         self.shouldReportTaps = YES;
         self.viewControllersVisited = [NSMutableArray arrayWithCapacity:VISITED_VIEW_CONTROLLERS_BUFFER_SIZE];
