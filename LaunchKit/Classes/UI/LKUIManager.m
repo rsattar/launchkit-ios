@@ -53,21 +53,7 @@
 {
     [self.bundlesManager loadBundleWithId:remoteUIId completion:^(NSBundle *bundle, NSError *error) {
 
-        UIStoryboard *storyboard = nil;
-        if (bundle != nil) {
-            if ([bundle URLForResource:remoteUIId withExtension:@"storyboardc"] != nil) {
-                storyboard = [UIStoryboard storyboardWithName:remoteUIId bundle:bundle];
-            }
-            if (storyboard == nil) {
-                // Hmm there isn't a storyboard that matches the name of the bundle/remote-id, so try finding any storyboard for now :okay:
-                NSArray *storyboardUrls = [bundle URLsForResourcesWithExtension:@"storyboardc" subdirectory:nil];
-                if (storyboardUrls.count > 0) {
-                    NSString *storyboardName = ((NSURL *)storyboardUrls[0]).lastPathComponent.stringByDeletingPathExtension;
-                    storyboard = [UIStoryboard storyboardWithName:storyboardName bundle:bundle];
-                }
-            }
-        }
-        if ((bundle == nil || storyboard == nil) && (error == nil || error.code == 404)) {
+        if (bundle == nil || (error == nil || error.code == 404)) {
             error = [self uiNotFoundError];
             if (completion) {
                 completion(nil, error);
@@ -75,56 +61,81 @@
             return;
         }
 
-        // At this point we have a valid storyboard, so try to load a vc inside
-        LKViewController *viewController = nil;
-        @try {
-            viewController = [storyboard instantiateInitialViewController];
-        }
-        @catch (NSException *exception) {
-            // In production, there seems to be an intermittent NSInternalConsistencyException
-            // which causes a crash. A way to reproduce this is to take the .nib file *inside*
-            // a .storyboardc file and either delete or rename it. (i.e. "WhatsNew.nib.fake")
-            // It is unclear why this would be happening. Perhaps an unzipping error, or disk
-            // corruption?
-            LKLogError(@"Encountered error loading LK storyboard:\n%@", exception);
-            NSError *nibLoadError = [NSError errorWithDomain:@"LKUIManagerError"
-                                                        code:500
-                                                    userInfo:@{@"underlyingException" : exception}];
-            if (completion) {
-                completion(nil, nibLoadError);
-            }
-            return;
-        }
-        @finally {
-            // Code that gets executed whether or not an exception is thrown
-        }
-        // Set the related bundleinfo into the initialviewcontroller, useful later (for tracking)
-        viewController.bundleInfo = [self.bundlesManager localBundleInfoWithName:remoteUIId];
+        NSError *preparationError = nil;
+        LKViewController *viewController = [self preparedViewControllerWithId:remoteUIId fromBundle:bundle error:&preparationError];
 
-        BOOL isCardStyleLayout = [viewController.presentationStyleName isEqualToString:@"card"];
-        if (isCardStyleLayout) {
-            if ([UIPresentationController class]) {
-                viewController.modalPresentationStyle = UIModalPresentationCustom;
-                viewController.transitioningDelegate = self;
-            } else {
-                // iOS 7
-                // Make it a "form sheet" so on iPads it won't be full screen
-                // On iOS 7 iPhones, this gets ignored and is still a full-screen presentation
-                viewController.modalPresentationStyle = UIModalPresentationFormSheet;
-            }
-        }
-        if (viewController.transitioningDelegate != self) {
-            // On iOS 7, we don't have a presentation controller to control our corner radius, so just
-            // ensure that our corner radius is 0 (which is the default).
-            // Since our .view hasn't loaded yet, we can't set the cornerRadius directly. Instead,
-            // we'll use a custom property in our LKViewController to set a corner radius which *IT*
-            // will set upon its -viewDidLoad:
-            viewController.viewCornerRadius = 0.0;
-        }
         if (completion) {
-            completion(viewController, error);
+            completion(viewController, preparationError);
         }
     }];
+}
+
+
+- (nullable LKViewController *)preparedViewControllerWithId:(nonnull NSString *)remoteUIId fromBundle:(nonnull NSBundle *)bundle error:(NSError **)error
+{
+
+    UIStoryboard *storyboard = nil;
+    if ([bundle URLForResource:remoteUIId withExtension:@"storyboardc"] != nil) {
+        storyboard = [UIStoryboard storyboardWithName:remoteUIId bundle:bundle];
+    }
+    if (storyboard == nil) {
+        // Hmm there isn't a storyboard that matches the name of the bundle/remote-id, so try finding any storyboard for now :okay:
+        NSArray *storyboardUrls = [bundle URLsForResourcesWithExtension:@"storyboardc" subdirectory:nil];
+        if (storyboardUrls.count > 0) {
+            NSString *storyboardName = ((NSURL *)storyboardUrls[0]).lastPathComponent.stringByDeletingPathExtension;
+            storyboard = [UIStoryboard storyboardWithName:storyboardName bundle:bundle];
+        }
+    }
+    if (storyboard == nil) {
+        *error = [self uiNotFoundError];
+        return nil;
+    }
+
+    // At this point we have a valid storyboard, so try to load a vc inside
+    LKViewController *viewController = nil;
+    @try {
+        viewController = [storyboard instantiateInitialViewController];
+    }
+    @catch (NSException *exception) {
+        // In production, there seems to be an intermittent NSInternalConsistencyException
+        // which causes a crash. A way to reproduce this is to take the .nib file *inside*
+        // a .storyboardc file and either delete or rename it. (i.e. "WhatsNew.nib.fake")
+        // It is unclear why this would be happening. Perhaps an unzipping error, or disk
+        // corruption?
+        LKLogError(@"Encountered error loading LK storyboard:\n%@", exception);
+        NSError *nibLoadError = [NSError errorWithDomain:@"LKUIManagerError"
+                                                    code:500
+                                                userInfo:@{@"underlyingException" : exception}];
+        *error = nibLoadError;
+        return nil;
+    }
+    @finally {
+        // Code that gets executed whether or not an exception is thrown
+    }
+    // Set the related bundleinfo into the initialviewcontroller, useful later (for tracking)
+    viewController.bundleInfo = [self.bundlesManager localBundleInfoWithName:remoteUIId];
+
+    BOOL isCardStyleLayout = [viewController.presentationStyleName isEqualToString:@"card"];
+    if (isCardStyleLayout) {
+        if ([UIPresentationController class]) {
+            viewController.modalPresentationStyle = UIModalPresentationCustom;
+            viewController.transitioningDelegate = self;
+        } else {
+            // iOS 7
+            // Make it a "form sheet" so on iPads it won't be full screen
+            // On iOS 7 iPhones, this gets ignored and is still a full-screen presentation
+            viewController.modalPresentationStyle = UIModalPresentationFormSheet;
+        }
+    }
+    if (viewController.transitioningDelegate != self) {
+        // On iOS 7, we don't have a presentation controller to control our corner radius, so just
+        // ensure that our corner radius is 0 (which is the default).
+        // Since our .view hasn't loaded yet, we can't set the cornerRadius directly. Instead,
+        // we'll use a custom property in our LKViewController to set a corner radius which *IT*
+        // will set upon its -viewDidLoad:
+        viewController.viewCornerRadius = 0.0;
+    }
+    return viewController;
 }
 
 
