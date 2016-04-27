@@ -731,8 +731,8 @@ static LaunchKit *_sharedInstance;
     // Make a closure here, in case we need to wait for config to be ready
     __weak LaunchKit *_weakSelf = self;
     void (^presentReviewCardIfPossible)() = ^ {
-        if (!self.shouldAskUserToRateApp) {
-            if (self.verboseLogging) {
+        if (!_weakSelf.shouldAskUserToRateApp) {
+            if (_weakSelf.verboseLogging) {
                 LKLog(@"Not showing App Rating Prompt because LaunchKit config says we don't need to.");
             }
             if (completion) {
@@ -742,11 +742,11 @@ static LaunchKit *_sharedInstance;
         }
         BOOL testIfAppStoreIdExists = YES;
 #if DEBUG
-        testIfAppStoreIdExists = !self.debugAlwaysShowAppRatingPrompt;
+        testIfAppStoreIdExists = !_weakSelf.debugAlwaysShowAppRatingPrompt;
 #endif
-        NSString *appStoreId = self.appiTunesStoreId;
-        if (testIfAppStoreIdExists && appStoreId.length == nil) {
-            if (self.verboseLogging) {
+        NSString *appStoreId = _weakSelf.appiTunesStoreId;
+        if (testIfAppStoreIdExists && appStoreId.length == 0) {
+            if (_weakSelf.verboseLogging) {
                 LKLog(@"App Rating Prompt not shown because app is not in the iTunes Store (no iTunes Store ID available)");
             }
             if (completion) {
@@ -754,7 +754,7 @@ static LaunchKit *_sharedInstance;
             }
             return;
         }
-        [self.uiManager presentAppRatingPromptIfNeededFromViewController:viewController completion:^(BOOL didPresent, LKViewControllerFlowResult flowResult) {
+        [_weakSelf.uiManager presentAppRatingPromptIfNeededFromViewController:viewController completion:^(BOOL didPresent, LKViewControllerFlowResult flowResult) {
 
             BOOL agreedToReview = (flowResult == LKViewControllerFlowResultCompleted);
             if (agreedToReview) {
@@ -766,7 +766,7 @@ static LaunchKit *_sharedInstance;
                 if (isSimulator) {
                     LKLog(@"Although user asked to review app, we cannot review apps in the Simulator. Skipping...");
                 } else {
-                    BOOL didOpenURL = [self openAppReviewURL];
+                    BOOL didOpenURL = [_weakSelf openAppReviewURL];
                     if (!didOpenURL) {
                         // Override whatever happened with the UI, to mark this as failed
                         flowResult = LKViewControllerFlowResultFailed;
@@ -774,7 +774,7 @@ static LaunchKit *_sharedInstance;
                 }
             } else {
                 // No Thanks, or Cancel, or Failed
-                if (self.verboseLogging) {
+                if (_weakSelf.verboseLogging) {
                     LKLog(@"Did not ask user, or user did not agree to rate/review app. Result: %@", NSStringFromViewControllerFlowResult(flowResult));
                 }
             }
