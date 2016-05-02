@@ -53,7 +53,7 @@
 {
     [self.bundlesManager loadBundleWithId:remoteUIId completion:^(NSBundle *bundle, NSError *error) {
 
-        if (bundle == nil || (error == nil || error.code == 404)) {
+        if (bundle == nil || (error != nil || error.code == 404)) {
             error = [self uiNotFoundError];
             if (completion) {
                 completion(nil, error);
