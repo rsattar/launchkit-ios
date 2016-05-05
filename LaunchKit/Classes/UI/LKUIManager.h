@@ -40,6 +40,9 @@ typedef void (^LKAppRatingPromptCompletionHandler)(BOOL didPresent, LKViewContro
 
 @property (weak, nonatomic, nullable) NSObject <LKUIManagerDelegate> *delegate;
 
+@property (assign, nonatomic) BOOL debugMode;
+@property (assign, nonatomic) BOOL verboseLogging;
+
 - (nonnull instancetype)initWithBundlesManager:(nonnull LKBundlesManager *)bundlesManager;
 
 #pragma mark - Remote UI Loading
