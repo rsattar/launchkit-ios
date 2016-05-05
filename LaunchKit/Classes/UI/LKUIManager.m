@@ -55,6 +55,15 @@
 
         if (bundle == nil || (error != nil || error.code == 404)) {
             error = [self uiNotFoundError];
+            if (self.debugMode) {
+                LKLogError(@"The requested UI was not found in your LaunchKit account. Things to check:\n"
+                           "— You have pressed \"Publish\" on the UI on the web editor.\n"
+                           "— Your app's bundle identifier matches with the UI on the web dashboard.\n"
+                           "— Your SDK token matches your account.");
+                if (self.verboseLogging) {
+                    LKLogError(@"Error: %@", error);
+                }
+            }
             if (completion) {
                 completion(nil, error);
             }
