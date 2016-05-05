@@ -560,6 +560,9 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
         // for downloads to finish (it's not going to be there)
         LKBundleInfo *remotelyAvailableBundleInfo = [self remoteBundleInfoWithName:bundleId];
         if (!remotelyAvailableBundleInfo) {
+            if (self.debugMode && self.verboseLogging) {
+                LKLog(@"Bundle with id '%@' not found in remote manifest, so failing early.", bundleId);
+            }
             if (completion) {
                 completion(nil, [self bundleInfoNotFoundErrorForId:bundleId]);
             }
@@ -577,6 +580,9 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     // In both situations we have to wait for the process to finish, before notifying the
     // completion block.
     if (!self.hasNewestRemoteBundles || self.retrievingRemoteBundles) {
+        if (self.debugMode && self.verboseLogging) {
+            LKLog(@"Waiting for bundles to finish loading before loading bundle '%@'...", bundleId);
+        }
         if (completion) {
 
             // We should wait until the remote bundle manifest is returned and then attempt this again
@@ -605,12 +611,18 @@ NSString *const LKBundlesManagerDidFinishDownloadingRemoteBundles = @"LKBundlesM
     LKBundleInfo *bundleInfo = [self localBundleInfoWithName:bundleId];
     if (!bundleInfo || !bundleInfo.url) {
         *error = [self bundleInfoNotFoundErrorForId:bundleId];
+        if (self.debugMode && self.verboseLogging) {
+            LKLogError(@"Bundle '%@' not found in local bundles manifest", bundleId);
+        }
         return nil;
     }
 
     NSBundle *bundle = [NSBundle bundleWithURL:bundleInfo.url];
     if (!bundle) {
         *error = [self bundleLoadErrorForUrl:bundleInfo.url];
+        if (self.debugMode && self.verboseLogging) {
+            LKLogError(@"Couldn't load an NSBundle within LK bundle '%@'. Error: %@", bundleId, *error);
+        }
         return nil;
     }
 
